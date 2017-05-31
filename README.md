@@ -1,2 +1,2 @@
 # contracts
-Programming by Contract for C++
+Programming by Contract for C and C++
