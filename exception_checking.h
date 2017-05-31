@@ -3,6 +3,8 @@
 #if defined(__cplusplus) && !defined(HURCHALLA_EXCEPTION_CHECKING_H_INCLUDED)
 #define HURCHALLA_EXCEPTION_CHECKING_H_INCLUDED
 
+#include <hurchalla/contracts/programming_by_contract.h>
+
 
 #ifndef PBC_CHECK_EXCEPTIONS
 #   define PBC_CHECK_EXCEPTIONS 1
