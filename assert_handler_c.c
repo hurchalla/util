@@ -27,13 +27,14 @@ void pbcAssertHandler(const char* failedAssertion, const char* filename,
 /*  You can set your executable's contract assert level by creating a predefined
 macro specific to compiling this file, called:
     PBC_ASSERT_LEVEL
-  If predefined, this macro must be set so that 0 <= PBC_ASSERT_LEVEL <= 3. When
-you set PBC_ASSERT_LEVEL lower than some value X, the contract-asserts
+  If predefined, this macro must be set so that 0 <= PBC_ASSERT_LEVEL <= 3.
+Keeping in mind that the unnumbered asserts have an implicit level number of 1,
+when you set PBC_ASSERT_LEVEL lower than some value X, the contract-asserts
 invariantX(), postconditionX(), assert_bodyX(), etc become effectively disabled
-after linking (with the exception of the level0 static_asserts). If you are
-using link-time-optimization, typically those particular contract-asserts will
-be completely removed from the code.  If you do not predefine PBC_ASSERT_LEVEL,
-it will be defined below in this file with a default value (the default ensures
+after linking (with the exception of the static asserts). If you are using
+link-time-optimization, typically those particular contract-asserts will be
+completely removed from the code.  If you do not predefine PBC_ASSERT_LEVEL, it
+will be defined below in this file with a default value (the default ensures
 asserts are active for debug mode and inactive for release mode).
   You can optionally set your executable's level specifically for precondition
 asserts by predefining a macro called:
