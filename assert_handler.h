@@ -15,7 +15,7 @@ prevented by the extern "C" from inlining pbcGetHandlerPreconditionAssertLevel()
 and pbcGetHandlerAssertLevel() during link time optimization. It is not a
 problem with clang, gcc, or msvc, and is unlikely to be a problem for other
 compilers. However, there is no standard for link time optimization and so its
-behavior can't be guaranteed across all compilers.
+behavior with extern "C" can't be guaranteed for all compilers/linkers.
 */
 
 /*
