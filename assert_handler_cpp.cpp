@@ -1,5 +1,5 @@
 // --- This file is distributed under the MIT Open Source License,
-// as detailed in "_LICENSE (MIT).TXT" in this directory ---
+// as detailed in "LICENSE.TXT" in this directory ---
 
 #include <hurchalla/programming_by_contract/assert_handler.h>
 
