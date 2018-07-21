@@ -93,6 +93,24 @@ Ordinarily, you shouldn't change anything in this file.
 #  define invariant(...) ((void)0)
 #  define invariant2(...) ((void)0)
 #  define invariant3(...) ((void)0)
+
+#  if defined(__cplusplus)
+#     define PBC_FALSE_VALUE false
+#  else
+#     define PBC_FALSE_VALUE 0
+#  endif
+#  define PRECONDITION_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define PRECONDITION2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define PRECONDITION3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_BODY_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_BODY2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_BODY3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define POSTCONDITION_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define POSTCONDITION2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define POSTCONDITION3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define INVARIANT_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define INVARIANT2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define INVARIANT3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #else
 #  include <hurchalla/programming_by_contract/assert_handler.h>
 
@@ -133,59 +151,57 @@ Ordinarily, you shouldn't change anything in this file.
 #  define invariant(...) PBC_LEVEL_ASSERT(1, __VA_ARGS__)
 #  define invariant2(...) PBC_LEVEL_ASSERT(2, __VA_ARGS__)
 #  define invariant3(...) PBC_LEVEL_ASSERT(3, __VA_ARGS__)
+
+#  define PRECONDITION_MACRO_IS_ACTIVE \
+                       (pbcGetHandlerPreconditionAssertLevel() >= 1)
+#  define PRECONDITION2_MACRO_IS_ACTIVE \
+                       (pbcGetHandlerPreconditionAssertLevel() >= 2)
+#  define PRECONDITION3_MACRO_IS_ACTIVE \
+                       (pbcGetHandlerPreconditionAssertLevel() >= 3)
+#  define ASSERT_BODY_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
+#  define ASSERT_BODY2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
+#  define ASSERT_BODY3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
+#  define POSTCONDITION_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
+#  define POSTCONDITION2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
+#  define POSTCONDITION3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
+#  define INVARIANT_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
+#  define INVARIANT2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
+#  define INVARIANT3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
 #endif  /* NDEBUG */
 
 
 
-#if defined(__cplusplus)
-#  ifdef NDEBUG
-#     define PBC_IS_NDEBUG_DEFINED true
-#  else
-#     define PBC_IS_NDEBUG_DEFINED false
-#  endif
-#else
-#  ifdef NDEBUG
-#     define PBC_IS_NDEBUG_DEFINED 1
-#  else
-#     define PBC_IS_NDEBUG_DEFINED 0
-#  endif
-#endif
-
-#define PBC_ENABLED_POSTCONDITIONS (!PBC_IS_NDEBUG_DEFINED \
-                                    && pbcGetHandlerAssertLevel() >= 1)
-#define PBC_ENABLED_POSTCONDITIONS2 (!PBC_IS_NDEBUG_DEFINED \
-                                     && pbcGetHandlerAssertLevel() >= 2)
-#define PBC_ENABLED_POSTCONDITIONS3 (!PBC_IS_NDEBUG_DEFINED \
-                                     && pbcGetHandlerAssertLevel() >= 3)
-
-
+/* For postconditions where we need to save a value at the function's start: */
 /* C example:
-typedef struct {
-    int a;
-    char b;
-} Widget;
-
-void initWidget(Widget* p) {
-}
-
-void bar()
+void foo(Widget* p)
 {
-    Widget w;
-    _Bool wHasValue = 0;
+   int origVal;
+   _Bool origHasValue = 0;
+   if (POSTCONDITION_MACRO_IS_ACTIVE) {
+      origVal = p->a;
+      origHasValue = 1;
+   }
+   ... preconditions ...
 
-    postcondition(initWidget(&w), wHasValue = 1, 1);
-    postcondition(wHasValue && 1);
+   ... function body ...   
+   changeWidget(p);
+   ... more function body ...
+
+   postcondition(origHasValue && origVal < p->a);
 }
+ An alternative to the "if (POSTCONDITION_MACRO_IS_ACTIVE)" clause above
+is to use the following (though I view it as a hack):
+   postcondition(origVal = p->a, origHasValue = 1, 1);
 */
-/* For C++ we'd normally want to use std::optional */
 
-/* For postconditions where we need to save a value at the function's start:
+/* C++ example:
+   Note we'll normally want to use std::optional (requires C++17)
+   or boost::optional (pre C++17):
 void bar()
 {
    std::optional<int> origVal;
-   if (PBC_ENABLED_POSTCONDITIONS)
+   if (POSTCONDITION_MACRO_IS_ACTIVE)
       origVal = getValue();
-   
    ... preconditions ...
    ... function body ...
    postcondition(origVal.has_value() && origVal < getValue());
