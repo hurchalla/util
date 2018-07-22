@@ -14,8 +14,9 @@ is possible (if unlikely) that a project consisting entirely of C++ files may be
 prevented by the extern "C" from inlining pbcGetHandlerPreconditionAssertLevel()
 and pbcGetHandlerAssertLevel() during link time optimization. It is not a
 problem with clang, gcc, or msvc, and is unlikely to be a problem for other
-compilers. However, there is no standard for link time optimization and so its
-behavior with extern "C" can't be guaranteed for all compilers/linkers.
+compilers. However, there is no standard for link time optimization, and so
+there is no way to guarantee for every possible C++ compiler/linker that extern
+"C" will allow inlining during link time optimization.
 */
 
 /*
