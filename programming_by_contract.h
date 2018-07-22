@@ -195,7 +195,7 @@ is to use the following (though I view it as a hack):
 */
 
 /* C++ example:
-   Note we'll normally want to use std::optional (requires C++17)
+   We'll normally want to use std::optional (requires C++17)
    or boost::optional (pre C++17):
 void bar()
 {
