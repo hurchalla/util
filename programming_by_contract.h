@@ -52,8 +52,8 @@ Any non-static assert, regardless of level, will be translated into a no-op when
 For a given compiler, by default NDEBUG is typically defined in release builds
   and undefined in debug builds.  It's a standard macro (see the C or C++
   documentation of assert()) and you can predefine it (or not) for any
-  compilation project - for example by using -D in gcc or clang, or in MSVC via
-  either /D or setting "preprocessor definitions" in the UI.
+  compilation project - for example by using -D in gcc or clang, or in MSVC++ via
+  either by command line option /D or by UI setting "preprocessor definitions".
 */
 /*
 Some ideas in this file are inspired by
@@ -95,9 +95,9 @@ Ordinarily, you shouldn't change anything in this file.
 #  define invariant3(...) ((void)0)
 
 #  if defined(__cplusplus)
-#     define PBC_FALSE_VALUE false
+#     define PBC_FALSE_VALUE (false)
 #  else
-#     define PBC_FALSE_VALUE 0
+#     define PBC_FALSE_VALUE (0)
 #  endif
 #  define PRECONDITION_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define PRECONDITION2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
@@ -111,34 +111,46 @@ Ordinarily, you shouldn't change anything in this file.
 #  define INVARIANT_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define INVARIANT2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define INVARIANT3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+
 #else
-#  include <hurchalla/programming_by_contract/assert_handler.h>
+#  if defined(PBC_WRAP_STDLIB_ASSERT)
+#     if defined(__cplusplus)
+#        include <cassert>
+#     else
+#        include <assert.h>
+#     endif
+#     define pbcGetHandlerAssertLevel() 3
+#     define pbcGetHandlerPreconditionAssertLevel() 3
+#     define PBC_LEVEL_ASSERT(LEVEL, ...) assert(__VA_ARGS__)
+#     define PBC_LEVEL_ASSERT_PRE(LEVEL, ...) assert(__VA_ARGS__)
+#  else   /* the normal Programming by Contract features */
+#     include <hurchalla/programming_by_contract/assert_handler.h>
 
-   /* If this is C++, we can (probably) detect if exceptions are enabled by
-      checking the gcc/clang macro __EXCEPTIONS, the msvc macro _CPPUNWIND, and
-      the official but not always supported C++98 macro __cpp_exceptions. */
-#  if defined(__cplusplus) && (defined(__EXCEPTIONS) || defined(_CPPUNWIND) || \
-                      (defined(__cpp_exceptions) && __cpp_exceptions != 0))
-      // C++ with exceptions: treat an exception as a failure during an assert
-#     define PBC_BASIC_ASSERT(...) do { \
-                     bool assertPassed = false; \
-                     try { if (__VA_ARGS__) assertPassed = true; } \
-                     catch (...) {} \
-                     if (!assertPassed) { \
-                         pbcAssertHandler(#__VA_ARGS__, __FILE__, __LINE__); } \
-                 } while(0)
-#  else   /* C, or C++ without exceptions */
-#     define PBC_BASIC_ASSERT(...) do { if (__VA_ARGS__) {} else  { \
+      /* If this is C++, we can (probably) detect if exceptions are enabled by
+         checking the gcc/clang macro __EXCEPTIONS, msvc's macro _CPPUNWIND, and
+         the official but not always supported C++98 macro __cpp_exceptions. */
+#     if defined(__cplusplus) && (defined(__EXCEPTIONS) || defined(_CPPUNWIND) \
+                        || (defined(__cpp_exceptions) && __cpp_exceptions != 0))
+         // C++ with exceptions: treat an exception as a failure during assert
+#        define PBC_BASIC_ASSERT(...) do { \
+                       bool assertPassed = false; \
+                       try { if (__VA_ARGS__) assertPassed = true; } \
+                       catch (...) {} \
+                       if (!assertPassed) \
+                           pbcAssertHandler(#__VA_ARGS__, __FILE__, __LINE__); \
+                   } while(0)
+#     else   /* C, or C++ without exceptions */
+#        define PBC_BASIC_ASSERT(...) do { if (__VA_ARGS__) {} else  { \
                 pbcAssertHandler(#__VA_ARGS__, __FILE__, __LINE__); } } while(0)
+#     endif
+
+#     define PBC_LEVEL_ASSERT(LEVEL, ...) do { \
+                        if (pbcGetHandlerAssertLevel() >= LEVEL) { \
+                             PBC_BASIC_ASSERT(__VA_ARGS__); } } while(0)
+#     define PBC_LEVEL_ASSERT_PRE(LEVEL, ...) do { \
+                        if (pbcGetHandlerPreconditionAssertLevel() >= LEVEL) { \
+                             PBC_BASIC_ASSERT(__VA_ARGS__); } } while(0)
 #  endif
-
-#  define PBC_LEVEL_ASSERT(LEVEL, ...) do { \
-                       if (pbcGetHandlerAssertLevel() >= LEVEL) { \
-                            PBC_BASIC_ASSERT(__VA_ARGS__); } } while(0)
-#  define PBC_LEVEL_ASSERT_PRE(LEVEL, ...) do { \
-                       if (pbcGetHandlerPreconditionAssertLevel() >= LEVEL) { \
-                            PBC_BASIC_ASSERT(__VA_ARGS__); } } while(0)
-
 #  define precondition(...) PBC_LEVEL_ASSERT_PRE(1, __VA_ARGS__)
 #  define precondition2(...) PBC_LEVEL_ASSERT_PRE(2, __VA_ARGS__)
 #  define precondition3(...) PBC_LEVEL_ASSERT_PRE(3, __VA_ARGS__)
