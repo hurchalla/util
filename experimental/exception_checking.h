@@ -10,11 +10,12 @@
 #include <hurchalla/programming_by_contract/programming_by_contract.h>
 
 
+
 #if defined(NDEBUG)
-#   define PBC_ASSERT_THROWS(INVARIANT_EXPRESSION, EXPRESSION_BODY, ...) \
-                PBC_BODY(INVARIANT_EXPRESSION, EXPRESSION_BODY)
-#   define PBC_ASSERT_NOTHROW(INVARIANT_EXPRESSION, EXPRESSION_BODY) \
-                PBC_BODY(INVARIANT_EXPRESSION, EXPRESSION_BODY)
+#   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
+                do { EXPRESSION_BODY; } while(0)
+#   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
+                do { EXPRESSION_BODY; } while(0)
 #else
     #include <sstream>
     #include <stdexcept>
@@ -76,22 +77,18 @@
 
     }}  // end namespaces
 
-#   define PBC_ASSERT_THROWS(INVARIANT_EXPRESSION, EXPRESSION_BODY, ...) \
-        PBC_BODY(INVARIANT_EXPRESSION, \
+#   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
                  hurchalla::runWithCheckedExceptions<__VA_ARGS__>( \
                        [&]{EXPRESSION_BODY;}, \
-                       "PBC_ASSERT_THROWS will only throw expected exceptions",\
+                       "PBC_VERIFY_THROWS should only throw expected exceptions",\
                        __FILE__, __LINE__ \
-                       ) \
-                 )
-#   define PBC_ASSERT_NOTHROW(INVARIANT_EXPRESSION, EXPRESSION_BODY) \
-        PBC_BODY(INVARIANT_EXPRESSION, \
-                 hurchalla::runWithCheckedExceptions<>( \
+                       )
+#   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
+                hurchalla::runWithCheckedExceptions<>( \
                        [&]{EXPRESSION_BODY;}, \
-                       "PBC_ASSERT_NOTHROW will not throw exceptions", \
+                       "PBC_VERIFY_NOTHROW should not throw exceptions", \
                        __FILE__, __LINE__ \
-                       ) \
-                 )
+                       )
 #endif
 
 
