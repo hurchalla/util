@@ -10,7 +10,6 @@
 #include <hurchalla/programming_by_contract/programming_by_contract.h>
 
 
-
 #if defined(NDEBUG)
 #   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
                 do { EXPRESSION_BODY; } while(0)
