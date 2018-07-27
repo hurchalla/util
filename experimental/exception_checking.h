@@ -16,9 +16,12 @@
 #   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
                 do { EXPRESSION_BODY; } while(0)
 #else
-    #include <sstream>
-    #include <stdexcept>
-    #include <typeinfo>
+#   include <sstream>
+#   include <stdexcept>
+#   include <typeinfo>
+#   if defined(PBC_WRAP_STDLIB_ASSERT)
+#      error exception_checking.h does not support PBC_WRAP_STDLIB_ASSERT
+#   endif
     namespace hurchalla { inline namespace v1 {
 
     template<typename Func>
