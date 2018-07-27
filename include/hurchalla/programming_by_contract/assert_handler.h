@@ -4,8 +4,12 @@
 #ifndef HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 #define HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 
-/* You should compile and link either assert_handler.cpp or assert_handler.c
-   (not both!) */
+/* In your main application project, you must compile an assert handler file
+   that implements the functions declared here. Your assert handler file does
+   not belong in this programming_by_contract project; it belongs in your
+   project(s) that contain main(). Normally, you can just file copy one of the
+   assert handlers in the example_assert_handlers folder: either
+   assert_handler_cpp.cpp or assert_handler_c.c (not both!) */
 
 /* To enable a project containing both C and C++ code to use one single assert
 handler, you can uncomment the #define SUPPORT_MIXED_C_AND_CPP below.
