@@ -1,4 +1,4 @@
-All files in this experimental directory are expected to be good and immediately usable if desired.  However, I consider them to be experiments that don't seem useful enough to belong in the include directory.
+All files in this experimental directory are expected to be good and immediately usable if desired.  However, I consider them to be experiments that aren't useful enough to belong in the include directory.
 <br/><br/><br/>
 The file "exception_checking.h" provides exception checking macros:<br/>
   * PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) <br/>
