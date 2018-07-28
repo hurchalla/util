@@ -16,9 +16,9 @@
    If you define PBC_WRAP_STDLIB_ASSERT for your main application and all
    libraries you link to (that use programming by contract), then you don't need
    to provide an assert handler file.  However, the programming by contract
-   features are rather limited in this case, because all the assertion macros in
-   this case simply map to the standard library assert(), while also
-   disregarding the named level in all the assertion macros. */
+   features are rather limited if you do so, because all the assertion macros
+   in that case are simply mapped to the standard library assert(), and the
+   named level in all the assertion macros are also disregarded. */
 
 /* To enable a project containing both C and C++ code to use one single assert
 handler, you can uncomment the #define SUPPORT_MIXED_C_AND_CPP below.
