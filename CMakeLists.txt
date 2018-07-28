@@ -36,7 +36,7 @@ if("C" IN_LIST languages)
          # FATAL_ERROR message below for info on how to solve the problem that
          # _Static_assert is unsupported by MSVC.
 
-         if (NOT "c_static_assert" IN_LIST CMAKE_C_COMPILE_FEATURES)
+         if(NOT "c_static_assert" IN_LIST CMAKE_C_COMPILE_FEATURES)
               message(FATAL_ERROR "
 Error: _Static_assert is not known to your C compiler (${CMAKE_C_COMPILER_ID}).
 Note: You can solve this problem by emulating _Static_assert (see the comment on _Static_assert in include/hurchalla/programming_by_contract/programming_by_contract.h).  Alternatively, you could remove the macros in programming_by_contract.h that use _Static_assert.  Either of these solutions will allow you to remove this FATAL_ERROR message from this CMakeLists.txt.
