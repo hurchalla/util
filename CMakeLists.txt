@@ -27,26 +27,27 @@ if("CXX" IN_LIST languages)
               )
 endif()
 if("C" IN_LIST languages)
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
          # MSVC doesn't provide _Static_assert for C, but I don't want this to
          # cause CMake to abort in the very common scenario that MSVC is being
          # used only for C++ but the parent CMake project() doesn't specify a
          # language (thereby defaulting to C++ and C).
-         target_compile_features(programming_by_contract INTERFACE
-                   c_variadic_macros
-#                   c_static_assert
-                   )
-    else()
-         target_compile_features(programming_by_contract INTERFACE
-                   c_variadic_macros
-                   c_static_assert
-                   )
+         # If you indeed need to use C (and thus _Static_assert), then see the
+         # FATAL_ERROR message below for info on how to solve the problem that
+         # _Static_assert is unsupported by MSVC.
+
+         if (NOT "c_static_assert" IN_LIST CMAKE_C_COMPILE_FEATURES)
+              message(FATAL_ERROR "
+Error: _Static_assert is not known to your C compiler (${CMAKE_C_COMPILER_ID}).
+Note: You can solve this problem by emulating _Static_assert (see the comment on _Static_assert in include/hurchalla/programming_by_contract/programming_by_contract.h).  Alternatively, you could remove the macros in programming_by_contract.h that use _Static_assert.  Either of these solutions will allow you to remove this FATAL_ERROR message from this CMakeLists.txt.
+")
+         endif()
     endif()
-    # For C, _Static_assert can be emulated - see the comment in
-    # include/hurchalla/programming_by_contract/programming_by_contract.h
-    # Alternatively, you could just remove the macros in programming_by_contract.h
-    # that use _Static_assert, which would in turn let you remove the
-    # target_compile_features requirement on c_static_assert above.
+    # the FATAL_ERROR message above handles when the target_compile_feature
+    # c_static_assert is missing
+    target_compile_features(programming_by_contract INTERFACE
+              c_variadic_macros
+              )
 endif()
 
 
