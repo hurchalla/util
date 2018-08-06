@@ -17,6 +17,7 @@ target_include_directories(programming_by_contract INTERFACE $<BUILD_INTERFACE:$
 target_include_directories(programming_by_contract SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 
+# Check for required C++ features only if the C++ compiler ID is non-empty.
 target_compile_features(programming_by_contract INTERFACE 
           $<$<NOT:$<CXX_COMPILER_ID:>>:
                cxx_variadic_macros
