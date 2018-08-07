@@ -1,7 +1,7 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // in "LICENSE.TXT" in the root of the programming_by_contract repository ---
 
-#include <hurchalla/programming_by_contract/assert_handler.h>
+#include "hurchalla/programming_by_contract/assert_handler.h"
 
 
 /* You can write a custom pbcAssertHandler implementation below to handle pbc

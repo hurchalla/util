@@ -7,7 +7,7 @@
 #if defined(__cplusplus)
 
 
-#include <hurchalla/programming_by_contract/programming_by_contract.h>
+#include "hurchalla/programming_by_contract/programming_by_contract.h"
 
 
 #if defined(NDEBUG)

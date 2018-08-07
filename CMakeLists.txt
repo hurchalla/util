@@ -1,3 +1,4 @@
+
 if(TARGET programming_by_contract)
     return()
 endif()
@@ -58,5 +59,24 @@ if(PBC_WRAP_STDLIB_ASSERT)
     target_compile_definitions(programming_by_contract INTERFACE
               PBC_WRAP_STDLIB_ASSERT
               )
+endif()
+
+
+
+
+# ***Tests***
+
+# call enable_testing() just once, in the top level CMakeLists.txt
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    option(BUILD_TESTING_ONLY_CURRENT_PROJECT "Build only tests for the current (top level) project." OFF)
+    option(BUILD_TESTING "Build the testing tree." OFF)
+    #include(CTest)
+    if(${BUILD_TESTING} OR ${BUILD_TESTING_ONLY_CURRENT_PROJECT})
+        enable_testing()
+        add_subdirectory(test)
+    endif()
+#elseif(${BUILD_TESTING} AND (NOT ${BUILD_TESTING_ONLY_CURRENT_PROJECT}) AND ${CMAKE_TESTING_ENABLED})
+elseif(${BUILD_TESTING} AND (NOT ${BUILD_TESTING_ONLY_CURRENT_PROJECT}))
+    add_subdirectory(test)
 endif()
 

@@ -124,7 +124,7 @@ Ordinarily, you shouldn't change anything in this file.
 #     define PBC_LEVEL_ASSERT(LEVEL, ...) assert(__VA_ARGS__)
 #     define PBC_LEVEL_ASSERT_PRE(LEVEL, ...) assert(__VA_ARGS__)
 #  else   /* the normal Programming by Contract features */
-#     include <hurchalla/programming_by_contract/assert_handler.h>
+#     include "hurchalla/programming_by_contract/assert_handler.h"
 
       /* If this is C++, we can (probably) detect if exceptions are enabled by
          checking the gcc/clang macro __EXCEPTIONS, msvc's macro _CPPUNWIND, and
