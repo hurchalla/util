@@ -6,6 +6,12 @@ endif()
 cmake_minimum_required(VERSION 3.12)
 project(programming_by_contract VERSION 1.0.0 LANGUAGES C CXX)
 
+# if this is the top level CMakeLists.txt, let IDEs group projects into folders.
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
+
 
 set(header_files
     ${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/assert_handler.h
@@ -63,20 +69,31 @@ endif()
 
 
 
-
 # ***Tests***
 
-# call enable_testing() just once, in the top level CMakeLists.txt
+# if this is the top level CMakeLists.txt
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     option(BUILD_TESTING_ONLY_CURRENT_PROJECT "Build only tests for the current (top level) project." OFF)
     option(BUILD_TESTING "Build the testing tree." OFF)
-    #include(CTest)
+    if(${BUILD_TESTING_ONLY_CURRENT_PROJECT} AND (NOT ${BUILD_TESTING}))
+        set(BUILD_TESTING ON CACHE BOOL "" FORCE)
+    endif()
     if(${BUILD_TESTING} OR ${BUILD_TESTING_ONLY_CURRENT_PROJECT})
         enable_testing()
+        #include(CTest)
         add_subdirectory(test)
     endif()
-#elseif(${BUILD_TESTING} AND (NOT ${BUILD_TESTING_ONLY_CURRENT_PROJECT}) AND ${CMAKE_TESTING_ENABLED})
 elseif(${BUILD_TESTING} AND (NOT ${BUILD_TESTING_ONLY_CURRENT_PROJECT}))
+    # If a parent project (to this project) calls include(CTest), the included
+    # CTest.cmake will define a BUILT_TESTING option and will call
+    # enable_testing if BUILD_TESTING is ON.  My own (possibly parent) projects
+    # may set BUILD_TESTING ON - if they do, they will call include(CTest) or
+    # call enable_testing().
+    # So, if we are inside this elseif clause, we know enable_testing() has
+    # already been called.  We will sanity-check this now.
+    if (NOT ${CMAKE_TESTING_ENABLED})
+        message(FATAL_ERROR "Fatal error: enable_testing() was not called")
+    endif()
     add_subdirectory(test)
 endif()
 
