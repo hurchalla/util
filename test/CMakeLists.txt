@@ -1,3 +1,5 @@
+# --- This file is distributed under the MIT Open Source License, as detailed
+# in the file "LICENSE.TXT" in the root of this repository ---
 
 if(TARGET test_programming_by_contract)
     return()

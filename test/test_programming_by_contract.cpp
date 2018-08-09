@@ -45,6 +45,7 @@ namespace {
         EXPECT_NO_EXIT(precondition3(true));
 	}
 
+#ifndef PBC_WRAP_STDLIB_ASSERT
 	TEST(PBCTest, PreconditionsHandlerLevel2) {
         setTestHandlerPreconditionAssertLevel(2);
 		EXPECT_EXIT(precondition(false), [](int){return true;}, "");
@@ -77,7 +78,7 @@ namespace {
         EXPECT_NO_EXIT(precondition2(true));
         EXPECT_NO_EXIT(precondition3(true));
 	}
-
+#endif
 
 	TEST(PBCTest, GeneralAssertsHandlerLevel3) {
         setTestHandlerAssertLevel(3);
@@ -102,6 +103,7 @@ namespace {
         EXPECT_NO_EXIT(invariant3(true));
 	}
 
+#ifndef PBC_WRAP_STDLIB_ASSERT
 	TEST(PBCTest, GeneralAssertsHandlerLevel2) {
         setTestHandlerAssertLevel(2);
 		EXPECT_EXIT(assert_body(false), [](int){return true;}, "");
@@ -170,6 +172,7 @@ namespace {
         EXPECT_NO_EXIT(invariant2(true));
         EXPECT_NO_EXIT(invariant3(true));
 	}
+#endif
 
 
 #ifdef STD_OPTIONAL_IS_AVAILABLE
@@ -301,52 +304,6 @@ namespace {
 
 }
 
-
-// DELETE THIS
-/* ----- All code below this line is C++ only ----- */
-#if defined(__cplusplus)
-#   if defined(NDEBUG)
-#       define PBC_BODY(INVARIANT_EXPRESSION, EXPRESSION_BODY) do { \
-                EXPRESSION_BODY; \
-                } while (0)
-#   elif !((defined(__cpp_exceptions) && __cpp_exceptions != 0) || \
-                    defined(__EXCEPTIONS) || defined(_CPPUNWIND))
-        // if compiling with exceptions disabled
-#       define PBC_BODY(INVARIANT_EXPRESSION, EXPRESSION_BODY) do { \
-                { INVARIANT_EXPRESSION; } \
-                { EXPRESSION_BODY; } \
-                { INVARIANT_EXPRESSION; } \
-                } while (0)
-#   else
-        // otherwise, use a C++03 compatible implementation of PBC_BODY
-#       define PBC_BODY(INVARIANT_EXPRESSION, EXPRESSION_BODY) do { \
-                /* I'm not sure if I should check invariants here (before the  \
-expression body, in addition to after the body). Also, note there may be two   \
-types of class invariants: ones that can be defined in terms of the interface, \
-and ones that need the private implementation. Two invariant expressions could \
-be used in that case, but I suspect one is almost always sufficient. */        \
-                { INVARIANT_EXPRESSION; } \
-                /* if EXPRESSION_BODY is noexcept, then I could omit the       \
-following try/catch to improve performance a bit. However, this likely isn't   \
-worth the added complexity of yet another macro to do it, given that invariant \
-checking happens here (likely harming performance much more than try/catch). */\
-                try { \
-                    EXPRESSION_BODY; \
-                } catch (const hurchalla::BrokenContract&) {	/* if a PBC    \
-handler throws an exception, the exception must derive from BrokenContract */  \
-                    throw;  /* If we already have a broken contract exception, \
-we want to rethrow immediately to keep the exception info of where it broke */ \
-                } catch (...) { \
-                    INVARIANT_EXPRESSION;	/* note: an invariant-assert might \
-throw (depending on pbcAssertHandler), leaving this scope before we rethrow */ \
-                    throw; \
-                } \
-                /* note: The function try catch mechanism I use above to ensure\
-invariants are maintained is cooincidentally a partial check of basic exception\
-safety (which is that all invariants are preserved and no resources leak.) */  \
-                { INVARIANT_EXPRESSION; } \
-                } while (0)
-#   endif
 
 #endif  /* defined(__cplusplus) */
 

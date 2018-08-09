@@ -56,6 +56,8 @@ static_assert(std::is_same<decltype(invariant3(false)), void>::value, "");
 
 
 namespace {
+    // since all the programming by contract asserts map to void when NDEBUG
+    // is defined, we expect they will never exit/abort when NDEBUG is defined.
 	TEST(PbcNdebugTest, PreconditionsHandlerLevel3) {
         setTestHandlerPreconditionAssertLevel(3);
 		EXPECT_NO_EXIT(precondition(true));
