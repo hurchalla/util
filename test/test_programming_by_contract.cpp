@@ -304,6 +304,3 @@ namespace {
 
 }
 
-
-#endif  /* defined(__cplusplus) */
-
