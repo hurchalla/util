@@ -81,16 +81,16 @@
 
 #   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
                  hurchalla::runWithCheckedExceptions<__VA_ARGS__>( \
-                       [&]{EXPRESSION_BODY;}, \
-                       "PBC_VERIFY_THROWS should only throw expected exceptions",\
-                       __FILE__, __LINE__ \
-                       )
+                     [&]{EXPRESSION_BODY;}, \
+                     "PBC_VERIFY_THROWS should only throw expected exceptions",\
+                     __FILE__, __LINE__ \
+                     )
 #   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
                 hurchalla::runWithCheckedExceptions<>( \
-                       [&]{EXPRESSION_BODY;}, \
-                       "PBC_VERIFY_NOTHROW should not throw exceptions", \
-                       __FILE__, __LINE__ \
-                       )
+                     [&]{EXPRESSION_BODY;}, \
+                     "PBC_VERIFY_NOTHROW should not throw exceptions", \
+                     __FILE__, __LINE__ \
+                     )
 #endif
 
 
