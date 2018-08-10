@@ -45,9 +45,12 @@ set(header_files
     )
 
 add_library(programming_by_contract INTERFACE)
-target_sources(programming_by_contract INTERFACE $<BUILD_INTERFACE:${header_files}>)
-target_include_directories(programming_by_contract INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_include_directories(programming_by_contract SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
+target_sources(programming_by_contract INTERFACE 
+               $<BUILD_INTERFACE:${header_files}>)
+target_include_directories(programming_by_contract
+               INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_include_directories(programming_by_contract SYSTEM
+               INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 
 # Check for required C++ features only if the C++ compiler ID is non-empty.
@@ -81,9 +84,11 @@ target_compile_features(programming_by_contract INTERFACE
 
 
 
-#You can turn the following option ON/OFF with cmake by using the -D flag. Example:
-#cmake -DPBC_WRAP_STDLIB_ASSERT=ON ..
-option(PBC_WRAP_STDLIB_ASSERT "Option PBC_WRAP_STDLIB_ASSERT: If you set PBC_WRAP_STDLIB_ASSERT=ON (you can do this via command line 'cmake -DPBC_WRAP_STDLIB_ASSERT=ON ...'), all the programming by contract assertion macros will use the standard library assert() and will always be active when NDEBUG is undefined and will always be inactive when NDEBUG is defined.  Setting this option to ON effectively reduces much of the programming by contract functionality, but it means you (or clients) will not need to provide or link any custom assert handler." OFF)
+# You can turn the following option ON/OFF with cmake by using the -D flag.
+# Example: cmake -DPBC_WRAP_STDLIB_ASSERT=ON ..
+option(PBC_WRAP_STDLIB_ASSERT
+       "Option PBC_WRAP_STDLIB_ASSERT: If you set PBC_WRAP_STDLIB_ASSERT=ON (you can do this via command line 'cmake -DPBC_WRAP_STDLIB_ASSERT=ON ...'), all the programming by contract assertion macros will use the standard library assert() and will always be active when NDEBUG is undefined and will always be inactive when NDEBUG is defined.  Setting this option to ON effectively reduces much of the programming by contract functionality, but it means you (or clients) will not need to provide or link any custom assert handler."
+       OFF)
 
 if(PBC_WRAP_STDLIB_ASSERT)
     target_compile_definitions(programming_by_contract INTERFACE
