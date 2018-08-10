@@ -13,6 +13,30 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
+option(TEST_HURCHALLA_LIBS
+       "Build tests for all Hurchalla library projects."
+       OFF)
+
+# if this is the top level CMakeLists.txt, add testing options, and enable
+# testing when testing options have been set to ON.
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    option(TEST_HURCHALLA_TOP_LEVEL
+           "Build tests for the top level Hurchalla library project."
+           OFF)
+    if(TEST_HURCHALLA_TOP_LEVEL OR TEST_HURCHALLA_LIBS)
+        enable_testing()
+        #include(CTest)
+    endif()
+elseif(TEST_HURCHALLA_LIBS)
+    # If TEST_HURCHALLA_LIBS is set to ON, enable_testing() should have been
+    # called either directly or indirectly by the top level project. (Note that
+    # if a project calls include(CTest), the included CTest.cmake defines a
+    # BUILT_TESTING option and calls enable_testing if BUILD_TESTING is ON.)
+    if (NOT CMAKE_TESTING_ENABLED)
+        message(FATAL_ERROR "Fatal error: TEST_HURCHALLA_LIBS was set, but enable_testing() was never called")
+    endif()
+endif()
+
 
 
 set(header_files
@@ -73,27 +97,10 @@ endif()
 
 # if this is the top level CMakeLists.txt
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    option(BUILD_TESTING_ONLY_CURRENT_PROJECT "Build only tests for the current (top level) project." OFF)
-    option(BUILD_TESTING "Build the testing tree." OFF)
-    if(${BUILD_TESTING_ONLY_CURRENT_PROJECT} AND (NOT ${BUILD_TESTING}))
-        set(BUILD_TESTING ON CACHE BOOL "" FORCE)
-    endif()
-    if(${BUILD_TESTING} OR ${BUILD_TESTING_ONLY_CURRENT_PROJECT})
-        enable_testing()
-        #include(CTest)
+    if(TEST_HURCHALLA_TOP_LEVEL OR TEST_HURCHALLA_LIBS)
         add_subdirectory(test)
     endif()
-elseif(${BUILD_TESTING} AND (NOT ${BUILD_TESTING_ONLY_CURRENT_PROJECT}))
-    # If a parent project (to this project) calls include(CTest), the included
-    # CTest.cmake will define a BUILT_TESTING option and will call
-    # enable_testing if BUILD_TESTING is ON.  My own (possibly parent) projects
-    # may set BUILD_TESTING ON - if they do, they will call include(CTest) or
-    # call enable_testing().
-    # So, if we are inside this elseif clause, we know enable_testing() has
-    # already been called.  We will sanity-check this now.
-    if (NOT ${CMAKE_TESTING_ENABLED})
-        message(FATAL_ERROR "Fatal error: enable_testing() was not called")
-    endif()
+elseif(TEST_HURCHALLA_LIBS)
     add_subdirectory(test)
 endif()
 
