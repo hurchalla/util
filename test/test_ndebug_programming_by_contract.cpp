@@ -19,9 +19,10 @@
 
 // This macro doesn't strictly test that the expression does not exit -
 // If the expression exits with a value of 0 it will pass this macro
-#ifndef EXPECT_NO_EXIT
-    #define EXPECT_NO_EXIT(EXPRESSION) do \
-           { EXPECT_EXIT(EXPRESSION; exit(0), testing::ExitedWithCode(0), ""); } while(0)
+#ifndef PBC_EXPECT_NO_EXIT
+    #define PBC_EXPECT_NO_EXIT(EXPRESSION) do \
+           { EXPECT_EXIT(EXPRESSION; exit(0), testing::ExitedWithCode(0), ""); \
+           } while(0)
 #endif
 
 
@@ -60,62 +61,62 @@ namespace {
     // is defined, we expect they will never exit/abort when NDEBUG is defined.
 	TEST(PbcNdebugTest, PreconditionsHandlerLevel3) {
         setTestHandlerPreconditionAssertLevel(3);
-		EXPECT_NO_EXIT(precondition(true));
-		EXPECT_NO_EXIT(precondition2(true));
-		EXPECT_NO_EXIT(precondition3(true));
-		EXPECT_NO_EXIT(precondition(false));
-		EXPECT_NO_EXIT(precondition2(false));
-		EXPECT_NO_EXIT(precondition3(false));
+		PBC_EXPECT_NO_EXIT(precondition(true));
+		PBC_EXPECT_NO_EXIT(precondition2(true));
+		PBC_EXPECT_NO_EXIT(precondition3(true));
+		PBC_EXPECT_NO_EXIT(precondition(false));
+		PBC_EXPECT_NO_EXIT(precondition2(false));
+		PBC_EXPECT_NO_EXIT(precondition3(false));
 	}
 	TEST(PbcNdebugTest, PreconditionsHandlerLevel0) {
 		setTestHandlerPreconditionAssertLevel(0);
-		EXPECT_NO_EXIT(precondition(true));
-		EXPECT_NO_EXIT(precondition2(true));
-		EXPECT_NO_EXIT(precondition3(true));
-		EXPECT_NO_EXIT(precondition(false));
-		EXPECT_NO_EXIT(precondition2(false));
-		EXPECT_NO_EXIT(precondition3(false));
+		PBC_EXPECT_NO_EXIT(precondition(true));
+		PBC_EXPECT_NO_EXIT(precondition2(true));
+		PBC_EXPECT_NO_EXIT(precondition3(true));
+		PBC_EXPECT_NO_EXIT(precondition(false));
+		PBC_EXPECT_NO_EXIT(precondition2(false));
+		PBC_EXPECT_NO_EXIT(precondition3(false));
 	}
 	TEST(PbcNdebugTest, GeneralAssertsHandlerLevel3) {
 		setTestHandlerAssertLevel(3);
-		EXPECT_NO_EXIT(assert_body(false));
-		EXPECT_NO_EXIT(assert_body2(false));
-		EXPECT_NO_EXIT(assert_body3(false));
-		EXPECT_NO_EXIT(postcondition(false));
-		EXPECT_NO_EXIT(postcondition2(false));
-		EXPECT_NO_EXIT(postcondition3(false));
-		EXPECT_NO_EXIT(invariant(false));
-		EXPECT_NO_EXIT(invariant2(false));
-		EXPECT_NO_EXIT(invariant3(false));
-		EXPECT_NO_EXIT(assert_body(true));
-		EXPECT_NO_EXIT(assert_body2(true));
-		EXPECT_NO_EXIT(assert_body3(true));
-		EXPECT_NO_EXIT(postcondition(true));
-		EXPECT_NO_EXIT(postcondition2(true));
-		EXPECT_NO_EXIT(postcondition3(true));
-		EXPECT_NO_EXIT(invariant(true));
-		EXPECT_NO_EXIT(invariant2(true));
-		EXPECT_NO_EXIT(invariant3(true));
+		PBC_EXPECT_NO_EXIT(assert_body(false));
+		PBC_EXPECT_NO_EXIT(assert_body2(false));
+		PBC_EXPECT_NO_EXIT(assert_body3(false));
+		PBC_EXPECT_NO_EXIT(postcondition(false));
+		PBC_EXPECT_NO_EXIT(postcondition2(false));
+		PBC_EXPECT_NO_EXIT(postcondition3(false));
+		PBC_EXPECT_NO_EXIT(invariant(false));
+		PBC_EXPECT_NO_EXIT(invariant2(false));
+		PBC_EXPECT_NO_EXIT(invariant3(false));
+		PBC_EXPECT_NO_EXIT(assert_body(true));
+		PBC_EXPECT_NO_EXIT(assert_body2(true));
+		PBC_EXPECT_NO_EXIT(assert_body3(true));
+		PBC_EXPECT_NO_EXIT(postcondition(true));
+		PBC_EXPECT_NO_EXIT(postcondition2(true));
+		PBC_EXPECT_NO_EXIT(postcondition3(true));
+		PBC_EXPECT_NO_EXIT(invariant(true));
+		PBC_EXPECT_NO_EXIT(invariant2(true));
+		PBC_EXPECT_NO_EXIT(invariant3(true));
 	}
 	TEST(PbcNdebugTest, GeneralAssertsHandlerLevel0) {
 		setTestHandlerAssertLevel(0);
-		EXPECT_NO_EXIT(assert_body(false));
-		EXPECT_NO_EXIT(assert_body2(false));
-		EXPECT_NO_EXIT(assert_body3(false));
-		EXPECT_NO_EXIT(postcondition(false));
-		EXPECT_NO_EXIT(postcondition2(false));
-		EXPECT_NO_EXIT(postcondition3(false));
-		EXPECT_NO_EXIT(invariant(false));
-		EXPECT_NO_EXIT(invariant2(false));
-		EXPECT_NO_EXIT(invariant3(false));
-		EXPECT_NO_EXIT(assert_body(true));
-		EXPECT_NO_EXIT(assert_body2(true));
-		EXPECT_NO_EXIT(assert_body3(true));
-		EXPECT_NO_EXIT(postcondition(true));
-		EXPECT_NO_EXIT(postcondition2(true));
-		EXPECT_NO_EXIT(postcondition3(true));
-		EXPECT_NO_EXIT(invariant(true));
-		EXPECT_NO_EXIT(invariant2(true));
-		EXPECT_NO_EXIT(invariant3(true));
+		PBC_EXPECT_NO_EXIT(assert_body(false));
+		PBC_EXPECT_NO_EXIT(assert_body2(false));
+		PBC_EXPECT_NO_EXIT(assert_body3(false));
+		PBC_EXPECT_NO_EXIT(postcondition(false));
+		PBC_EXPECT_NO_EXIT(postcondition2(false));
+		PBC_EXPECT_NO_EXIT(postcondition3(false));
+		PBC_EXPECT_NO_EXIT(invariant(false));
+		PBC_EXPECT_NO_EXIT(invariant2(false));
+		PBC_EXPECT_NO_EXIT(invariant3(false));
+		PBC_EXPECT_NO_EXIT(assert_body(true));
+		PBC_EXPECT_NO_EXIT(assert_body2(true));
+		PBC_EXPECT_NO_EXIT(assert_body3(true));
+		PBC_EXPECT_NO_EXIT(postcondition(true));
+		PBC_EXPECT_NO_EXIT(postcondition2(true));
+		PBC_EXPECT_NO_EXIT(postcondition3(true));
+		PBC_EXPECT_NO_EXIT(invariant(true));
+		PBC_EXPECT_NO_EXIT(invariant2(true));
+		PBC_EXPECT_NO_EXIT(invariant3(true));
 	}
 }
