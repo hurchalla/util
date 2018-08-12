@@ -39,41 +39,41 @@
 
 
 namespace {
-	TEST(PBCTest, PreconditionsHandlerLevel3) {
+    TEST(PBCTest, PreconditionsHandlerLevel3) {
         setTestHandlerPreconditionAssertLevel(3);
-		PBC_EXPECT_EXIT(precondition(false));
-		PBC_EXPECT_EXIT(precondition2(false));
-		PBC_EXPECT_EXIT(precondition3(false));
+        PBC_EXPECT_EXIT(precondition(false));
+        PBC_EXPECT_EXIT(precondition2(false));
+        PBC_EXPECT_EXIT(precondition3(false));
 
         PBC_EXPECT_NO_EXIT(precondition(true));
         PBC_EXPECT_NO_EXIT(precondition2(true));
         PBC_EXPECT_NO_EXIT(precondition3(true));
-	}
+    }
 
 #ifndef PBC_WRAP_STDLIB_ASSERT
-	TEST(PBCTest, PreconditionsHandlerLevel2) {
+    TEST(PBCTest, PreconditionsHandlerLevel2) {
         setTestHandlerPreconditionAssertLevel(2);
-		PBC_EXPECT_EXIT(precondition(false));
-		PBC_EXPECT_EXIT(precondition2(false));
+        PBC_EXPECT_EXIT(precondition(false));
+        PBC_EXPECT_EXIT(precondition2(false));
         PBC_EXPECT_NO_EXIT(precondition3(false));
 
         PBC_EXPECT_NO_EXIT(precondition(true));
         PBC_EXPECT_NO_EXIT(precondition2(true));
         PBC_EXPECT_NO_EXIT(precondition3(true));
-	}
+    }
 
-	TEST(PBCTest, PreconditionsHandlerLevel1) {
+    TEST(PBCTest, PreconditionsHandlerLevel1) {
         setTestHandlerPreconditionAssertLevel(1);
-		PBC_EXPECT_EXIT(precondition(false));
+        PBC_EXPECT_EXIT(precondition(false));
         PBC_EXPECT_NO_EXIT(precondition2(false));
         PBC_EXPECT_NO_EXIT(precondition3(false));
 
         PBC_EXPECT_NO_EXIT(precondition(true));
         PBC_EXPECT_NO_EXIT(precondition2(true));
         PBC_EXPECT_NO_EXIT(precondition3(true));
-	}
+    }
 
-	TEST(PBCTest, PreconditionsHandlerLevel0) {
+    TEST(PBCTest, PreconditionsHandlerLevel0) {
         setTestHandlerPreconditionAssertLevel(0);
         PBC_EXPECT_NO_EXIT(precondition(false));
         PBC_EXPECT_NO_EXIT(precondition2(false));
@@ -82,20 +82,20 @@ namespace {
         PBC_EXPECT_NO_EXIT(precondition(true));
         PBC_EXPECT_NO_EXIT(precondition2(true));
         PBC_EXPECT_NO_EXIT(precondition3(true));
-	}
+    }
 #endif
 
-	TEST(PBCTest, GeneralAssertsHandlerLevel3) {
+    TEST(PBCTest, GeneralAssertsHandlerLevel3) {
         setTestHandlerAssertLevel(3);
-		PBC_EXPECT_EXIT(assert_body(false));
-		PBC_EXPECT_EXIT(assert_body2(false));
-		PBC_EXPECT_EXIT(assert_body3(false));
-		PBC_EXPECT_EXIT(postcondition(false));
-		PBC_EXPECT_EXIT(postcondition2(false));
-		PBC_EXPECT_EXIT(postcondition3(false));
-		PBC_EXPECT_EXIT(invariant(false));
-		PBC_EXPECT_EXIT(invariant2(false));
-		PBC_EXPECT_EXIT(invariant3(false));
+        PBC_EXPECT_EXIT(assert_body(false));
+        PBC_EXPECT_EXIT(assert_body2(false));
+        PBC_EXPECT_EXIT(assert_body3(false));
+        PBC_EXPECT_EXIT(postcondition(false));
+        PBC_EXPECT_EXIT(postcondition2(false));
+        PBC_EXPECT_EXIT(postcondition3(false));
+        PBC_EXPECT_EXIT(invariant(false));
+        PBC_EXPECT_EXIT(invariant2(false));
+        PBC_EXPECT_EXIT(invariant3(false));
 
         PBC_EXPECT_NO_EXIT(assert_body(true));
         PBC_EXPECT_NO_EXIT(assert_body2(true));
@@ -106,20 +106,20 @@ namespace {
         PBC_EXPECT_NO_EXIT(invariant(true));
         PBC_EXPECT_NO_EXIT(invariant2(true));
         PBC_EXPECT_NO_EXIT(invariant3(true));
-	}
+    }
 
 #ifndef PBC_WRAP_STDLIB_ASSERT
-	TEST(PBCTest, GeneralAssertsHandlerLevel2) {
+    TEST(PBCTest, GeneralAssertsHandlerLevel2) {
         setTestHandlerAssertLevel(2);
-		PBC_EXPECT_EXIT(assert_body(false));
-		PBC_EXPECT_EXIT(assert_body2(false));
-		PBC_EXPECT_NO_EXIT(assert_body3(false));
-		PBC_EXPECT_EXIT(postcondition(false));
-		PBC_EXPECT_EXIT(postcondition2(false));
-		PBC_EXPECT_NO_EXIT(postcondition3(false));
-		PBC_EXPECT_EXIT(invariant(false));
-		PBC_EXPECT_EXIT(invariant2(false));
-		PBC_EXPECT_NO_EXIT(invariant3(false));
+        PBC_EXPECT_EXIT(assert_body(false));
+        PBC_EXPECT_EXIT(assert_body2(false));
+        PBC_EXPECT_NO_EXIT(assert_body3(false));
+        PBC_EXPECT_EXIT(postcondition(false));
+        PBC_EXPECT_EXIT(postcondition2(false));
+        PBC_EXPECT_NO_EXIT(postcondition3(false));
+        PBC_EXPECT_EXIT(invariant(false));
+        PBC_EXPECT_EXIT(invariant2(false));
+        PBC_EXPECT_NO_EXIT(invariant3(false));
 
         PBC_EXPECT_NO_EXIT(assert_body(true));
         PBC_EXPECT_NO_EXIT(assert_body2(true));
@@ -130,19 +130,19 @@ namespace {
         PBC_EXPECT_NO_EXIT(invariant(true));
         PBC_EXPECT_NO_EXIT(invariant2(true));
         PBC_EXPECT_NO_EXIT(invariant3(true));
-	}
+    }
 
-	TEST(PBCTest, GeneralAssertsHandlerLevel1) {
+    TEST(PBCTest, GeneralAssertsHandlerLevel1) {
         setTestHandlerAssertLevel(1);
-		PBC_EXPECT_EXIT(assert_body(false));
-		PBC_EXPECT_NO_EXIT(assert_body2(false));
-		PBC_EXPECT_NO_EXIT(assert_body3(false));
-		PBC_EXPECT_EXIT(postcondition(false));
-		PBC_EXPECT_NO_EXIT(postcondition2(false));
-		PBC_EXPECT_NO_EXIT(postcondition3(false));
-		PBC_EXPECT_EXIT(invariant(false));
-		PBC_EXPECT_NO_EXIT(invariant2(false));
-		PBC_EXPECT_NO_EXIT(invariant3(false));
+        PBC_EXPECT_EXIT(assert_body(false));
+        PBC_EXPECT_NO_EXIT(assert_body2(false));
+        PBC_EXPECT_NO_EXIT(assert_body3(false));
+        PBC_EXPECT_EXIT(postcondition(false));
+        PBC_EXPECT_NO_EXIT(postcondition2(false));
+        PBC_EXPECT_NO_EXIT(postcondition3(false));
+        PBC_EXPECT_EXIT(invariant(false));
+        PBC_EXPECT_NO_EXIT(invariant2(false));
+        PBC_EXPECT_NO_EXIT(invariant3(false));
 
         PBC_EXPECT_NO_EXIT(assert_body(true));
         PBC_EXPECT_NO_EXIT(assert_body2(true));
@@ -153,19 +153,19 @@ namespace {
         PBC_EXPECT_NO_EXIT(invariant(true));
         PBC_EXPECT_NO_EXIT(invariant2(true));
         PBC_EXPECT_NO_EXIT(invariant3(true));
-	}
+    }
 
-	TEST(PBCTest, GeneralAssertsHandlerLevel0) {
+    TEST(PBCTest, GeneralAssertsHandlerLevel0) {
         setTestHandlerAssertLevel(0);
-		PBC_EXPECT_NO_EXIT(assert_body(false));
-		PBC_EXPECT_NO_EXIT(assert_body2(false));
-		PBC_EXPECT_NO_EXIT(assert_body3(false));
-		PBC_EXPECT_NO_EXIT(postcondition(false));
-		PBC_EXPECT_NO_EXIT(postcondition2(false));
-		PBC_EXPECT_NO_EXIT(postcondition3(false));
-		PBC_EXPECT_NO_EXIT(invariant(false));
-		PBC_EXPECT_NO_EXIT(invariant2(false));
-		PBC_EXPECT_NO_EXIT(invariant3(false));
+        PBC_EXPECT_NO_EXIT(assert_body(false));
+        PBC_EXPECT_NO_EXIT(assert_body2(false));
+        PBC_EXPECT_NO_EXIT(assert_body3(false));
+        PBC_EXPECT_NO_EXIT(postcondition(false));
+        PBC_EXPECT_NO_EXIT(postcondition2(false));
+        PBC_EXPECT_NO_EXIT(postcondition3(false));
+        PBC_EXPECT_NO_EXIT(invariant(false));
+        PBC_EXPECT_NO_EXIT(invariant2(false));
+        PBC_EXPECT_NO_EXIT(invariant3(false));
 
         PBC_EXPECT_NO_EXIT(assert_body(true));
         PBC_EXPECT_NO_EXIT(assert_body2(true));
@@ -176,12 +176,12 @@ namespace {
         PBC_EXPECT_NO_EXIT(invariant(true));
         PBC_EXPECT_NO_EXIT(invariant2(true));
         PBC_EXPECT_NO_EXIT(invariant3(true));
-	}
+    }
 #endif
 
 
 #ifdef STD_OPTIONAL_IS_AVAILABLE
-	TEST(PBCTest, PostconditionCompareOriginalValue) {
+    TEST(PBCTest, PostconditionCompareOriginalValue) {
         setTestHandlerAssertLevel(3);
 
         // We'll normally want to use std::optional (requires C++17)
@@ -276,14 +276,14 @@ namespace {
     };
 
 /*
-	TEST(PBCTest, PbcBodyThrowingHandlerLevel3) {
-		EXPECT_THROW(assert_body(false), hurchalla::BrokenContract);
-		EXPECT_NO_THROW(assert_body2(false));
-	}
+    TEST(PBCTest, PbcBodyThrowingHandlerLevel3) {
+        EXPECT_THROW(assert_body(false), hurchalla::BrokenContract);
+        EXPECT_NO_THROW(assert_body2(false));
+    }
 */
     TEST(PBCTest, ParentClass) {
-		setTestHandlerPreconditionAssertLevel(3);
-		setTestHandlerAssertLevel(3);
+        setTestHandlerPreconditionAssertLevel(3);
+        setTestHandlerAssertLevel(3);
         PBC_EXPECT_NO_EXIT({Parent a(true);});
         PBC_EXPECT_EXIT({Parent a(false);});
         
@@ -294,8 +294,8 @@ namespace {
     }
 
     TEST(PBCTest, DerivedClass) {
-		setTestHandlerPreconditionAssertLevel(3);
-		setTestHandlerAssertLevel(3);
+        setTestHandlerPreconditionAssertLevel(3);
+        setTestHandlerAssertLevel(3);
         PBC_EXPECT_NO_EXIT({Derived a(true, true);});
         PBC_EXPECT_EXIT({Derived a(false, false);});
         PBC_EXPECT_EXIT({Derived a(false, true);});
