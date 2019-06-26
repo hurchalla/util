@@ -24,8 +24,8 @@ that can and will be made at compile-time:
 
 The number at the end of an assertion macro name specifies the assertion level.
 The assertion macros without a number at the end (precondition, assert_body,
-postcondition, invariant) can be viewed as having an implicit 1. For more
-detail:
+postcondition, invariant) can be viewed as having an implicit level of 1. For
+more detail:
   An unnumbered (implicit level 1) assert can be viewed as a "normal" assert
     and is the go-to assert level, useful for when you either don't care about
     levels at all, or for when an assert is unremarkable in the time it will
@@ -52,11 +52,11 @@ Any non-static assert, regardless of level, will be translated into a no-op when
 For a given compiler, by default NDEBUG is typically defined in release builds
   and undefined in debug builds.  It's a standard macro (see the C or C++
   documentation of assert()) and you can predefine it (or not) for any
-  compilation project - for example by using -D in gcc or clang, or in MSVC++ via
-  either by command line option /D or by UI setting "preprocessor definitions".
+  compilation project - for example by using -D in gcc or clang, or in MSVC++
+  via either command line option /D or by UI setting "preprocessor definitions".
 */
 /*
-Some ideas in this file are inspired by
+Some ideas in this file were inspired by
  https://www.youtube.com/watch?v=1QhtXRMp3Hg
  http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
 */
