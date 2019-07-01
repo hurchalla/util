@@ -16,12 +16,6 @@ Postcondition asserts are intended to check that a postcondition is satisfied.
 Invariant asserts are intended to check that invariants are true.
 Body asserts are intended to check that logic internal to a function is correct.
 
-There are also four contract assertion macros that map simply to the function
-static_assert(). These macros exist in order to clarify intent. They are checks
-that can and will be made at compile-time:
-    precondition_static(x), assert_body_static(x), postcondition_static(x),
-    invariant_static(x)
-
 The number at the end of an assertion macro name specifies the assertion level.
 The assertion macros without a number at the end (precondition, assert_body,
 postcondition, invariant) can be viewed as having an implicit level of 1. For
@@ -30,23 +24,25 @@ more detail:
     and is the go-to assert level, useful for when you either don't care about
     levels at all, or for when an assert is unremarkable in the time it will
     take to check while the program is running. [Note that if you are able to
-    perform a check at compile time, you should always prefer one of the static
-    asserts, since they are free of cost and fail nicely at compile time.]
+    perform a check at compile time, you should always prefer static_assert()
+    in C++ or _Static_assert() in C, since it is always free of cost and fails
+    during compilation.]
   A level 2 assert is intended for checks that you know will be unusually
     expensive to perform.
   A level 3 assert is for checks that are incredibly expensive, such as a check
     with a larger order of computational complexity than the function that
     contains it. It could be considered a "safe mode" assert.
 
-Any non-static assert, regardless of level, will be translated into a no-op when
-  compiled in a translation unit with NDEBUG defined. When compiling without
-  NDEBUG defined, the assert will be translated into first a call to a trivial
-  getter function to determine the program-wide assert level. This is followed
-  by a branch to skip the assert if the program-wide assert level is less than
-  that particular assert's level. For that case, if you are using link-time-
-  optimization, the linker will typically see that the code will always skip the
-  assert, and remove the getter call and the branch and the assert, resulting in
-  a no-op. However, the effects of link-time-optimization are implementation
+When NDEBUG is defined in a translation unit, all of these asserts will be
+  replaced with a no-op, regardless of assertion level.
+When NDEBUG is undefined, each assert will be replaced with first a call to a
+  trivial getter function [pbcGetHandlerAssertLevel()] to determine the program-
+  wide assert level. Then, this will be followed by a conditional to skip the
+  assert check if your particular assert's level is greater than the program-
+  wide assert level. If this occurs and you are using link-time-optimization,
+  the linker will typically see that the code will always skip the assert, and
+  it will remove the getter call and the conditional and the assert, resulting
+  in a no-op. However, the effects of link-time-optimization are implementation
   dependent.
 
 For a given compiler, by default NDEBUG is typically defined in release builds
@@ -64,21 +60,6 @@ Some ideas in this file were inspired by
 /*
 Ordinarily, you shouldn't change anything in this file.
 */
-
-#if defined(__cplusplus)
-#  define precondition_static(...) static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define assert_body_static(...) static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define postcondition_static(...) static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define invariant_static(...) static_assert(__VA_ARGS__, #__VA_ARGS__)
-#else
-   /* this assumes C11 support in your compiler.  To emulate static_assert
-     pre-C11, see http://stackoverflow.com/questions/3385515/static-assert-in-c
-     For visual studio C, see _STATIC_ASSERT */
-#  define precondition_static(...) _Static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define assert_body_static(...) _Static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define postcondition_static(...) _Static_assert(__VA_ARGS__, #__VA_ARGS__)
-#  define invariant_static(...) _Static_assert(__VA_ARGS__, #__VA_ARGS__)
-#endif
 
 #if defined(NDEBUG)
 #  define precondition(...) ((void)0)
