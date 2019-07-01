@@ -57,7 +57,6 @@ target_include_directories(programming_by_contract SYSTEM
 target_compile_features(programming_by_contract INTERFACE 
           $<$<NOT:$<CXX_COMPILER_ID:>>:
                cxx_variadic_macros
-               cxx_static_assert
                cxx_decltype
                cxx_deleted_functions
            >)
@@ -66,22 +65,6 @@ target_compile_features(programming_by_contract INTERFACE
           $<$<NOT:$<C_COMPILER_ID:>>:
                c_variadic_macros
            >)
-# MSVC doesn't provide _Static_assert for C, but we don't want this to cause
-# CMake to abort in the very common scenario that MSVC is being used only for
-# C++ but the parent CMake project() doesn't specify a language (thereby
-# defaulting to C++ and C). Therefore I only check here for the c_static_assert
-# feature if both the C compiler ID is non-empty and the ID is non-MSVC.
-# Note: If you are using MSVC and you indeed need to use C, then you'll need to
-# emulate _Static_assert in
-# include/hurchalla/programming_by_contract/programming_by_contract.h (see the
-# comment there on _Static_assert). Alternatively, you could remove the macros
-# in programming_by_contract.h that use _Static_assert. Either of these
-# solutions would allow your C files to compile with MSVC.
-target_compile_features(programming_by_contract INTERFACE
-          $<$<AND:$<NOT:$<C_COMPILER_ID:>>,$<NOT:$<C_COMPILER_ID:MSVC>>>:
-               c_static_assert
-           >)
-
 
 
 # You can turn the following option ON/OFF with cmake by using the -D flag.
