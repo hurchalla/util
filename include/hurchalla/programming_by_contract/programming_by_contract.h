@@ -182,9 +182,6 @@ void foo(Widget* p)
 
    postcondition(origHasValue && origVal < p->a);
 }
- An alternative to the "if (POSTCONDITION_MACRO_IS_ACTIVE)" clause above
-is to use the following (though I view it as a hack):
-   postcondition(origVal = p->a, origHasValue = 1, 1);
 */
 
 /* C++ example:
