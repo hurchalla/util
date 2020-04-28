@@ -77,7 +77,7 @@ Assertions implemented as macros do not have these problems. However, they do
   non-caps used so that these macros are not overly distracting in code. These
   macros are best considered to be reserved keywords throughout projects, but if
   the current macro names are not possible to use or not desirable to use, then
-  this file can be changed to use different and more destinctive names.
+  this file can be changed to use different and more distinctive names.
 */
 /*
 Some ideas in this file were inspired by
