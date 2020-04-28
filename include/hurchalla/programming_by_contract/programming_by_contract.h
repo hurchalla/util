@@ -10,6 +10,8 @@ These are the main contract assertion macros:
     assert_body(x), assert_body2(x), assert_body3(x)
     postcondition(x), postcondition2(x), postcondition3(x)
     invariant(x), invariant2(x), invariant3(x)
+They are purposely implemented as macros instead of inline functions, as
+described at the end of this section.
 
 Precondition asserts are intended to check that a precondition is satisfied.
 Postcondition asserts are intended to check that a postcondition is satisfied.
@@ -50,6 +52,32 @@ For a given compiler, by default NDEBUG is typically defined in release builds
   documentation of assert()) and you can predefine it (or not) for any
   compilation project - for example by using -D in gcc or clang, or in MSVC++
   via either command line option /D or by UI setting "preprocessor definitions".
+
+Note: the assertions are all purposely implemented as macros instead of inline
+  functions. Implementing them as functions involves at least two unavoidable
+  problems, which is very likely the reason the standard assert() from assert.h
+  is also implemented as a macro. First, the assserts use the C/C++ standard
+  predefined macros __FILE__ and __LINE_ to show the location of an assertion
+  failure. If assertions were implemented as functions, this could not work,
+  since __FILE__ and __LINE_ would provide locations in the called functions
+  rather than the location of the assert in the caller. Second, the contract
+  assertions are designed to guarantee zero overhead when NDEBUG is defined in a
+  translation unit. If assertions were implemented as functions, the argument
+  given to an assert could break that guarantee. For example consider:
+  assert(isGood()). If isGood() has side effects, the compiler would always need
+  to call it, even if a hypothetical assert function (instead of macro) had an
+  empty body. Even if isGood() has no side effects, it's possible the compiler
+  and linker would miss an optimization we would expect to remove the isGood()
+  call. Missed optimizations might be unlikely, but the lack of guarantee and
+  the side-effects issue would make the use-cases for asserts more complicated.
+Assertions implemented as macros do not have these problems. However, they do
+  have the problem that they 'pollute' the namespace, particularly given that
+  this file uses uncapitalized common names for the asssertion macros such as
+  'precondition'. This is in keeping with the standard 'assert' macro, with the
+  non-caps used so that these macros are not overly distracting in code. These
+  macros are best considered to be reserved keywords throughout projects, but if
+  the current macro names are not possible to use or not desirable to use, then
+  this file can be changed to use different and more destinctive names.
 */
 /*
 Some ideas in this file were inspired by
