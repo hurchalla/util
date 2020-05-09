@@ -7,20 +7,20 @@
 /*
 These are the main contract assertion macros:
     precondition(x), precondition2(x), precondition3(x)
-    assert_body(x), assert_body2(x), assert_body3(x)
     postcondition(x), postcondition2(x), postcondition3(x)
     invariant(x), invariant2(x), invariant3(x)
+    assert_logic(x), assert_logic2(x), assert_logic3(x)
 They are purposely implemented as macros instead of inline functions, as
 described at the end of this section.
 
 Precondition asserts are intended to check that a precondition is satisfied.
 Postcondition asserts are intended to check that a postcondition is satisfied.
 Invariant asserts are intended to check that invariants are true.
-Body asserts are intended to check that logic internal to a function is correct.
+Logic asserts are intended to check that logical assumptions are true.
 
 The number at the end of an assertion macro name specifies the assertion level.
-The assertion macros without a number at the end (precondition, assert_body,
-postcondition, invariant) can be viewed as having an implicit level of 1. For
+The assertion macros without a number at the end (precondition, postcondition,
+invariant, assumption) can be viewed as having an implicit level of 1. For
 more detail:
   An unnumbered (implicit level 1) assert can be viewed as a "normal" assert
     and is the go-to assert level, useful for when you either don't care about
@@ -48,7 +48,7 @@ When NDEBUG is undefined, each assert will be replaced with first a call to a
   dependent.
 
 For a given compiler, by default NDEBUG is typically defined in release builds
-  and undefined in debug builds.  It's a standard macro (see the C or C++
+  and undefined in debug builds. It's a standard macro (see the C or C++
   documentation of assert()) and you can predefine it (or not) for any
   compilation project - for example by using -D in gcc or clang, or in MSVC++
   via either command line option /D or by UI setting "preprocessor definitions".
@@ -70,14 +70,15 @@ Note: the assertions are all purposely implemented as macros instead of inline
   and linker would miss an optimization we would expect to remove the isGood()
   call. Missed optimizations might be unlikely, but the lack of guarantee and
   the side-effects issue would make the use-cases for asserts more complicated.
-Assertions implemented as macros do not have these problems. However, they do
-  have the problem that they 'pollute' the namespace, particularly given that
-  this file uses uncapitalized common names for the asssertion macros such as
-  'precondition'. This is in keeping with the standard 'assert' macro, with the
-  non-caps used so that these macros are not overly distracting in code. These
-  macros are best considered to be reserved keywords throughout projects, but if
-  the current macro names are not possible to use or not desirable to use, then
-  this file can be changed to use different and more distinctive names.
+Assertions implemented as macros do not have these problems. However, macros
+  have the problem that they 'pollute' the namespace, and this problem is
+  worsened in our case by the fact that this file uses uncapitalized common
+  names for its assertion macros- such as 'precondition' (the use of non-caps
+  is in keeping with the standard 'assert' macro, with the intention that these
+  macros not be overly distracting in code). Consequently, you must treat all
+  the assertion macro names as reserved keywords throughout your projects. If
+  the given assertion names here are impossible or undesirable for you to use,
+  you can edit this file to change the macro names.
 */
 /*
 Some ideas in this file were inspired by
@@ -93,15 +94,15 @@ Ordinarily, you shouldn't change anything in this file.
 #  define precondition(...) ((void)0)
 #  define precondition2(...) ((void)0)
 #  define precondition3(...) ((void)0)
-#  define assert_body(...) ((void)0)
-#  define assert_body2(...) ((void)0)
-#  define assert_body3(...) ((void)0)
 #  define postcondition(...) ((void)0)
 #  define postcondition2(...) ((void)0)
 #  define postcondition3(...) ((void)0)
 #  define invariant(...) ((void)0)
 #  define invariant2(...) ((void)0)
 #  define invariant3(...) ((void)0)
+#  define assert_logic(...) ((void)0)
+#  define assert_logic2(...) ((void)0)
+#  define assert_logic3(...) ((void)0)
 
 #  if defined(__cplusplus)
 #     define PBC_FALSE_VALUE (false)
@@ -111,15 +112,15 @@ Ordinarily, you shouldn't change anything in this file.
 #  define PRECONDITION_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define PRECONDITION2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define PRECONDITION3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
-#  define ASSERT_BODY_MACRO_IS_ACTIVE PBC_FALSE_VALUE
-#  define ASSERT_BODY2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
-#  define ASSERT_BODY3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define POSTCONDITION_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define POSTCONDITION2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define POSTCONDITION3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define INVARIANT_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define INVARIANT2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 #  define INVARIANT3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_LOGIC_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_LOGIC2_MACRO_IS_ACTIVE PBC_FALSE_VALUE
+#  define ASSERT_LOGIC3_MACRO_IS_ACTIVE PBC_FALSE_VALUE
 
 #else
 #  if defined(PBC_WRAP_STDLIB_ASSERT)
@@ -163,15 +164,15 @@ Ordinarily, you shouldn't change anything in this file.
 #  define precondition(...) PBC_LEVEL_ASSERT_PRE(1, __VA_ARGS__)
 #  define precondition2(...) PBC_LEVEL_ASSERT_PRE(2, __VA_ARGS__)
 #  define precondition3(...) PBC_LEVEL_ASSERT_PRE(3, __VA_ARGS__)
-#  define assert_body(...) PBC_LEVEL_ASSERT(1, __VA_ARGS__)
-#  define assert_body2(...) PBC_LEVEL_ASSERT(2, __VA_ARGS__)
-#  define assert_body3(...) PBC_LEVEL_ASSERT(3, __VA_ARGS__)
 #  define postcondition(...) PBC_LEVEL_ASSERT(1, __VA_ARGS__)
 #  define postcondition2(...) PBC_LEVEL_ASSERT(2, __VA_ARGS__)
 #  define postcondition3(...) PBC_LEVEL_ASSERT(3, __VA_ARGS__)
 #  define invariant(...) PBC_LEVEL_ASSERT(1, __VA_ARGS__)
 #  define invariant2(...) PBC_LEVEL_ASSERT(2, __VA_ARGS__)
 #  define invariant3(...) PBC_LEVEL_ASSERT(3, __VA_ARGS__)
+#  define assert_logic(...) PBC_LEVEL_ASSERT(1, __VA_ARGS__)
+#  define assert_logic2(...) PBC_LEVEL_ASSERT(2, __VA_ARGS__)
+#  define assert_logic3(...) PBC_LEVEL_ASSERT(3, __VA_ARGS__)
 
 #  define PRECONDITION_MACRO_IS_ACTIVE \
                        (pbcGetHandlerPreconditionAssertLevel() >= 1)
@@ -179,15 +180,15 @@ Ordinarily, you shouldn't change anything in this file.
                        (pbcGetHandlerPreconditionAssertLevel() >= 2)
 #  define PRECONDITION3_MACRO_IS_ACTIVE \
                        (pbcGetHandlerPreconditionAssertLevel() >= 3)
-#  define ASSERT_BODY_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
-#  define ASSERT_BODY2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
-#  define ASSERT_BODY3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
 #  define POSTCONDITION_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
 #  define POSTCONDITION2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
 #  define POSTCONDITION3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
 #  define INVARIANT_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
 #  define INVARIANT2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
 #  define INVARIANT3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
+#  define ASSERT_LOGIC_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 1)
+#  define ASSERT_LOGIC2_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 2)
+#  define ASSERT_LOGIC3_MACRO_IS_ACTIVE (pbcGetHandlerAssertLevel() >= 3)
 #endif  /* NDEBUG */
 
 
