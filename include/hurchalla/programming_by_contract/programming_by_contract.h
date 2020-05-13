@@ -91,18 +91,30 @@ Ordinarily, you shouldn't change anything in this file.
 */
 
 #if defined(NDEBUG)
-#  define precondition(...) ((void)0)
-#  define precondition2(...) ((void)0)
-#  define precondition3(...) ((void)0)
-#  define postcondition(...) ((void)0)
-#  define postcondition2(...) ((void)0)
-#  define postcondition3(...) ((void)0)
-#  define invariant(...) ((void)0)
-#  define invariant2(...) ((void)0)
-#  define invariant3(...) ((void)0)
-#  define assert_logic(...) ((void)0)
-#  define assert_logic2(...) ((void)0)
-#  define assert_logic3(...) ((void)0)
+#  if 1
+     /* PBC_DO_NOTHING() is written to avoid 'unused variable' warnings during
+        compilation. Note: for C++ prior to C++20, the line below will not
+        compile if the arg contains a lambda.  You can use the alternative
+        version if necessary. */
+#    define PBC_DO_NOTHING(...) ((void)sizeof(__VA_ARGS__))
+#  else
+     /* Alternative version for C++ pre-20 with lambdas in contract args. */
+#    define PBC_DO_NOTHING(...) \
+                       do { true ? ((void)0) : ((void)(__VA_ARGS__)); } while(0)
+#  endif
+
+#  define precondition(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define precondition2(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define precondition3(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define postcondition(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define postcondition2(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define postcondition3(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define invariant(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define invariant2(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define invariant3(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define assert_logic(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define assert_logic2(...) PBC_DO_NOTHING(__VA_ARGS__)
+#  define assert_logic3(...) PBC_DO_NOTHING(__VA_ARGS__)
 
 #  if defined(__cplusplus)
 #     define PBC_FALSE_VALUE (false)
