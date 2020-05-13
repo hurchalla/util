@@ -94,7 +94,7 @@ Ordinarily, you shouldn't change anything in this file.
 #  if 1
      /* PBC_DO_NOTHING() is written to avoid 'unused variable' warnings during
         compilation. Note: for C++ prior to C++20, the line below will not
-        compile if the arg contains a lambda.  You can use the alternative
+        compile if the arg contains a lambda. You can use the alternative
         version if necessary. */
 #    define PBC_DO_NOTHING(...) ((void)sizeof(__VA_ARGS__))
 #  else
