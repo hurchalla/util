@@ -138,7 +138,7 @@ Ordinarily, you shouldn't change anything in this file.
 #  define HPBC_ASSERT3_MACRO_IS_ACTIVE HPBC_FALSE_VALUE
 
 #else
-#  if defined(PBC_WRAP_STDLIB_ASSERT)
+#  if defined(HPBC_WRAP_STDLIB_ASSERT)
 #     if defined(__cplusplus)
 #        include <cassert>
 #     else

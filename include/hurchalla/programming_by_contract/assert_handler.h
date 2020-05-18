@@ -4,7 +4,7 @@
 #ifndef HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 #define HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 
-/* Unless you have defined PBC_WRAP_STDLIB_ASSERT (which is not normally
+/* Unless you have defined HPBC_WRAP_STDLIB_ASSERT (which is not normally
    recommended) for your main application and for all libraries you link to
    that use programming by contract, then in your main application project you
    must compile an assert handler file that implements the functions declared
