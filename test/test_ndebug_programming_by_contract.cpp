@@ -19,8 +19,8 @@
 
 // This macro doesn't strictly test that the expression does not exit -
 // If the expression exits with a value of 0 it will pass this macro
-#ifndef PBC_EXPECT_NO_EXIT
-    #define PBC_EXPECT_NO_EXIT(EXPRESSION) do \
+#ifndef HPBC_EXPECT_NO_EXIT
+    #define HPBC_EXPECT_NO_EXIT(EXPRESSION) do \
            { EXPECT_EXIT(EXPRESSION; exit(0), testing::ExitedWithCode(0), ""); \
            } while(0)
 #endif
@@ -28,30 +28,30 @@
 
 
 // confirm the contract-asserts have zero overhead when NDEBUG is defined
-static_assert(std::is_same<decltype(precondition(true)), void>::value, "");
-static_assert(std::is_same<decltype(precondition2(true)), void>::value, "");
-static_assert(std::is_same<decltype(precondition3(true)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition(true)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition2(true)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition3(true)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body(true)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body2(true)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body3(true)), void>::value, "");
-static_assert(std::is_same<decltype(invariant(true)), void>::value, "");
-static_assert(std::is_same<decltype(invariant2(true)), void>::value, "");
-static_assert(std::is_same<decltype(invariant3(true)), void>::value, "");
-static_assert(std::is_same<decltype(precondition(false)), void>::value, "");
-static_assert(std::is_same<decltype(precondition2(false)), void>::value, "");
-static_assert(std::is_same<decltype(precondition3(false)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition(false)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition2(false)), void>::value, "");
-static_assert(std::is_same<decltype(postcondition3(false)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body(false)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body2(false)), void>::value, "");
-static_assert(std::is_same<decltype(assert_body3(false)), void>::value, "");
-static_assert(std::is_same<decltype(invariant(false)), void>::value, "");
-static_assert(std::is_same<decltype(invariant2(false)), void>::value, "");
-static_assert(std::is_same<decltype(invariant3(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION2(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION3(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION2(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION3(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT2(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT3(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT2(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT3(true)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION2(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_PRECONDITION3(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION2(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_POSTCONDITION3(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT2(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_ASSERT3(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT2(false)), void>::value, "");
+static_assert(std::is_same<decltype(HPBC_INVARIANT3(false)), void>::value, "");
 
 
 
@@ -59,64 +59,64 @@ static_assert(std::is_same<decltype(invariant3(false)), void>::value, "");
 namespace {
     // since all the programming by contract asserts map to void when NDEBUG
     // is defined, we expect they will never exit/abort when NDEBUG is defined.
-    TEST(PbcNdebugTest, PreconditionsHandlerLevel3) {
+    TEST(HpbcNdebugTest, PreconditionsHandlerLevel3) {
         setTestHandlerPreconditionAssertLevel(3);
-        PBC_EXPECT_NO_EXIT(precondition(true));
-        PBC_EXPECT_NO_EXIT(precondition2(true));
-        PBC_EXPECT_NO_EXIT(precondition3(true));
-        PBC_EXPECT_NO_EXIT(precondition(false));
-        PBC_EXPECT_NO_EXIT(precondition2(false));
-        PBC_EXPECT_NO_EXIT(precondition3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION3(false));
     }
-    TEST(PbcNdebugTest, PreconditionsHandlerLevel0) {
+    TEST(HpbcNdebugTest, PreconditionsHandlerLevel0) {
         setTestHandlerPreconditionAssertLevel(0);
-        PBC_EXPECT_NO_EXIT(precondition(true));
-        PBC_EXPECT_NO_EXIT(precondition2(true));
-        PBC_EXPECT_NO_EXIT(precondition3(true));
-        PBC_EXPECT_NO_EXIT(precondition(false));
-        PBC_EXPECT_NO_EXIT(precondition2(false));
-        PBC_EXPECT_NO_EXIT(precondition3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION3(false));
     }
-    TEST(PbcNdebugTest, GeneralAssertsHandlerLevel3) {
+    TEST(HpbcNdebugTest, GeneralAssertsHandlerLevel3) {
         setTestHandlerAssertLevel(3);
-        PBC_EXPECT_NO_EXIT(assert_body(false));
-        PBC_EXPECT_NO_EXIT(assert_body2(false));
-        PBC_EXPECT_NO_EXIT(assert_body3(false));
-        PBC_EXPECT_NO_EXIT(postcondition(false));
-        PBC_EXPECT_NO_EXIT(postcondition2(false));
-        PBC_EXPECT_NO_EXIT(postcondition3(false));
-        PBC_EXPECT_NO_EXIT(invariant(false));
-        PBC_EXPECT_NO_EXIT(invariant2(false));
-        PBC_EXPECT_NO_EXIT(invariant3(false));
-        PBC_EXPECT_NO_EXIT(assert_body(true));
-        PBC_EXPECT_NO_EXIT(assert_body2(true));
-        PBC_EXPECT_NO_EXIT(assert_body3(true));
-        PBC_EXPECT_NO_EXIT(postcondition(true));
-        PBC_EXPECT_NO_EXIT(postcondition2(true));
-        PBC_EXPECT_NO_EXIT(postcondition3(true));
-        PBC_EXPECT_NO_EXIT(invariant(true));
-        PBC_EXPECT_NO_EXIT(invariant2(true));
-        PBC_EXPECT_NO_EXIT(invariant3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT3(true));
     }
-    TEST(PbcNdebugTest, GeneralAssertsHandlerLevel0) {
+    TEST(HpbcNdebugTest, GeneralAssertsHandlerLevel0) {
         setTestHandlerAssertLevel(0);
-        PBC_EXPECT_NO_EXIT(assert_body(false));
-        PBC_EXPECT_NO_EXIT(assert_body2(false));
-        PBC_EXPECT_NO_EXIT(assert_body3(false));
-        PBC_EXPECT_NO_EXIT(postcondition(false));
-        PBC_EXPECT_NO_EXIT(postcondition2(false));
-        PBC_EXPECT_NO_EXIT(postcondition3(false));
-        PBC_EXPECT_NO_EXIT(invariant(false));
-        PBC_EXPECT_NO_EXIT(invariant2(false));
-        PBC_EXPECT_NO_EXIT(invariant3(false));
-        PBC_EXPECT_NO_EXIT(assert_body(true));
-        PBC_EXPECT_NO_EXIT(assert_body2(true));
-        PBC_EXPECT_NO_EXIT(assert_body3(true));
-        PBC_EXPECT_NO_EXIT(postcondition(true));
-        PBC_EXPECT_NO_EXIT(postcondition2(true));
-        PBC_EXPECT_NO_EXIT(postcondition3(true));
-        PBC_EXPECT_NO_EXIT(invariant(true));
-        PBC_EXPECT_NO_EXIT(invariant2(true));
-        PBC_EXPECT_NO_EXIT(invariant3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT2(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT3(false));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_ASSERT3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_POSTCONDITION3(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT2(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT3(true));
     }
 }

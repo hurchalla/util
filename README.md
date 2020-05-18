@@ -12,7 +12,7 @@ This project is licensed under the MIT License - see the
 
 ## TODO
 
-Document options PBC_WRAP_STDLIB_ASSERT, TEST_HURCHALLA_TOP_LEVEL, and
+Document options HPBC_WRAP_STDLIB_ASSERT, TEST_HURCHALLA_TOP_LEVEL, and
 TEST_HURCHALLA_LIBS
 
 ## Running CMake

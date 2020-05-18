@@ -11,16 +11,16 @@
 
 
 #if defined(NDEBUG)
-#   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
+#   define HPBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
                 do { EXPRESSION_BODY; } while(0)
-#   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
+#   define HPBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
                 do { EXPRESSION_BODY; } while(0)
 #else
 #   include <sstream>
 #   include <stdexcept>
 #   include <typeinfo>
-#   if defined(PBC_WRAP_STDLIB_ASSERT)
-#      error exception_checking.h does not support PBC_WRAP_STDLIB_ASSERT
+#   if defined(HPBC_WRAP_STDLIB_ASSERT)
+#      error exception_checking.h does not support HPBC_WRAP_STDLIB_ASSERT
 #   endif
     namespace hurchalla { inline namespace v1 {
 
@@ -64,14 +64,14 @@
                    << " [yet unknown exception was thrown, explanation: "
                    << e.what() << "]";
 #endif
-                pbcAssertHandler(ss.str().c_str(), filename, line);
+                hpbcAssertHandler(ss.str().c_str(), filename, line);
             }
             throw;
         } catch (...) {
             if (!wasHandled) {
                 std::ostringstream ss;
                 ss << assertMessage << " [yet unknown exception was thrown]";
-                pbcAssertHandler(ss.str().c_str(), filename, line);
+                hpbcAssertHandler(ss.str().c_str(), filename, line);
             }
             throw;
         }
@@ -79,16 +79,16 @@
 
     }}  // end namespaces
 
-#   define PBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
+#   define HPBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
                  hurchalla::runWithCheckedExceptions<__VA_ARGS__>( \
                      [&]{EXPRESSION_BODY;}, \
-                     "PBC_VERIFY_THROWS should only throw expected exceptions",\
+                     "HPBC_VERIFY_THROWS should only throw expected exceptions",\
                      __FILE__, __LINE__ \
                      )
-#   define PBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
+#   define HPBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
                 hurchalla::runWithCheckedExceptions<>( \
                      [&]{EXPRESSION_BODY;}, \
-                     "PBC_VERIFY_NOTHROW should not throw exceptions", \
+                     "HPBC_VERIFY_NOTHROW should not throw exceptions", \
                      __FILE__, __LINE__ \
                      )
 #endif

@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <cstdlib>
-void pbcAssertHandler(const char* failedAssertion, const char* filename,
+void hpbcAssertHandler(const char* failedAssertion, const char* filename,
                       int line)
 {
     std::cerr << "Assert failed (" << failedAssertion << "): " << filename
@@ -30,12 +30,12 @@ static int globalPbcAssertLevelPre = 3;
 static int globalPbcAssertLevel = 3;
 
 
-int pbcGetHandlerPreconditionAssertLevel()
+int hpbcGetHandlerPreconditionAssertLevel()
 {
     return globalPbcAssertLevelPre;
 }
 
-int pbcGetHandlerAssertLevel()
+int hpbcGetHandlerAssertLevel()
 {
     return globalPbcAssertLevel;
 }
