@@ -3,7 +3,7 @@ Programming by Contract for C++ and C
 
 ## Author
 
-* **Jeff Hurchalla**
+* **Jeffrey Hurchalla**
 
 ## License
 
