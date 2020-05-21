@@ -68,14 +68,14 @@ target_compile_features(programming_by_contract INTERFACE
 
 
 # You can turn the following option ON/OFF with cmake by using the -D flag.
-# Example: cmake -DHPBC_WRAP_STDLIB_ASSERT=ON ..
-option(HPBC_WRAP_STDLIB_ASSERT
-       "Option HPBC_WRAP_STDLIB_ASSERT: If you set HPBC_WRAP_STDLIB_ASSERT=ON (you can do this via command line 'cmake -DHPBC_WRAP_STDLIB_ASSERT=ON ...'), all the programming by contract assertion macros will use the standard library assert() and will always be active when NDEBUG is undefined and will always be inactive when NDEBUG is defined.  Setting this option to ON effectively reduces much of the programming by contract functionality, but it means you (or clients) will not need to provide or link any custom assert handler."
+# Example: cmake -DHPBC_ENABLE_FULL_FEATURES=ON ..
+option(HPBC_ENABLE_FULL_FEATURES
+       "Option HPBC_ENABLE_FULL_FEATURES: If you set HPBC_ENABLE_FULL_FEATURES=ON (you can do this via command line 'cmake -DHPBC_ENABLE_FULL_FEATURES=ON ...'), all the programming by contract assertion macros will be fully functional, and you will need to provide a custom assert handler function.  When this option is not set to ON, all the macros are just remapped to the standard library assert(), and no custom assert handler is necessary.  This effectively reduces much of the programming by contract functionality, but it is appealingly simple, and it allows someone to link to your code without knowing anything about programming by contract (or assert handlers)."
        OFF)
 
-if(HPBC_WRAP_STDLIB_ASSERT)
+if(HPBC_ENABLE_FULL_FEATURES)
     target_compile_definitions(programming_by_contract INTERFACE
-              HPBC_WRAP_STDLIB_ASSERT
+              HPBC_ENABLE_FULL_FEATURES
               )
 endif()
 

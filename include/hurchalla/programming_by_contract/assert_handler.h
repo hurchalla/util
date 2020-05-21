@@ -4,21 +4,20 @@
 #ifndef HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 #define HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 
-/* Unless you have defined HPBC_WRAP_STDLIB_ASSERT (which is not normally
-   recommended) for your main application and for all libraries you link to
-   that use programming by contract, then in your main application project you
-   must compile an assert handler file that implements the functions declared
-   here. Your assert handler file does not belong in this
-   programming_by_contract project; it belongs in your project(s) that contain
-   main(). Normally, you can just file copy one of the assert handlers in the
-   example_assert_handlers folder: either assert_handler_cpp.cpp or
-   assert_handler_c.c (not both!)
-   If you define HPBC_WRAP_STDLIB_ASSERT for your main application and all
-   libraries you link to (that use programming by contract), then you don't need
-   to provide an assert handler file.  However, the programming by contract
-   features are rather limited if you do so, because all the assertion macros
-   in that case are simply mapped to the standard library assert(), and the
-   named level in all the assertion macros are also disregarded. */
+/* If you have defined HPBC_ENABLE_FULL_FEATURES for your main application or
+   for any libraries you link to (that use programming by contract), then in
+   your main application project you must compile an assert handler file that
+   implements the functions declared here. Your assert handler file does not
+   belong in this programming_by_contract project; it belongs in your project(s)
+   that contain main(). Normally, you can just file copy one of the assert
+   handlers in the example_assert_handlers folder: either assert_handler_cpp.cpp
+   or assert_handler_c.c (not both!)
+   If you do not define HPBC_ENABLE_FULL_FEATURES for your main application or
+   any libraries you link to (that use programming by contract), then you don't
+   need to provide an assert handler file.  However, the programming by contract
+   features will be rather limited in that case, because all assertion macros
+   will be simply mapped to the standard library assert(), and the named levels
+   in all the assertion macros will also be disregarded. */
 
 /* To enable a project containing both C and C++ code to use one single assert
 handler, you can uncomment the #define HPBC_SUPPORT_MIXED_C_AND_CPP below.

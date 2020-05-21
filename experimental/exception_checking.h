@@ -19,8 +19,8 @@
 #   include <sstream>
 #   include <stdexcept>
 #   include <typeinfo>
-#   if defined(HPBC_WRAP_STDLIB_ASSERT)
-#      error exception_checking.h does not support HPBC_WRAP_STDLIB_ASSERT
+#   if !defined(HPBC_ENABLE_FULL_FEATURES)
+#      error exception_checking.h requires HPBC_ENABLE_FULL_FEATURES
 #   endif
     namespace hurchalla { inline namespace v1 {
 

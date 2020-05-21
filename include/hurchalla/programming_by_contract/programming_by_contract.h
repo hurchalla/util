@@ -138,16 +138,17 @@ Ordinarily, you shouldn't change anything in this file.
 #  define HPBC_ASSERT3_MACRO_IS_ACTIVE HPBC_FALSE_VALUE
 
 #else
-#  if defined(HPBC_WRAP_STDLIB_ASSERT)
+#  if !defined(HPBC_ENABLE_FULL_FEATURES)
+      /* wrap the standard library assert */
 #     if defined(__cplusplus)
 #        include <cassert>
 #     else
 #        include <assert.h>
 #     endif
-      inline int hpbcGetHandlerAssertLevel() { return 3; }
-      inline int hpbcGetHandlerPreconditionAssertLevel() { return 3; }
 #     define HPBC_LEVEL_ASSERT(LEVEL, ...) assert(__VA_ARGS__)
 #     define HPBC_LEVEL_ASSERT_PRE(LEVEL, ...) assert(__VA_ARGS__)
+#     define HPBC_HANDLER_LEVEL 3
+#     define HPBC_HANDLER_PRECOND_LEVEL 3
 #  else   /* the normal Programming by Contract features */
 #     include "hurchalla/programming_by_contract/assert_handler.h"
 
@@ -175,6 +176,8 @@ Ordinarily, you shouldn't change anything in this file.
 #     define HPBC_LEVEL_ASSERT_PRE(LEVEL, ...) do { \
                        if (hpbcGetHandlerPreconditionAssertLevel() >= LEVEL) { \
                             HPBC_BASIC_ASSERT(__VA_ARGS__); } } while(0)
+#     define HPBC_HANDLER_LEVEL hpbcGetHandlerAssertLevel()
+#     define HPBC_HANDLER_PRECOND_LEVEL hpbcGetHandlerPreconditionAssertLevel()
 #  endif
 #  define HPBC_PRECONDITION(...) HPBC_LEVEL_ASSERT_PRE(1, __VA_ARGS__)
 #  define HPBC_PRECONDITION2(...) HPBC_LEVEL_ASSERT_PRE(2, __VA_ARGS__)
@@ -189,21 +192,18 @@ Ordinarily, you shouldn't change anything in this file.
 #  define HPBC_ASSERT2(...) HPBC_LEVEL_ASSERT(2, __VA_ARGS__)
 #  define HPBC_ASSERT3(...) HPBC_LEVEL_ASSERT(3, __VA_ARGS__)
 
-#  define HPBC_PRECONDITION_MACRO_IS_ACTIVE \
-                       (hpbcGetHandlerPreconditionAssertLevel() >= 1)
-#  define HPBC_PRECONDITION2_MACRO_IS_ACTIVE \
-                       (hpbcGetHandlerPreconditionAssertLevel() >= 2)
-#  define HPBC_PRECONDITION3_MACRO_IS_ACTIVE \
-                       (hpbcGetHandlerPreconditionAssertLevel() >= 3)
-#  define HPBC_POSTCONDITION_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 1)
-#  define HPBC_POSTCONDITION2_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 2)
-#  define HPBC_POSTCONDITION3_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 3)
-#  define HPBC_INVARIANT_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 1)
-#  define HPBC_INVARIANT2_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 2)
-#  define HPBC_INVARIANT3_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 3)
-#  define HPBC_ASSERT_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 1)
-#  define HPBC_ASSERT2_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 2)
-#  define HPBC_ASSERT3_MACRO_IS_ACTIVE (hpbcGetHandlerAssertLevel() >= 3)
+#  define HPBC_PRECONDITION_MACRO_IS_ACTIVE (HPBC_HANDLER_PRECOND_LEVEL >= 1)
+#  define HPBC_PRECONDITION2_MACRO_IS_ACTIVE (HPBC_HANDLER_PRECOND_LEVEL >= 2)
+#  define HPBC_PRECONDITION3_MACRO_IS_ACTIVE (HPBC_HANDLER_PRECOND_LEVEL >= 3)
+#  define HPBC_POSTCONDITION_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 1)
+#  define HPBC_POSTCONDITION2_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 2)
+#  define HPBC_POSTCONDITION3_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 3)
+#  define HPBC_INVARIANT_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 1)
+#  define HPBC_INVARIANT2_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 2)
+#  define HPBC_INVARIANT3_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 3)
+#  define HPBC_ASSERT_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 1)
+#  define HPBC_ASSERT2_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 2)
+#  define HPBC_ASSERT3_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 3)
 #endif  /* NDEBUG */
 
 

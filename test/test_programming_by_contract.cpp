@@ -50,7 +50,7 @@ namespace {
         HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION3(true));
     }
 
-#ifndef HPBC_WRAP_STDLIB_ASSERT
+#ifdef HPBC_ENABLE_FULL_FEATURES
     TEST(HPBCTest, PreconditionsHandlerLevel2) {
         setTestHandlerPreconditionAssertLevel(2);
         HPBC_EXPECT_EXIT(HPBC_PRECONDITION(false));
@@ -108,7 +108,7 @@ namespace {
         HPBC_EXPECT_NO_EXIT(HPBC_INVARIANT3(true));
     }
 
-#ifndef HPBC_WRAP_STDLIB_ASSERT
+#ifdef HPBC_ENABLE_FULL_FEATURES
     TEST(HPBCTest, GeneralAssertsHandlerLevel2) {
         setTestHandlerAssertLevel(2);
         HPBC_EXPECT_EXIT(HPBC_ASSERT(false));
