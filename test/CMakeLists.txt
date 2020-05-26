@@ -5,7 +5,7 @@ if(TARGET test_programming_by_contract)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 #project(test_programming_by_contract VERSION 1.0.0 LANGUAGES CXX)
 
 

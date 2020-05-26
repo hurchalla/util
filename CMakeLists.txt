@@ -5,7 +5,7 @@ if(TARGET programming_by_contract)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 project(programming_by_contract VERSION 1.0.0 LANGUAGES C CXX)
 
 # if this is the top level CMakeLists.txt, let IDEs group projects into folders.
@@ -38,19 +38,19 @@ elseif(TEST_HURCHALLA_LIBS)
 endif()
 
 
-
-set(header_files
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/assert_handler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/programming_by_contract.h
-    )
-
 add_library(programming_by_contract INTERFACE)
 target_sources(programming_by_contract INTERFACE 
-               $<BUILD_INTERFACE:${header_files}>)
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/assert_handler.h>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/programming_by_contract.h>)
+
 target_include_directories(programming_by_contract
                INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_include_directories(programming_by_contract SYSTEM
-               INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
+
+target_include_directories(programming_by_contract
+               INTERFACE $<INSTALL_INTERFACE:include>)
+#use this instead?
+#target_include_directories(programming_by_contract SYSTEM
+#               INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 
 # Check for required C++ features only if the C++ compiler ID is non-empty.
