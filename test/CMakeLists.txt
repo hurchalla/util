@@ -31,6 +31,13 @@ add_executable(test_programming_by_contract
                test_programming_by_contract.cpp
                testhelper_assert_handler.cpp
                testhelper_assert_handler.h)
+if(MSVC)
+    target_compile_options(test_programming_by_contract PRIVATE /W4 /WX)
+else()
+    target_compile_options(test_programming_by_contract PRIVATE -Wall
+                            -Wextra -Wpedantic -pedantic-errors -Werror -Wshadow
+                            -Wconversion -Wsign-conversion)
+endif()
 set_target_properties(test_programming_by_contract
                       PROPERTIES FOLDER "Tests")
 target_link_libraries(test_programming_by_contract
@@ -44,6 +51,13 @@ add_executable(test_ndebug_programming_by_contract
                test_ndebug_programming_by_contract.cpp
                testhelper_assert_handler.cpp
                testhelper_assert_handler.h)
+if(MSVC)
+    target_compile_options(test_ndebug_programming_by_contract PRIVATE /W4 /WX)
+else()
+    target_compile_options(test_ndebug_programming_by_contract PRIVATE -Wall
+                            -Wextra -Wpedantic -pedantic-errors -Werror -Wshadow
+                            -Wconversion -Wsign-conversion)
+endif()
 set_target_properties(test_ndebug_programming_by_contract
                       PROPERTIES FOLDER "Tests")
 target_link_libraries(test_ndebug_programming_by_contract
@@ -52,4 +66,3 @@ target_link_libraries(test_ndebug_programming_by_contract
 #add_test(test_ndebug_programming_by_contract
 #          test_ndebug_programming_by_contract)
 gtest_discover_tests(test_ndebug_programming_by_contract)
-

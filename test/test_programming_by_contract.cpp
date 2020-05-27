@@ -210,12 +210,10 @@ namespace {
         Parent(bool passContract) : contractWillPass(passContract) {
             // ...a bunch of code...
 
-            //checkClassInvariants();
-            HPBC_INVARIANTS_CHECK(checkClassInvariants);
+            checkClassInvariants(false);
         };
         virtual ~Parent() {
-            //checkClassInvariants();
-            HPBC_INVARIANTS_CHECK(checkClassInvariants);
+            checkClassInvariants(false);
 
             // ...a bunch of code...
         }
@@ -229,6 +227,7 @@ namespace {
         }
     protected:
         void checkClassInvariants(bool callParent = true) {
+            (void)callParent;  // silence the unused param warning
             HPBC_INVARIANT3(contractWillPass);
             HPBC_INVARIANT2(contractWillPass);
         }
@@ -248,10 +247,10 @@ namespace {
                                             contractWillPass(passContract) {
             // ...a bunch of code...
 
-            HPBC_INVARIANTS_CHECK(checkClassInvariants, false);
+            checkClassInvariants(false);
         };
         virtual ~Derived() {
-            HPBC_INVARIANTS_CHECK(checkClassInvariants, false);
+            checkClassInvariants(false);
 
             // ...a bunch of code...
         }

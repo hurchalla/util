@@ -244,21 +244,11 @@ void bar()
 
 
 
-#if defined(NDEBUG)
-#  define HPBC_INVARIANTS_CHECK(METHOD_NAME, ...) ((void)0)
-#else
-#  define HPBC_INVARIANTS_CHECK(METHOD_NAME, ...) do { \
-                                    if (hpbcGetHandlerAssertLevel() > 0) { \
-                                        METHOD_NAME(__VA_ARGS__); \
-                                    } } while(0)
-#endif
-
-
 #if defined(__cplusplus)
 #  if defined(NDEBUG)
-#     define HPBC_INVARIANTS_GUARD(INVARIANTS_METHOD_NAME, ...) ((void)0)
+#     define HPBC_INVARIANTS_GUARD(INVARIANTS_METHOD_NAME) ((void)0)
 #  else
-#     define HPBC_INVARIANTS_GUARD(INVARIANTS_METHOD_NAME, ...) \
+#     define HPBC_INVARIANTS_GUARD(INVARIANTS_METHOD_NAME) \
          using OuterClassPtrHpbcInvariantsGuard = decltype(this); \
          class HpbcClassInvariantsGuard { \
          public: \
@@ -267,12 +257,12 @@ void bar()
                : pOuter(ptr) \
             { \
                if (hpbcGetHandlerAssertLevel() > 0) \
-                  pOuter->INVARIANTS_METHOD_NAME(__VA_ARGS__); \
+                  pOuter->INVARIANTS_METHOD_NAME(); \
             } \
             ~HpbcClassInvariantsGuard() \
             { \
                if (hpbcGetHandlerAssertLevel() > 0) \
-                  pOuter->INVARIANTS_METHOD_NAME(__VA_ARGS__); \
+                  pOuter->INVARIANTS_METHOD_NAME(); \
             } \
             HpbcClassInvariantsGuard(const HpbcClassInvariantsGuard&) = delete;\
             HpbcClassInvariantsGuard& operator=(const HpbcClassInvariantsGuard&) = delete; \
