@@ -243,6 +243,15 @@ void bar()
 */
 
 
+#if defined(NDEBUG)
+#  define HPBC_INVARIANTS_CHECK(METHOD_NAME) ((void)0)
+#else
+#  define HPBC_INVARIANTS_CHECK(METHOD_NAME) do { \
+                                    if (hpbcGetHandlerAssertLevel() > 0) { \
+                                        METHOD_NAME(); \
+                                    } } while(0)
+#endif
+
 
 #if defined(__cplusplus)
 #  if defined(NDEBUG)

@@ -210,10 +210,10 @@ namespace {
         Parent(bool passContract) : contractWillPass(passContract) {
             // ...a bunch of code...
 
-            checkClassInvariants(false);
+            checkClassInvariantsLocal();
         };
         virtual ~Parent() {
-            checkClassInvariants(false);
+            checkClassInvariantsLocal();
 
             // ...a bunch of code...
         }
@@ -226,12 +226,17 @@ namespace {
             HPBC_POSTCONDITION2(contractWillPass);
         }
     protected:
-        void checkClassInvariants(bool callParent = true) {
-            (void)callParent;  // silence the unused param warning
+        void checkClassInvariants() {
+            // If we inherited from a class Grandparent, we'd also call here:
+            // Grandparent::checkClassInvariants();
+            checkClassInvariantsLocal();
+        }
+    private:
+        void checkClassInvariantsLocal() {
             HPBC_INVARIANT3(contractWillPass);
             HPBC_INVARIANT2(contractWillPass);
         }
-    private:
+
         virtual void fooImpl() {
         }
 
@@ -247,10 +252,10 @@ namespace {
                                             contractWillPass(passContract) {
             // ...a bunch of code...
 
-            checkClassInvariants(false);
+            checkClassInvariantsLocal();
         };
         virtual ~Derived() {
-            checkClassInvariants(false);
+            checkClassInvariantsLocal();
 
             // ...a bunch of code...
         }
@@ -263,12 +268,15 @@ namespace {
             HPBC_POSTCONDITION(contractWillPass);
         }
     protected:
-        void checkClassInvariants(bool callParent = true) {
-            if (callParent)
-                Parent::checkClassInvariants(true);
-            HPBC_INVARIANT2(contractWillPass);
+        void checkClassInvariants() {
+            Parent::checkClassInvariants();
+            checkClassInvariantsLocal();
         }
     private:
+        void checkClassInvariantsLocal() {
+            HPBC_INVARIANT2(contractWillPass);
+        }
+
         void fooImpl() override {
         }
 
