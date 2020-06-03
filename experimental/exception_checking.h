@@ -51,8 +51,7 @@
         try {
             runAndCheckExceptionParams<Func, Exceptions...>
                                       (std::forward<Func>(f), wasHandled);
-        }
-        catch (const std::exception& e) {
+        } catch (const std::exception& e) {
             if (!wasHandled) {
                 std::ostringstream ss;
 #if 1
