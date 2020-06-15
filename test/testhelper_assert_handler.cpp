@@ -16,6 +16,12 @@
 
 #include <iostream>
 #include <cstdlib>
+
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wmissing-noreturn"
+#endif
 void hpbcAssertHandler(const char* failedAssertion, const char* filename,
                       int line)
 {
@@ -23,6 +29,9 @@ void hpbcAssertHandler(const char* failedAssertion, const char* filename,
               << " line " << line << "\n";
     std::abort();
 }
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 
 // Evil globals should be ok for the unit tests this file is written for.
