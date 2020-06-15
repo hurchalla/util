@@ -211,7 +211,7 @@ namespace {
             // ...a bunch of code...
 
             checkClassInvariantsLocal();
-        };
+        }
         virtual ~Parent() {
             checkClassInvariantsLocal();
 
@@ -253,7 +253,7 @@ namespace {
             // ...a bunch of code...
 
             checkClassInvariantsLocal();
-        };
+        }
         virtual ~Derived() {
             checkClassInvariantsLocal();
 
