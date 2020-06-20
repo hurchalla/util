@@ -254,7 +254,7 @@ namespace {
 
             checkClassInvariantsLocal();
         }
-        virtual ~Derived() {
+        virtual ~Derived() override {
             checkClassInvariantsLocal();
 
             // ...a bunch of code...

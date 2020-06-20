@@ -94,16 +94,18 @@ Ordinarily, you shouldn't change anything in this file.
 */
 
 #if defined(NDEBUG)
-#  if 1
+#  if 0
      /* HPBC_DO_NOTHING() is written to avoid 'unused variable' warnings during
         compilation. Note: for C++ prior to C++20, the line below will not
-        compile if the arg contains a lambda. You can use the alternative
-        version if necessary. */
+        compile if the arg contains a lambda. Perhaps more importantly, this
+        version below doesn't seem to achieve the goal of avoiding 'unused
+        variable' warnings for the Intel C/C++ compiler. The alternative version
+        appears to be preferable to this version. */
 #    define HPBC_DO_NOTHING(...) ((void)sizeof(__VA_ARGS__))
 #  else
-     /* Alternative version for C++ pre-20 with lambdas in contract args. */
-#    define HPBC_DO_NOTHING(...) \
-                       do { true ? ((void)0) : ((void)(__VA_ARGS__)); } while(0)
+     /* Alternative version that will work C++ pre-20 with lambdas in contract
+        args, and that will work with Intel C/C++ compiler. */
+#    define HPBC_DO_NOTHING(...) ((void)(true || (__VA_ARGS__)))
 #  endif
 
 #  define HPBC_PRECONDITION(...) HPBC_DO_NOTHING(__VA_ARGS__)
