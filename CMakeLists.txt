@@ -1,12 +1,12 @@
 # --- This file is distributed under the MIT Open Source License, as detailed
 # in the file "LICENSE.TXT" in the root of this repository ---
 
-if(TARGET programming_by_contract)
+if(TARGET hurchalla_programming_by_contract)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
-project(programming_by_contract VERSION 1.0.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.14)
+project(hurchalla_programming_by_contract VERSION 1.0.0 LANGUAGES C CXX)
 
 # if this is the top level CMakeLists.txt, let IDEs group projects into folders.
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -38,30 +38,30 @@ elseif(TEST_HURCHALLA_LIBS)
 endif()
 
 
-add_library(programming_by_contract INTERFACE)
-target_sources(programming_by_contract INTERFACE 
+add_library(hurchalla_programming_by_contract INTERFACE)
+target_sources(hurchalla_programming_by_contract INTERFACE 
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/assert_handler.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/programming_by_contract/programming_by_contract.h>)
 
-target_include_directories(programming_by_contract
+target_include_directories(hurchalla_programming_by_contract
                INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-target_include_directories(programming_by_contract
+target_include_directories(hurchalla_programming_by_contract
                INTERFACE $<INSTALL_INTERFACE:include>)
 #use this instead?
-#target_include_directories(programming_by_contract SYSTEM
+#target_include_directories(hurchalla_programming_by_contract SYSTEM
 #               INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 
 # Check for required C++ features only if the C++ compiler ID is non-empty.
-target_compile_features(programming_by_contract INTERFACE 
+target_compile_features(hurchalla_programming_by_contract INTERFACE 
           $<$<NOT:$<CXX_COMPILER_ID:>>:
                cxx_variadic_macros
                cxx_decltype
                cxx_deleted_functions
            >)
 
-target_compile_features(programming_by_contract INTERFACE
+target_compile_features(hurchalla_programming_by_contract INTERFACE
           $<$<NOT:$<C_COMPILER_ID:>>:
                c_variadic_macros
            >)
@@ -74,7 +74,7 @@ option(HPBC_ENABLE_FULL_FEATURES
        OFF)
 
 if(HPBC_ENABLE_FULL_FEATURES)
-    target_compile_definitions(programming_by_contract INTERFACE
+    target_compile_definitions(hurchalla_programming_by_contract INTERFACE
               HPBC_ENABLE_FULL_FEATURES
               )
 endif()

@@ -5,7 +5,7 @@ if(TARGET test_programming_by_contract)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.14)
 #project(test_programming_by_contract VERSION 1.0.0 LANGUAGES CXX)
 
 
@@ -39,7 +39,7 @@ EnableMaxWarnings(test_programming_by_contract)
 set_target_properties(test_programming_by_contract
                       PROPERTIES FOLDER "Tests")
 target_link_libraries(test_programming_by_contract
-                      programming_by_contract
+                      hurchalla_programming_by_contract
                       gtest_main)
 #add_test(test_programming_by_contract  test_programming_by_contract)
 gtest_discover_tests(test_programming_by_contract)
@@ -57,7 +57,7 @@ EnableMaxWarnings(test_ndebug_programming_by_contract)
 set_target_properties(test_ndebug_programming_by_contract
                       PROPERTIES FOLDER "Tests")
 target_link_libraries(test_ndebug_programming_by_contract
-                      programming_by_contract
+                      hurchalla_programming_by_contract
                       gtest_main)
 #add_test(test_ndebug_programming_by_contract
 #          test_ndebug_programming_by_contract)
