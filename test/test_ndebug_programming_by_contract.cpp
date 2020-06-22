@@ -1,12 +1,10 @@
-/* --- This file is distributed under the MIT Open Source License, as detailed
-   in "LICENSE.TXT" in the root of the programming_by_contract repository --- */
-
+// --- This file is distributed under the MIT Open Source License, as detailed
+// in "LICENSE.TXT" in the root of the programming_by_contract repository ---
 
 // needed to test programming_by_contract with NDEBUG!
 #ifndef NDEBUG
 #  define NDEBUG 1
 #endif
-
 
 #include "hurchalla/programming_by_contract/programming_by_contract.h"
 #include "testhelper_assert_handler.h"
@@ -24,7 +22,6 @@
            { EXPECT_EXIT(EXPRESSION; exit(0), testing::ExitedWithCode(0), ""); \
            } while(0)
 #endif
-
 
 
 // confirm the contract-asserts have zero overhead when NDEBUG is defined
@@ -52,8 +49,6 @@ static_assert(std::is_same<decltype(HPBC_ASSERT3(false)), void>::value, "");
 static_assert(std::is_same<decltype(HPBC_INVARIANT(false)), void>::value, "");
 static_assert(std::is_same<decltype(HPBC_INVARIANT2(false)), void>::value, "");
 static_assert(std::is_same<decltype(HPBC_INVARIANT3(false)), void>::value, "");
-
-
 
 
 namespace {

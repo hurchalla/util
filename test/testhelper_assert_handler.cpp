@@ -1,9 +1,6 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // in "LICENSE.TXT" in the root of the programming_by_contract repository ---
 
-#include "testhelper_assert_handler.h"
-#include "hurchalla/programming_by_contract/assert_handler.h"
-
 
 // This file is *not* an example of a normal assert handler. For the purposes of
 // testing it implements functions  setTestHandlerPreconditionAssertLevel(int);
@@ -14,6 +11,8 @@
 // normal assert handlers.
 
 
+#include "testhelper_assert_handler.h"
+#include "hurchalla/programming_by_contract/assert_handler.h"
 #include <iostream>
 #include <cstdlib>
 
