@@ -1,12 +1,10 @@
-/* --- This file is distributed under the MIT Open Source License, as detailed
-   in "LICENSE.TXT" in the root of the programming_by_contract repository --- */
-
+// --- This file is distributed under the MIT Open Source License, as detailed
+// in "LICENSE.TXT" in the root of the programming_by_contract repository ---
 
 // needed to test programming_by_contract without NDEBUG!
 #ifdef NDEBUG
 #  undef NDEBUG
 #endif
-
 
 #include "hurchalla/programming_by_contract/programming_by_contract.h"
 #include "testhelper_assert_handler.h"
@@ -15,13 +13,11 @@
 #include "gtest/gtest.h"
 
 
-
 #if defined(__cpp_lib_optional) || __cplusplus >= 201703L || \
    (defined(_HAS_CXX17) && _HAS_CXX17 > 0)
 #   include <optional>
 #   define STD_OPTIONAL_IS_AVAILABLE 1
 #endif
-
 
 
 // This macro doesn't strictly test that the expression does not exit -
@@ -203,7 +199,6 @@ namespace {
 #endif
 
 
-
     class Parent
     {
     public:
@@ -236,7 +231,6 @@ namespace {
             HPBC_INVARIANT3(contractWillPass);
             HPBC_INVARIANT2(contractWillPass);
         }
-
         virtual void fooImpl() {
         }
 
@@ -276,7 +270,6 @@ namespace {
         void checkClassInvariantsLocal() {
             HPBC_INVARIANT2(contractWillPass);
         }
-
         void fooImpl() override {
         }
 
@@ -289,7 +282,6 @@ namespace {
         setTestHandlerAssertLevel(3);
         HPBC_EXPECT_NO_EXIT({Parent a(true);});
         HPBC_EXPECT_EXIT({Parent a(false);});
-        
         {
             Parent a(true);
             HPBC_EXPECT_NO_EXIT(a.foo(););
@@ -303,7 +295,6 @@ namespace {
         HPBC_EXPECT_EXIT({Derived a(false, false);});
         HPBC_EXPECT_EXIT({Derived a(false, true);});
         HPBC_EXPECT_EXIT({Derived a(true, false);});
-
         {
             Derived a(true, true);
             HPBC_EXPECT_NO_EXIT(a.foo(););
