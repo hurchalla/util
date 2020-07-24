@@ -106,8 +106,11 @@ Ordinarily, you shouldn't change anything in this file.
 #  else
      /* Alternative version that will work C++ pre-20 with lambdas in contract
         args, and that will work with Intel C/C++ compiler and with MSVC */
-//#    define HPBC_DO_NOTHING(...) ((void)(true || (__VA_ARGS__)))
-#    define HPBC_DO_NOTHING(...) (false ? (void)(__VA_ARGS__) : (void)0)
+#    ifdef _MSC_VER
+#      define HPBC_DO_NOTHING(...) (false ? (void)(__VA_ARGS__) : (void)0)
+#    else
+#      define HPBC_DO_NOTHING(...) ((void)(true || (__VA_ARGS__)))
+#    endif
 //#    define HPBC_DO_NOTHING(...) (while (false) (void)(__VA_ARGS__))
 //#    define HPBC_DO_NOTHING(...) do { (void)(__VA_ARGS__); } while (0, 0)
 #  endif
