@@ -99,13 +99,17 @@ Ordinarily, you shouldn't change anything in this file.
         compilation. Note: for C++ prior to C++20, the line below will not
         compile if the arg contains a lambda. Perhaps more importantly, this
         version below doesn't seem to achieve the goal of avoiding 'unused
-        variable' warnings for the Intel C/C++ compiler. The alternative version
-        appears to be preferable to this version. */
+        variable' warnings for the Intel C/C++ compiler, or for all the recent
+        MSVC compilers. The alternative version in the #else seems to be
+        preferable to this version. */
 #    define HPBC_DO_NOTHING(...) ((void)sizeof(__VA_ARGS__))
 #  else
      /* Alternative version that will work C++ pre-20 with lambdas in contract
-        args, and that will work with Intel C/C++ compiler. */
-#    define HPBC_DO_NOTHING(...) ((void)(true || (__VA_ARGS__)))
+        args, and that will work with Intel C/C++ compiler and with MSVC */
+//#    define HPBC_DO_NOTHING(...) ((void)(true || (__VA_ARGS__)))
+#    define HPBC_DO_NOTHING(...) (false ? (void)(__VA_ARGS__) : (void)0)
+//#    define HPBC_DO_NOTHING(...) (while (false) (void)(__VA_ARGS__))
+//#    define HPBC_DO_NOTHING(...) do { (void)(__VA_ARGS__); } while (0, 0)
 #  endif
 
 #  define HPBC_PRECONDITION(...) HPBC_DO_NOTHING(__VA_ARGS__)
