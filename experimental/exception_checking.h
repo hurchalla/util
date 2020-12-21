@@ -1,5 +1,5 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
-// in "LICENSE.TXT" in the root of the programming_by_contract repository ---
+// in "LICENSE.TXT" in the root of this repository ---
 
 #ifndef HURCHALLA_PBC_EXCEPTION_CHECKING_H_INCLUDED
 #define HURCHALLA_PBC_EXCEPTION_CHECKING_H_INCLUDED
@@ -7,7 +7,7 @@
 #if defined(__cplusplus)
 
 
-#include "hurchalla/programming_by_contract/programming_by_contract.h"
+#include "hurchalla/util/programming_by_contract.h"
 
 
 #if defined(NDEBUG)

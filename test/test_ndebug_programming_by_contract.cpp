@@ -1,14 +1,14 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
-// in "LICENSE.TXT" in the root of the programming_by_contract repository ---
+// in "LICENSE.TXT" in the root of this repository ---
 
 // needed to test programming_by_contract with NDEBUG!
 #ifndef NDEBUG
 #  define NDEBUG 1
 #endif
 
-#include "hurchalla/programming_by_contract/programming_by_contract.h"
+#include "hurchalla/util/programming_by_contract.h"
 #include "testhelper_assert_handler.h"
-#include "hurchalla/programming_by_contract/assert_handler.h"
+#include "hurchalla/util/assert_handler.h"
 
 #include "gtest/gtest.h"
 

@@ -1,5 +1,5 @@
 /* --- This file is distributed under the MIT Open Source License, as detailed
-   in "LICENSE.TXT" in the root of the programming_by_contract repository --- */
+   in "LICENSE.TXT" in the root of this repository --- */
 
 #ifndef HURCHALLA_PROGRAMMING_BY_CONTRACT_H_INCLUDED
 #define HURCHALLA_PROGRAMMING_BY_CONTRACT_H_INCLUDED
@@ -159,7 +159,7 @@ Ordinarily, you shouldn't change anything in this file.
 #     define HPBC_HANDLER_LEVEL 3
 #     define HPBC_HANDLER_PRECOND_LEVEL 3
 #  else   /* the normal Programming by Contract features */
-#     include "hurchalla/programming_by_contract/assert_handler.h"
+#     include "hurchalla/util/assert_handler.h"
 
       /* If this is C++, we can (probably) detect if exceptions are enabled by
          checking the gcc/clang macro __EXCEPTIONS, msvc's macro _CPPUNWIND, and
@@ -291,4 +291,4 @@ void bar()
 #endif  /* defined(__cplusplus) */
 
 
-#endif  /* HURCHALLA_PROGRAMMING_BY_CONTRACT_H_INCLUDED */
+#endif

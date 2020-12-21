@@ -1,10 +1,14 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
-// in "LICENSE.TXT" in the root of the programming_by_contract repository ---
+// in "LICENSE.TXT" in the root of this repository ---
 
-#include "hurchalla/programming_by_contract/assert_handler.h"
+#include "hurchalla/util/assert_handler.h"
 
 
-/* You can write a custom hpbcAssertHandler implementation below to handle pbc
+/* This file is an example, intended to demonstrate the use of an assert handler
+with Programming By Contract (see programming_by_contract.h and assert_handler.h
+in hurchalla/util).
+
+You can write a custom hpbcAssertHandler implementation below to handle pbc
 assert violations. A few possible custom handlers might be:
   - A handler that prints to stderr and calls abort().
   - A handler that prints to stderr and spins/sleeps and wakes periodically to

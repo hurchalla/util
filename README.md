@@ -1,5 +1,6 @@
-# Programming by Contract
-Programming by Contract for C++ and C
+# Util
+Various utility C++ files for use across projects,
+including a utility for Programming by Contract (for C++ and C)
 
 ## Author
 
@@ -12,8 +13,8 @@ This project is licensed under the MIT License - see the
 
 ## TODO
 
-Document options HPBC_ENABLE_FULL_FEATURES, TEST_HURCHALLA_TOP_LEVEL, and
-TEST_HURCHALLA_LIBS
+Document the Programming by Contract options HPBC_ENABLE_FULL_FEATURES,
+TEST_HURCHALLA_TOP_LEVEL, and TEST_HURCHALLA_LIBS
 
 ## Running CMake
 
