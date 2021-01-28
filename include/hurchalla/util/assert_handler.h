@@ -4,6 +4,10 @@
 #ifndef HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 #define HURCHALLA_PBC_ASSERT_HANDLER_H_INCLUDED
 
+/* This file is intended solely to be used in conjunction with and in support of
+   programming_by_contract.h (it's where the macros discussed here, such as
+   HPBC_ENABLE_FULL_FEATURES, are checked). */
+
 /* If you define the macro HPBC_ENABLE_FULL_FEATURES while compiling your C++ or
    C files, or if any libraries you link to defined this macro while compiling
    (presumably because your organization has chosen across multiple projects to

@@ -8,7 +8,7 @@
 #include "hurchalla/util/compiler_macros.h"
 #include <cstdint>
 
-namespace hurchalla { namespace util {
+namespace hurchalla {
 
 
 // Example of use:
@@ -16,7 +16,7 @@ namespace hurchalla { namespace util {
 //   static_assert(std::numeric_limits<T>::is_integer, "");
 //   static_assert(!std::numeric_limits<T>::is_signed, "");
 //   constexpr int bits = std::numeric_limits<T>::digits;
-//   using T2 = typename hurchalla::util::sized_uint<bits*2>::type;
+//   using T2 = typename hurchalla::sized_uint<bits*2>::type;
 // }
 
 
@@ -77,6 +77,6 @@ template <typename DUMMY> constexpr bool sized_uint<64, DUMMY>::is_valid;
 #endif
 
 
-}} // end namespace
+} // end namespace
 
 #endif

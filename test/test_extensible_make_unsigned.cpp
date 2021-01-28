@@ -13,15 +13,15 @@ namespace {
 template <typename T, typename U>
 void check_type_conversion()
 {
-    namespace ut = hurchalla::util;
+    namespace hc = hurchalla;
     static_assert(std::is_same<U, typename
-                             ut::extensible_make_unsigned<T>::type>::value, "");
+                             hc::extensible_make_unsigned<T>::type>::value, "");
     static_assert(std::is_same<const U, typename
-                       ut::extensible_make_unsigned<const T>::type>::value, "");
+                       hc::extensible_make_unsigned<const T>::type>::value, "");
     static_assert(std::is_same<volatile U, typename
-                    ut::extensible_make_unsigned<volatile T>::type>::value, "");
+                    hc::extensible_make_unsigned<volatile T>::type>::value, "");
     static_assert(std::is_same<const volatile U, typename
-              ut::extensible_make_unsigned<const volatile T>::type>::value, "");
+              hc::extensible_make_unsigned<const volatile T>::type>::value, "");
 }
 
 
@@ -42,7 +42,7 @@ TEST(HurchallaUtil, extensible_make_unsigned) {
     // the following statement should cause a static_assert compile error within
     // extensible_make_unsigned, if it is enabled:
 #if 0
-    using T = hurchalla::util::extensible_make_unsigned<float>::type;
+    using T = hurchalla::extensible_make_unsigned<float>::type;
 #endif
 }
 

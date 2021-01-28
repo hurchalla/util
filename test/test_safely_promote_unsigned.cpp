@@ -12,15 +12,15 @@ namespace {
 template <typename U, typename P>
 void check_type_promotion()
 {
-    namespace ut = hurchalla::util;
+    namespace hc = hurchalla;
     static_assert(std::is_same<P, typename
-                              ut::safely_promote_unsigned<U>::type>::value, "");
+                              hc::safely_promote_unsigned<U>::type>::value, "");
     static_assert(std::is_same<const P, typename
-                        ut::safely_promote_unsigned<const U>::type>::value, "");
+                        hc::safely_promote_unsigned<const U>::type>::value, "");
     static_assert(std::is_same<volatile P, typename
-                     ut::safely_promote_unsigned<volatile U>::type>::value, "");
+                     hc::safely_promote_unsigned<volatile U>::type>::value, "");
     static_assert(std::is_same<const volatile P, typename
-               ut::safely_promote_unsigned<const volatile U>::type>::value, "");
+               hc::safely_promote_unsigned<const volatile U>::type>::value, "");
 }
 
 
@@ -37,14 +37,14 @@ TEST(HurchallaUtil, safely_promote_unsigned) {
     // the following statements should cause static_assert compile errors within
     // safely_promote_unsigned, if any of them are enabled:
 #if 0
-    namespace ut = hurchalla::util;
-    using T1 = ut::safely_promote_unsigned<float>::type;
-    using T2 = ut::safely_promote_unsigned<short>::type;
-    using T3 = ut::safely_promote_unsigned<int>::type;
-    using T4 = ut::safely_promote_unsigned<long int>::type;
-    using T5 = ut::safely_promote_unsigned<long long int>::type;
+    namespace hc = hurchalla;
+    using T1 = hc::safely_promote_unsigned<float>::type;
+    using T2 = hc::safely_promote_unsigned<short>::type;
+    using T3 = hc::safely_promote_unsigned<int>::type;
+    using T4 = hc::safely_promote_unsigned<long int>::type;
+    using T5 = hc::safely_promote_unsigned<long long int>::type;
 #  if HURCHALLA_COMPILER_HAS_UINT128_T()
-    using T6 = ut::safely_promote_unsigned<__int128_t>::type;
+    using T6 = hc::safely_promote_unsigned<__int128_t>::type;
 #  endif
 #endif
 }

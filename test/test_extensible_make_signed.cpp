@@ -13,15 +13,15 @@ namespace {
 template <typename T, typename S>
 void check_type_conversion()
 {
-    namespace ut = hurchalla::util;
+    namespace hc = hurchalla;
     static_assert(std::is_same<S, typename
-                               ut::extensible_make_signed<T>::type>::value, "");
+                               hc::extensible_make_signed<T>::type>::value, "");
     static_assert(std::is_same<const S, typename
-                         ut::extensible_make_signed<const T>::type>::value, "");
+                         hc::extensible_make_signed<const T>::type>::value, "");
     static_assert(std::is_same<volatile S, typename
-                      ut::extensible_make_signed<volatile T>::type>::value, "");
+                      hc::extensible_make_signed<volatile T>::type>::value, "");
     static_assert(std::is_same<const volatile S, typename
-                ut::extensible_make_signed<const volatile T>::type>::value, "");
+                hc::extensible_make_signed<const volatile T>::type>::value, "");
 }
 
 
@@ -42,7 +42,7 @@ TEST(HurchallaUtil, extensible_make_signed) {
     // the following statement should cause a static_assert compile error within
     // extensible_make_signed, if it is enabled:
 #if 0
-    using T = hurchalla::util::extensible_make_signed<float>::type;
+    using T = hurchalla::extensible_make_signed<float>::type;
 #endif
 }
 

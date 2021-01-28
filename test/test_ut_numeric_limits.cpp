@@ -12,31 +12,31 @@ namespace {
 template <typename T>
 void verify_is_specialized()
 {
-    namespace ut = hurchalla::util;
+    namespace hc = hurchalla;
     // verify usage during both compile-time and run-time
-    static_assert(ut::ut_numeric_limits<T>::is_specialized, "");
-    static_assert(ut::ut_numeric_limits<const T>::is_specialized, "");
-    static_assert(ut::ut_numeric_limits<volatile T>::is_specialized, "");
-    static_assert(ut::ut_numeric_limits<const volatile T>::is_specialized, "");
-    EXPECT_TRUE(ut::ut_numeric_limits<T>::is_specialized);
-    EXPECT_TRUE(ut::ut_numeric_limits<const T>::is_specialized);
-    EXPECT_TRUE(ut::ut_numeric_limits<volatile T>::is_specialized);
-    EXPECT_TRUE(ut::ut_numeric_limits<const volatile T>::is_specialized);
+    static_assert(hc::ut_numeric_limits<T>::is_specialized, "");
+    static_assert(hc::ut_numeric_limits<const T>::is_specialized, "");
+    static_assert(hc::ut_numeric_limits<volatile T>::is_specialized, "");
+    static_assert(hc::ut_numeric_limits<const volatile T>::is_specialized, "");
+    EXPECT_TRUE(hc::ut_numeric_limits<T>::is_specialized);
+    EXPECT_TRUE(hc::ut_numeric_limits<const T>::is_specialized);
+    EXPECT_TRUE(hc::ut_numeric_limits<volatile T>::is_specialized);
+    EXPECT_TRUE(hc::ut_numeric_limits<const volatile T>::is_specialized);
 }
 
 template <typename T>
 void verify_not_specialized()
 {
-    namespace ut = hurchalla::util;
+    namespace hc = hurchalla;
     // verify usage during both compile-time and run-time
-    static_assert(!ut::ut_numeric_limits<T>::is_specialized, "");
-    static_assert(!ut::ut_numeric_limits<const T>::is_specialized, "");
-    static_assert(!ut::ut_numeric_limits<volatile T>::is_specialized, "");
-    static_assert(!ut::ut_numeric_limits<const volatile T>::is_specialized, "");
-    EXPECT_FALSE(ut::ut_numeric_limits<T>::is_specialized);
-    EXPECT_FALSE(ut::ut_numeric_limits<const T>::is_specialized);
-    EXPECT_FALSE(ut::ut_numeric_limits<volatile T>::is_specialized);
-    EXPECT_FALSE(ut::ut_numeric_limits<const volatile T>::is_specialized);
+    static_assert(!hc::ut_numeric_limits<T>::is_specialized, "");
+    static_assert(!hc::ut_numeric_limits<const T>::is_specialized, "");
+    static_assert(!hc::ut_numeric_limits<volatile T>::is_specialized, "");
+    static_assert(!hc::ut_numeric_limits<const volatile T>::is_specialized, "");
+    EXPECT_FALSE(hc::ut_numeric_limits<T>::is_specialized);
+    EXPECT_FALSE(hc::ut_numeric_limits<const T>::is_specialized);
+    EXPECT_FALSE(hc::ut_numeric_limits<volatile T>::is_specialized);
+    EXPECT_FALSE(hc::ut_numeric_limits<const volatile T>::is_specialized);
 }
 
 
@@ -68,9 +68,9 @@ TEST(HurchallaUtil, ut_numeric_limits) {
     verify_is_specialized<__int128_t>();
     verify_is_specialized<__uint128_t>();
     // Do a sanity check on digits10 to see if other variables are correct too.
-    namespace ut = hurchalla::util;
-    static_assert(ut::ut_numeric_limits<__int128_t>::digits10 == 38, "");
-    EXPECT_TRUE(ut::ut_numeric_limits<__int128_t>::digits10 == 38);
+    namespace hc = hurchalla;
+    static_assert(hc::ut_numeric_limits<__int128_t>::digits10 == 38, "");
+    EXPECT_TRUE(hc::ut_numeric_limits<__int128_t>::digits10 == 38);
 #endif
 
     struct A {};

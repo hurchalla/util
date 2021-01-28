@@ -8,7 +8,7 @@
 #include "hurchalla/util/compiler_macros.h"
 #include <type_traits>
 
-namespace hurchalla { namespace util {
+namespace hurchalla {
 
 
 // primary template
@@ -66,6 +66,6 @@ struct extensible_make_unsigned<const volatile __uint128_t> {
 #endif
 
 
-}}  // end namespace
+}  // end namespace
 
 #endif

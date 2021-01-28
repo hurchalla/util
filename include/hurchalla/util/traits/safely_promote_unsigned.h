@@ -8,7 +8,7 @@
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include <type_traits>
 
-namespace hurchalla { namespace util {
+namespace hurchalla {
 
 
 // safely_promote_unsigned<T> is intended to protect against the undefined
@@ -64,6 +64,6 @@ struct safely_promote_unsigned<T,
 };
 
 
-}} // end namespace
+} // end namespace
 
 #endif

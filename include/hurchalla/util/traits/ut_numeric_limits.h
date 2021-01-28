@@ -9,12 +9,12 @@
 #include <limits>
 #include <climits>
 
-namespace hurchalla { namespace util {
+namespace hurchalla {
 
 
 // This traits struct replicates and extends std::numeric_limits.
 // Example of use:
-// uint64_t max64 = hurchalla::util::ut_numeric_limits<uint64_t>::max();
+// uint64_t max64 = hurchalla::ut_numeric_limits<uint64_t>::max();
 
 // Rationale for ut_numeric_limits:
 // The specializations on __int128_t and __uint128_t are the reasons to use
@@ -285,6 +285,6 @@ constexpr bool ut_numeric_limits<__uint128_t, U>::tinyness_before;
 #endif
 
 
-}}  // end namespace
+}  // end namespace
 
 #endif
