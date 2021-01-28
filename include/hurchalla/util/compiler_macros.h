@@ -14,7 +14,40 @@
 #  define HURCHALLA_FORCE_INLINE inline
 #endif
 
+#ifdef _MSC_VER
+#  define HURCHALLA_INLINE_LAMBDA [[msvc::forceinline]]
+#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+#  define HURCHALLA_INLINE_LAMBDA __attribute__((always_inline))
+#else
+#  define HURCHALLA_INLINE_LAMBDA
+#endif
 
+#ifdef _MSC_VER
+#  define HURCHALLA_FLATTEN
+#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+#  define HURCHALLA_FLATTEN __attribute__((flatten))
+#else
+#  define HURCHALLA_FLATTEN
+#endif
+
+// Unfortunately the unroll pragmas seem to be either unreliable or
+// inconclusive on the compilers that 'support' them.  On gcc at least up to
+// gcc10, using it to fully unroll a loop doesn't seem to work at all, even
+// though it's supposedly supported.  With clang, my experiments had the same
+// behavior regardless of whether I manually unrolled loops, or used loops with
+// this macro, or used loops without this macro (I suspect clang fully unrolled
+// my experiments' loops even when not requested by this macro).  Thus I don't
+// yet know whether this macro reliably causes clang to fully unroll a loop.
+// I believe a better option is to use the Unroll class from this repository to
+// automatically unroll a loop.  There's no absolute guarantee it will work as
+// desired to unroll everything flawlessly, but so far it has worked so long as
+// I used HURCHALLA_INLINE_LAMBDA with the lambda supplied to it.
+// Of course manually unrolling a loop is always guaranteed to work...
+// (For the limited case where the loop count is known during preprocessing,
+// it would be possible to accomplish reliable auto-unrolling (up to some
+// maximum count) via macro call chaining.  But this would not help for loop
+// counts that are a compile-time constant but not a preprocessor-time constant-
+// for example template arguments.)
 #if defined(__clang__) || defined(__INTEL_COMPILER)
 #  define HURCHALLA_REQUEST_UNROLL_LOOP _Pragma("unroll")
 #elif defined(__GNUC__) && __GNUC__ >= 8
@@ -148,6 +181,15 @@
 #else
 #  define HURCHALLA_LIKELY_IF(cond)   if (!!(cond))
 #  define HURCHALLA_UNLIKELY_IF(cond) if (!!(cond))
+#endif
+
+#if defined(__clang__) && ((__clang_major__ > 3) || \
+                           ((__clang_major__ == 3) && (__clang_minor__ >= 8)))
+#  define HURCHALLA_CMOV(cond, srcdst, val) \
+      do { if (__builtin_unpredictable(!!(cond))) { srcdst = (val); } } while(0)
+#else
+#  define HURCHALLA_CMOV(cond, srcdst, val) \
+      do { srcdst = (!!(cond)) ? (val) : (srcdst); } while (0)
 #endif
 
 

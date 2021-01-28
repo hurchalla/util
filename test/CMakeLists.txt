@@ -34,7 +34,8 @@ add_executable(test_hurchalla_util
                test_extensible_make_unsigned.cpp
                test_safely_promote_unsigned.cpp
                test_ut_numeric_limits.cpp
-               test_sized_uint.cpp)
+               test_sized_uint.cpp
+               test_Unroll.cpp)
 
 EnableMaxWarnings(test_hurchalla_util)
 
