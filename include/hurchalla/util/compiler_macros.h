@@ -14,7 +14,8 @@
 #  define HURCHALLA_FORCE_INLINE inline
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && (_MSC_VER >= 1927) && \
+            defined(_MSVC_LANG) && (_MSVC_LANG > 201703L)
 #  define HURCHALLA_INLINE_LAMBDA [[msvc::forceinline]]
 #elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
 #  define HURCHALLA_INLINE_LAMBDA __attribute__((always_inline))
