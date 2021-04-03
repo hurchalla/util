@@ -54,6 +54,9 @@ struct ut_numeric_limits : std::numeric_limits<T> {
     // https://stackoverflow.com/questions/16122912/is-it-ok-to-specialize-stdnumeric-limitst-for-user-defined-number-like-class/38670996
 };
 
+// We need these 3 partial specializations so that a cv-qualified type T can
+// still match (through the inherited parent) the specializations below.
+// ---
 template <typename T, typename U>
 struct ut_numeric_limits<const T, U> : public ut_numeric_limits<T> {};
 

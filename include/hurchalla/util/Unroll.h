@@ -19,6 +19,7 @@ namespace hurchalla {
 
 template <std::size_t N>
 struct Unroll {
+    static_assert(N > 0, "");
     template <class T>
     HURCHALLA_FORCE_INLINE static void call(T&& lambda)
     {
@@ -27,9 +28,12 @@ struct Unroll {
     }
 };
 template <>
-struct Unroll<static_cast<std::size_t>(0)> {
+struct Unroll<static_cast<std::size_t>(1)> {
     template <class T>
-    HURCHALLA_FORCE_INLINE static void call(T&&) {}
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+    }
 };
 
 
