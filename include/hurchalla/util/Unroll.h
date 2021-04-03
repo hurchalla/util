@@ -17,14 +17,111 @@ namespace hurchalla {
 // it with HURCHALLA_INLINE_LAMBDA, to ensure that your unrolled code doesn't
 // end up with function calls to the lambda.
 
+
+// Implementation note: we specialize for 8 sizes of Unroll in order to improve
+// compilation time compared to the much simpler/obvious implementation in this
+// comment:
+//    template <std::size_t N>
+//    struct Unroll {
+//        template <class T>
+//        HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+//        {
+//            Unroll<N - 1>::call(lambda);
+//            lambda(N - 1);
+//        }
+//    };
+//    template <>
+//    struct Unroll<static_cast<std::size_t>(0)> {
+//        template <class T>
+//        HURCHALLA_FORCE_INLINE static void call(T&&) {}
+//    };
+
+
 template <std::size_t N>
 struct Unroll {
-    static_assert(N > 0, "");
     template <class T>
     HURCHALLA_FORCE_INLINE static void call(T&& lambda)
     {
-        Unroll<N - 1>::call(lambda);
+        static_assert(N >= 8, "");
+        Unroll<N - 8>::call(lambda);
+        lambda(N - 8);
+        lambda(N - 7);
+        lambda(N - 6);
+        lambda(N - 5);
+        lambda(N - 4);
+        lambda(N - 3);
+        lambda(N - 2);
         lambda(N - 1);
+    }
+};
+
+template <>
+struct Unroll<static_cast<std::size_t>(7)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
+        lambda(static_cast<std::size_t>(2));
+        lambda(static_cast<std::size_t>(3));
+        lambda(static_cast<std::size_t>(4));
+        lambda(static_cast<std::size_t>(5));
+        lambda(static_cast<std::size_t>(6));
+    }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(6)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
+        lambda(static_cast<std::size_t>(2));
+        lambda(static_cast<std::size_t>(3));
+        lambda(static_cast<std::size_t>(4));
+        lambda(static_cast<std::size_t>(5));
+    }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(5)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
+        lambda(static_cast<std::size_t>(2));
+        lambda(static_cast<std::size_t>(3));
+        lambda(static_cast<std::size_t>(4));
+    }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(4)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
+        lambda(static_cast<std::size_t>(2));
+        lambda(static_cast<std::size_t>(3));
+    }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(3)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
+        lambda(static_cast<std::size_t>(2));
+    }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(2)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&& lambda)
+    {
+        lambda(static_cast<std::size_t>(0));
+        lambda(static_cast<std::size_t>(1));
     }
 };
 template <>
@@ -34,6 +131,11 @@ struct Unroll<static_cast<std::size_t>(1)> {
     {
         lambda(static_cast<std::size_t>(0));
     }
+};
+template <>
+struct Unroll<static_cast<std::size_t>(0)> {
+    template <class T>
+    HURCHALLA_FORCE_INLINE static void call(T&&) {}
 };
 
 
