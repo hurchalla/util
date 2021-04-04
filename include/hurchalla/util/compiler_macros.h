@@ -170,26 +170,28 @@
 #else
 #  define HURCHALLA_COMPILER_HAS_BUILTIN(builtin) 0
 #endif
-#if HURCHALLA_COMPILER_HAS_BUILTIN(__builtin_expect) || \
+#if ( HURCHALLA_COMPILER_HAS_BUILTIN(__builtin_expect) && \
+            !defined(__INTEL_COMPILER) ) || \
     ( defined(__GNUC__) && !defined(__INTEL_COMPILER) && \
             !defined(__clang__) && __GNUC__ >= 3 ) || \
-    ( defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1300 )
-#  define HURCHALLA_LIKELY_IF(cond)   if (__builtin_expect(!!(cond), 1))
-#  define HURCHALLA_UNLIKELY_IF(cond) if (__builtin_expect(!!(cond), 0))
+    ( defined(__INTEL_COMPILER) && __INTEL_COMPILER >= 1300 && \
+            !defined(__has_cpp_attribute))
+#  define HURCHALLA_LIKELY(cond)   (__builtin_expect(!!(cond), 1))
+#  define HURCHALLA_UNLIKELY(cond) (__builtin_expect(!!(cond), 0))
 #elif defined(__has_cpp_attribute)
 #  if __has_cpp_attribute(likely)
-#    define HURCHALLA_LIKELY_IF(cond)   if (!!(cond)) [[likely]]
+#    define HURCHALLA_LIKELY(cond)   (!!(cond)) [[likely]]
 #  else
-#    define HURCHALLA_LIKELY_IF(cond)   if (!!(cond))
+#    define HURCHALLA_LIKELY(cond)   (!!(cond))
 #  endif
 #  if __has_cpp_attribute(unlikely)
-#    define HURCHALLA_UNLIKELY_IF(cond) if (!!(cond)) [[unlikely]]
+#    define HURCHALLA_UNLIKELY(cond) (!!(cond)) [[unlikely]]
 #  else
-#    define HURCHALLA_UNLIKELY_IF(cond) if (!!(cond))
+#    define HURCHALLA_UNLIKELY(cond) (!!(cond))
 #  endif
 #else
-#  define HURCHALLA_LIKELY_IF(cond)   if (!!(cond))
-#  define HURCHALLA_UNLIKELY_IF(cond) if (!!(cond))
+#  define HURCHALLA_LIKELY(cond)   (!!(cond))
+#  define HURCHALLA_UNLIKELY(cond) (!!(cond))
 #endif
 
 

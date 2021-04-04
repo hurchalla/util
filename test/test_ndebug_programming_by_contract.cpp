@@ -24,7 +24,8 @@
 #endif
 
 
-// confirm the contract-asserts have zero overhead when NDEBUG is defined
+// confirm that the non-xonstexpr contract-asserts have zero overhead when
+// NDEBUG is defined
 static_assert(std::is_same<decltype(HPBC_PRECONDITION(true)), void>::value, "");
 static_assert(std::is_same<decltype(HPBC_PRECONDITION2(true)), void>::value, "");
 static_assert(std::is_same<decltype(HPBC_PRECONDITION3(true)), void>::value, "");
@@ -52,8 +53,9 @@ static_assert(std::is_same<decltype(HPBC_INVARIANT3(false)), void>::value, "");
 
 
 namespace {
-    // since all the programming by contract asserts map to void when NDEBUG
-    // is defined, we expect they will never exit/abort when NDEBUG is defined.
+    // since all the non-constexpr programming by contract asserts map to void
+    // when NDEBUG is defined, we expect they will never exit/abort when NDEBUG
+    // is defined.
     TEST(HpbcNdebugTest, PreconditionsHandlerLevel3) {
         setTestHandlerPreconditionAssertLevel(3);
         HPBC_EXPECT_NO_EXIT(HPBC_PRECONDITION(true));

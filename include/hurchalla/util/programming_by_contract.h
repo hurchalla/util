@@ -10,6 +10,9 @@ These are the main contract assertion macros:
     HPBC_POSTCONDITION(x), HPBC_POSTCONDITION2(x), HPBC_POSTCONDITION3(x)
     HPBC_INVARIANT(x), HPBC_INVARIANT2(x), HPBC_INVARIANT3(x)
     HPBC_ASSERT(x), HPBC_ASSERT2(x), HPBC_ASSERT3(x)
+    Additionally for C++ only, HPBC_CONSTEXPR_PRECONDITION(x),
+      HPBC_CONSTEXPR_POSTCONDITION(x), HPBC_CONSTEXPR_INVARIANT(x),
+      HPBC_CONSTEXPR_ASSERT(x)
 They are purposely implemented as macros instead of inline functions, as
 described at the end of this section.
 
@@ -37,9 +40,9 @@ more detail:
 
 When NDEBUG is defined in a translation unit, all of these asserts will be
   replaced with a no-op, regardless of assertion level.
-When NDEBUG is undefined, each assert will be replaced with first a call to a
-  trivial getter function [hpbcGetHandlerAssertLevel()] to determine the
-  program-wide assert level. Then, this will be followed by a conditional to
+When NDEBUG is undefined, each non-CONSTEXPR assert will be replaced with first
+  a call to a trivial getter function [hpbcGetHandlerAssertLevel()] to determine
+  the program-wide assert level. Then, this will be followed by a conditional to
   skip the assert check if your particular assert's level is greater than the
   program-wide assert level. If this occurs and you are using link-time-
   optimization, the linker will typically see that the code will always skip the
@@ -52,6 +55,15 @@ For a given compiler, by default NDEBUG is typically defined in release builds
   documentation of assert()) and you can predefine it (or not) for any
   compilation project - for example by using -D in gcc or clang, or in MSVC++
   via either command line option /D or by UI setting "preprocessor definitions".
+
+The C++ CONSTEXPR assertion macros are designed for use in constexpr functions.
+  If one of these assertions is evaluated at compile-time, it will cause a
+  compilation error when the asserted condition is false.  If it is evaluated
+  at run-time it essentially just invokes the standard assert() macro defined in
+  <cassert>.  It specifically does not check the current assert level [via
+  hpbcGetHandlerAssertLevel()], because that would be impossible to do within
+  a constexpr function given that hpbcGetHandlerAssertLevel is not (and is not
+  meant to be) constexpr.
 
 Note: the assertions are all purposely implemented as macros instead of inline
   functions. Implementing them as functions involves at least two unavoidable
@@ -215,6 +227,26 @@ Ordinarily, you shouldn't change anything in this file.
 #  define HPBC_ASSERT3_MACRO_IS_ACTIVE (HPBC_HANDLER_LEVEL >= 3)
 #endif  /* NDEBUG */
 
+
+#if defined(__cplusplus)
+   // this section was adapted from the ideas in
+   // https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/
+   // https://gist.github.com/oliora/928424f7675d58fadf49c70fdba70d2f
+#  include "hurchalla/util/compiler_macros.h"
+#  include <cassert>
+#  include <utility>
+   template <class L>
+   void hurchalla_hpbc_forward_lambda(L&& lambda) noexcept 
+   {
+      std::forward<L>(lambda)();
+   }
+#  define HPBC_CONSTEXPR_ASSERT(...) ((void)( HURCHALLA_LIKELY(__VA_ARGS__) ? \
+                            (void)0 : hurchalla_hpbc_forward_lambda( \
+                            [](){ assert(__VA_ARGS__);}), (void)0 ))
+#  define HPBC_CONSTEXPR_PRECONDITION(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
+#  define HPBC_CONSTEXPR_POSTCONDITION(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
+#  define HPBC_CONSTEXPR_INVARIANT(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
+#endif
 
 
 /* For postconditions where we need to save a value at the function's start: */

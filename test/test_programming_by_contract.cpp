@@ -175,6 +175,45 @@ namespace {
     }
 #endif
 
+    constexpr int test_constexpr_asserts()
+    {
+        // We use the comma operator to form a single statement here, since
+        // C++11 needs to have essentially nothing but a return statement in
+        // constexpr functions.
+        // For C++14 and beyond, you could just write the function normally,
+        // with the asserts on their own semicolon delimited lines, prior to a
+        // separate return statement.
+        return HPBC_CONSTEXPR_ASSERT(true),
+            HPBC_CONSTEXPR_PRECONDITION(true),
+            HPBC_CONSTEXPR_POSTCONDITION(true),
+            HPBC_CONSTEXPR_INVARIANT(true),
+        #if 0
+            // Unfortunately I'm not aware of any way we can automate tests that
+            // should show that code doesn't compile, but the following code by
+            // design should fail to compile.
+            HPBC_CONSTEXPR_ASSERT(0 > 1),
+            HPBC_CONSTEXPR_PRECONDITION(false),
+            HPBC_CONSTEXPR_POSTCONDITION(false),
+            HPBC_CONSTEXPR_INVARIANT(false),
+        #endif
+            0;
+    }
+
+    TEST(HPBCTest, ConstexprAsserts) {
+        // this statement should be evaluated at compile-time
+        constexpr int x = test_constexpr_asserts();
+        (void)x;
+        // the following statements should be evaluated at run-time
+        HPBC_EXPECT_NO_EXIT(HPBC_CONSTEXPR_ASSERT(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_CONSTEXPR_PRECONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_CONSTEXPR_POSTCONDITION(true));
+        HPBC_EXPECT_NO_EXIT(HPBC_CONSTEXPR_INVARIANT(true));
+        HPBC_EXPECT_EXIT(HPBC_CONSTEXPR_ASSERT(false));
+        HPBC_EXPECT_EXIT(HPBC_CONSTEXPR_PRECONDITION(false));
+        HPBC_EXPECT_EXIT(HPBC_CONSTEXPR_POSTCONDITION(false));
+        HPBC_EXPECT_EXIT(HPBC_CONSTEXPR_INVARIANT(false));
+    }
+
 
 #ifdef STD_OPTIONAL_IS_AVAILABLE
     TEST(HPBCTest, PostconditionCompareOriginalValue) {
