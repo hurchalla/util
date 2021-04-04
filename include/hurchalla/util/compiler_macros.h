@@ -157,6 +157,14 @@
 #endif
 
 
+#if (__cplusplus >= 201402L) || \
+        (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L && _MSC_VER >= 1910)
+#  define HURCHALLA_COMPILER_HAS_CPP14_CONSTEXPR() 1
+#else
+#  define HURCHALLA_COMPILER_HAS_CPP14_CONSTEXPR() 0
+#endif
+
+
 #if defined(__has_builtin)
 #  define HURCHALLA_COMPILER_HAS_BUILTIN(builtin) __has_builtin(builtin)
 #else
@@ -183,6 +191,7 @@
 #  define HURCHALLA_LIKELY_IF(cond)   if (!!(cond))
 #  define HURCHALLA_UNLIKELY_IF(cond) if (!!(cond))
 #endif
+
 
 #if defined(__clang__) && ((__clang_major__ > 3) || \
                            ((__clang_major__ == 3) && (__clang_minor__ >= 8)))
