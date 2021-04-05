@@ -159,9 +159,9 @@
 
 #if (__cplusplus >= 201402L) || \
         (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L && _MSC_VER >= 1910)
-#  define HURCHALLA_COMPILER_HAS_CPP14_CONSTEXPR() 1
+#  define HURCHALLA_CPP14_CONSTEXPR constexpr
 #else
-#  define HURCHALLA_COMPILER_HAS_CPP14_CONSTEXPR() 0
+#  define HURCHALLA_CPP14_CONSTEXPR
 #endif
 
 
