@@ -235,11 +235,18 @@ Ordinarily, you shouldn't change anything in this file.
 #  include "hurchalla/util/compiler_macros.h"
 #  include <cassert>
 #  include <utility>
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wsuggest-attribute=noreturn"
+#  endif
    template <class L>
    void hurchalla_hpbc_forward_lambda(L&& lambda) noexcept 
    {
       std::forward<L>(lambda)();
    }
+#  if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic pop
+#  endif
 #  define HPBC_CONSTEXPR_ASSERT(...) ((void)( HURCHALLA_LIKELY(__VA_ARGS__) ? \
                             (void)0 : hurchalla_hpbc_forward_lambda( \
                             [](){ assert(#__VA_ARGS__ == nullptr);}), (void)0 ))
