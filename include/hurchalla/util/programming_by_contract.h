@@ -247,9 +247,15 @@ Ordinarily, you shouldn't change anything in this file.
 #  if defined(__GNUC__) && !defined(__clang__)
 #    pragma GCC diagnostic pop
 #  endif
-#  define HPBC_CONSTEXPR_ASSERT(...) ((void)( HURCHALLA_LIKELY(__VA_ARGS__) ? \
-                            (void)0 : hurchalla_hpbc_forward_lambda( \
-                            [](){ assert(#__VA_ARGS__ == nullptr);}), (void)0 ))
+#  ifdef _MSC_VER
+#    define HPBC_CONSTEXPR_ASSERT(...) ((void)(HURCHALLA_LIKELY(__VA_ARGS__) ? \
+                             (void)0 : hurchalla_hpbc_forward_lambda( \
+                             [](){ assert(!#__VA_ARGS__);}), (void)0))
+#  else
+#    define HPBC_CONSTEXPR_ASSERT(...) ((void)(HURCHALLA_LIKELY(__VA_ARGS__) ? \
+                             (void)0 : hurchalla_hpbc_forward_lambda( \
+                             [](){ assert(#__VA_ARGS__ == nullptr);}), (void)0))
+#  endif
 #  define HPBC_CONSTEXPR_PRECONDITION(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
 #  define HPBC_CONSTEXPR_POSTCONDITION(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
 #  define HPBC_CONSTEXPR_INVARIANT(...) HPBC_CONSTEXPR_ASSERT(__VA_ARGS__)
