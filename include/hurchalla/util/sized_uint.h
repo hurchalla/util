@@ -13,9 +13,9 @@ namespace hurchalla {
 
 // Example of use:
 // template <typename T> void foo() {
-//   static_assert(std::numeric_limits<T>::is_integer, "");
-//   static_assert(!std::numeric_limits<T>::is_signed, "");
-//   constexpr int bits = std::numeric_limits<T>::digits;
+//   static_assert(hurchalla::ut_numeric_limits<T>::is_integer, "");
+//   static_assert(!hurchalla::ut_numeric_limits<T>::is_signed, "");
+//   constexpr int bits = hurchalla::ut_numeric_limits<T>::digits;
 //   using T2 = typename hurchalla::sized_uint<bits*2>::type;
 // }
 

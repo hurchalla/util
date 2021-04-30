@@ -42,9 +42,14 @@ namespace hurchalla {
 // out-of-line define their static member variables within this header without
 // any danger of ODR violations.  Unfortunately out-of-line definitions are
 // necessary up until C++17 (17 allows the inline keyword to be used on member
-// variables, which is much cleaner).  A good description of the requirements
-// for const/constexpr member variables -
+// variables, which is much cleaner).  For more information, see
+// https://stackoverflow.com/questions/8016780/undefined-reference-to-static-constexpr-char
+// and also
+// https://stackoverflow.com/questions/45210631/odr-violation-with-template-specializations
+// https://stackoverflow.com/questions/34552380/why-cs-vector-templated-class-doesnt-break-one-definition-rule
 // https://en.cppreference.com/w/cpp/language/static
+// https://en.cppreference.com/w/cpp/language/storage_duration
+// https://en.cppreference.com/w/cpp/language/definition
 template <typename T, typename U=void>
 struct ut_numeric_limits : std::numeric_limits<T> {
     // If you are getting an error on this template, then you should provide a
