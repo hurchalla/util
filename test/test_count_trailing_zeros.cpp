@@ -25,6 +25,10 @@ TEST(HurchallaUtil, count_trailing_zeros) {
     EXPECT_TRUE(count_trailing_zeros(xl) == 17);
     unsigned long long xll = 9223372036854775808ull;
     EXPECT_TRUE(count_trailing_zeros(xll) == 63);
+#if (HURCHALLA_COMPILER_HAS_UINT128_T())
+    __uint128_t x128 = static_cast<__uint128_t>(1) << 68;
+    EXPECT_TRUE(count_trailing_zeros(x128) == 68);
+#endif
 }
 
 } // end namespace
