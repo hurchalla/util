@@ -30,6 +30,7 @@ include(GoogleTest)
 
 
 add_executable(test_hurchalla_util
+               test_count_trailing_zeros.cpp
                test_extensible_make_signed.cpp
                test_extensible_make_unsigned.cpp
                test_safely_promote_unsigned.cpp
