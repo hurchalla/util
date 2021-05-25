@@ -54,6 +54,12 @@ target_sources(hurchalla_util INTERFACE
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/traits/ut_numeric_limits.h>
                )
 
+
+install(DIRECTORY
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+    DESTINATION include)
+
+
 target_include_directories(hurchalla_util
                INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
