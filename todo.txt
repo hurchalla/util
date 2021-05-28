@@ -1,0 +1,12 @@
+
+Document the Programming by Contract options HPBC_ENABLE_FULL_FEATURES,
+TEST_HURCHALLA_TOP_LEVEL, and TEST_HURCHALLA_LIBS
+
+Document using CMake with this project.  Some previous info:
+To run cmake for this project, open a command prompt in your desired build
+directory, and assuming <src_dir> is the name of the directory on your system
+that contains this util repository, type:
+   cmake <src_dir>
+To build with one or more of the options, use -D<option>=ON for each desired
+option. For example if you wish to enable the TEST_HURCHALLA_LIBS option, type:
+   cmake -DTEST_HURCHALLA_LIBS=ON <src_dir>
