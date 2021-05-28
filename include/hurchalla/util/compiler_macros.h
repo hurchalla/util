@@ -5,9 +5,20 @@
 #define HURCHALLA_UTIL_COMPILER_MACROS_H_INCLUDED
 
 
+#if defined(_MSC_VER)
+#  define HURCHALLA_RESTRICT __restrict
+#elif defined(__GNUC__)
+#  define HURCHALLA_RESTRICT __restrict__
+#else
+# error "Unknown compiler, couldn't define HURCHALLA_RESTRICT macro"
+#endif
+
+
 #ifdef _MSC_VER
+#  define HURCHALLA_NEVER_INLINE __declspec(noinline)
 #  define HURCHALLA_FORCE_INLINE __forceinline
 #elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+#  define HURCHALLA_NEVER_INLINE __attribute__((noinline))
    // Note that Intel compiler (icc) also accepts __forceinline
 #  define HURCHALLA_FORCE_INLINE inline __attribute__((always_inline))
 #else
