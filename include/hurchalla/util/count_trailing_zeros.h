@@ -18,7 +18,7 @@ namespace hurchalla {
 
 
 template <typename T>
-HURCHALLA_FORCE_INLINE int count_trailing_zeros(T x)
+HURCHALLA_FORCE_INLINE int default_count_trailing_zeros(T x)
 {
     static_assert(ut_numeric_limits<T>::is_integer, "");
     static_assert(!ut_numeric_limits<T>::is_signed, "");
@@ -26,7 +26,9 @@ HURCHALLA_FORCE_INLINE int count_trailing_zeros(T x)
     static_assert(!std::is_same<T, std::uint8_t>::value, "");
     static_assert(!std::is_same<T, std::uint16_t>::value, "");
     static_assert(!std::is_same<T, std::uint32_t>::value, "");
+#ifndef _MSC_VER
     static_assert(!std::is_same<T, std::uint64_t>::value, "");
+#endif
     HPBC_PRECONDITION2(x != 0);
     int count = 0;
     while ((x & 1) == 0) {
@@ -34,6 +36,14 @@ HURCHALLA_FORCE_INLINE int count_trailing_zeros(T x)
         ++count;
     }
     return count;
+}
+
+// by C++ rules, the overloads below get higher priority for argument matching
+// than this template function
+template <typename T>
+HURCHALLA_FORCE_INLINE int count_trailing_zeros(T x)
+{
+    return default_count_trailing_zeros(x);
 }
 
 // From the gcc docs:
@@ -71,10 +81,14 @@ HURCHALLA_FORCE_INLINE int count_trailing_zeros(unsigned long long x)
 {
     HPBC_PRECONDITION2(x != 0);
 #ifdef _MSC_VER
+# if HURCHALLA_TARGET_BIT_WIDTH >= 64
     static_assert(sizeof(unsigned long long) == sizeof(unsigned __int64), "");
     unsigned long index;
     _BitScanForward64(&index, x);
     return static_cast<int>(index);
+# else
+    return default_count_trailing_zeros(x);
+# endif
 #else
     return __builtin_ctzll(x);
 #endif
