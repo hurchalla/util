@@ -7,7 +7,7 @@
 
 #if defined(_MSC_VER)
 #  define HURCHALLA_RESTRICT __restrict
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
 #  define HURCHALLA_RESTRICT __restrict__
 #else
 # error "Unknown compiler, couldn't define HURCHALLA_RESTRICT macro"
@@ -22,6 +22,7 @@
    // Note that Intel compiler (icc) also accepts __forceinline
 #  define HURCHALLA_FORCE_INLINE inline __attribute__((always_inline))
 #else
+#  define HURCHALLA_NEVER_INLINE
 #  define HURCHALLA_FORCE_INLINE inline
 #endif
 
@@ -69,22 +70,17 @@
 #endif
 
 
-#if defined(__x86_64__) || defined(_M_X64)
-#  ifndef HURCHALLA_TARGET_ISA_X86_64
+#if !defined(HURCHALLA_TARGET_ISA_X86_64) && \
+    !defined(HURCHALLA_TARGET_ISA_X86_32) && \
+    !defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    !defined(HURCHALLA_TARGET_ISA_ARM_32)
+#  if defined(__x86_64__) || defined(_M_X64)
 #    define HURCHALLA_TARGET_ISA_X86_64 1
-#  endif
-#elif defined(__i386) || defined(_M_IX86)
-#  ifndef HURCHALLA_TARGET_ISA_X86_32
+#  elif defined(__i386) || defined(_M_IX86)
 #    define HURCHALLA_TARGET_ISA_X86_32 1
-#  endif
-#endif
-
-#if defined(__aarch64__) || defined(_M_ARM64)
-#  ifndef HURCHALLA_TARGET_ISA_ARM_64
+#  elif defined(__aarch64__) || defined(_M_ARM64)
 #    define HURCHALLA_TARGET_ISA_ARM_64 1
-#  endif
-#elif defined(__arm__) || defined(_M_ARM)
-#  ifndef HURCHALLA_TARGET_ISA_ARM_32
+#  elif defined(__arm__) || defined(_M_ARM)
 #    define HURCHALLA_TARGET_ISA_ARM_32 1
 #  endif
 #endif
