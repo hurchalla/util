@@ -202,14 +202,15 @@
 #endif
 
 
+#define HURCHALLA_CMOV(cond, srcdst, val) \
+      do { srcdst = (!!(cond)) ? (val) : (srcdst); } while (0)
+/*
 #if defined(__clang__) && ((__clang_major__ > 3) || \
                            ((__clang_major__ == 3) && (__clang_minor__ >= 8)))
 #  define HURCHALLA_CMOV(cond, srcdst, val) \
       do { if (__builtin_unpredictable(!!(cond))) { srcdst = (val); } } while(0)
-#else
-#  define HURCHALLA_CMOV(cond, srcdst, val) \
-      do { srcdst = (!!(cond)) ? (val) : (srcdst); } while (0)
 #endif
+*/
 
 
 #endif
