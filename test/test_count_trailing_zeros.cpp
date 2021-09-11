@@ -11,23 +11,23 @@
 namespace {
 
 TEST(HurchallaUtil, count_trailing_zeros) {
-    using namespace hurchalla;
+    namespace hc = ::hurchalla;
 
     unsigned char xc = 6;
-    EXPECT_TRUE(count_trailing_zeros(xc) == 1);
+    EXPECT_TRUE(hc::count_trailing_zeros(xc) == 1);
     unsigned short xs = 260;
-    EXPECT_TRUE(count_trailing_zeros(xs) == 2);
+    EXPECT_TRUE(hc::count_trailing_zeros(xs) == 2);
     xs = 512;
-    EXPECT_TRUE(count_trailing_zeros(xs) == 9);
+    EXPECT_TRUE(hc::count_trailing_zeros(xs) == 9);
     unsigned int xi = 5120352;
-    EXPECT_TRUE(count_trailing_zeros(xi) == 5);
+    EXPECT_TRUE(hc::count_trailing_zeros(xi) == 5);
     unsigned long xl = 166068224;
-    EXPECT_TRUE(count_trailing_zeros(xl) == 17);
+    EXPECT_TRUE(hc::count_trailing_zeros(xl) == 17);
     unsigned long long xll = 9223372036854775808ull;
-    EXPECT_TRUE(count_trailing_zeros(xll) == 63);
+    EXPECT_TRUE(hc::count_trailing_zeros(xll) == 63);
 #if (HURCHALLA_COMPILER_HAS_UINT128_T())
     __uint128_t x128 = static_cast<__uint128_t>(1) << 68;
-    EXPECT_TRUE(count_trailing_zeros(x128) == 68);
+    EXPECT_TRUE(hc::count_trailing_zeros(x128) == 68);
 #endif
 }
 

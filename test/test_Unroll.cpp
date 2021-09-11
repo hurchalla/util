@@ -11,7 +11,7 @@
 namespace {
 
 TEST(HurchallaUtil, Unroll) {
-    namespace hc = hurchalla;
+    namespace hc = ::hurchalla;
     {
         constexpr int COUNT = 5;
         int sum1 = 0;

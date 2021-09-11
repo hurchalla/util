@@ -13,7 +13,7 @@ namespace {
 template <typename T, typename S>
 void check_type_conversion()
 {
-    namespace hc = hurchalla;
+    namespace hc = ::hurchalla;
     static_assert(std::is_same<S, typename
                                hc::extensible_make_signed<T>::type>::value, "");
     static_assert(std::is_same<const S, typename

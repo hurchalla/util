@@ -12,7 +12,7 @@ namespace {
 template <typename U, typename P>
 void check_type_promotion()
 {
-    namespace hc = hurchalla;
+    namespace hc = ::hurchalla;
     static_assert(std::is_same<P, typename
                               hc::safely_promote_unsigned<U>::type>::value, "");
     static_assert(std::is_same<const P, typename
@@ -37,7 +37,7 @@ TEST(HurchallaUtil, safely_promote_unsigned) {
     // the following statements should cause static_assert compile errors within
     // safely_promote_unsigned, if any of them are enabled:
 #if 0
-    namespace hc = hurchalla;
+    namespace hc = ::hurchalla;
     using T1 = hc::safely_promote_unsigned<float>::type;
     using T2 = hc::safely_promote_unsigned<short>::type;
     using T3 = hc::safely_promote_unsigned<int>::type;

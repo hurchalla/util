@@ -23,7 +23,7 @@ namespace {
 
 void call_unreachable(bool makecall) {
     if (makecall)
-        hurchalla::unreachable();
+        ::hurchalla::unreachable();
 }
 
 TEST(HurchallaUtil, unreachable) {

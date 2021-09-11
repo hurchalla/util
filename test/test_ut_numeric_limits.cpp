@@ -6,13 +6,14 @@
 #include "gtest/gtest.h"
 #include <type_traits>
 
-
 namespace {
+
+
+namespace hc = ::hurchalla;
 
 template <typename T>
 void verify_is_specialized()
 {
-    namespace hc = hurchalla;
     // verify usage during both compile-time and run-time
     static_assert(hc::ut_numeric_limits<T>::is_specialized, "");
     static_assert(hc::ut_numeric_limits<const T>::is_specialized, "");
@@ -27,7 +28,6 @@ void verify_is_specialized()
 template <typename T>
 void verify_not_specialized()
 {
-    namespace hc = hurchalla;
     // verify usage during both compile-time and run-time
     static_assert(!hc::ut_numeric_limits<T>::is_specialized, "");
     static_assert(!hc::ut_numeric_limits<const T>::is_specialized, "");
@@ -68,7 +68,6 @@ TEST(HurchallaUtil, ut_numeric_limits) {
     verify_is_specialized<__int128_t>();
     verify_is_specialized<__uint128_t>();
     // Do a sanity check on digits10 to see if other variables are correct too.
-    namespace hc = hurchalla;
     static_assert(hc::ut_numeric_limits<__int128_t>::digits10 == 38, "");
     EXPECT_TRUE(hc::ut_numeric_limits<__int128_t>::digits10 == 38);
 #endif

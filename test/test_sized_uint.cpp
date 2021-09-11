@@ -11,7 +11,7 @@
 namespace {
 
 TEST(HurchallaUtil, sized_uint) {
-    namespace hc = hurchalla;
+    namespace hc = ::hurchalla;
     static_assert(std::is_same<std::uint8_t, hc::sized_uint<8>::type>::value, "");
     static_assert(std::is_same<std::uint16_t, hc::sized_uint<16>::type>::value, "");
     static_assert(std::is_same<std::uint32_t, hc::sized_uint<32>::type>::value, "");
