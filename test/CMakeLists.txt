@@ -38,7 +38,8 @@ add_executable(test_hurchalla_util
                test_ut_numeric_limits.cpp
                test_sized_uint.cpp
                test_unreachable.cpp
-               test_Unroll.cpp)
+               test_Unroll.cpp
+               test_unsigned_multiply_to_hilo_product.cpp)
 
 EnableMaxWarnings(test_hurchalla_util)
 
