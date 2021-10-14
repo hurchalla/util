@@ -15,6 +15,7 @@ namespace hurchalla {
 // behavior and unexpected results that can arise from unsigned integral
 // promotion in C++.  For details on these issues, see
 // https://jeffhurchalla.com/2019/01/16/c-c-surprises-and-undefined-behavior-due-to-unsigned-integer-promotion/
+// https://www.nayuki.io/page/summary-of-c-cpp-integer-rules
 
 // If an unsigned type T would get promoted to (signed) 'int', we want to make
 // sure that the type safely_promote_unsigned<T> provides is 'unsigned int'.
@@ -23,8 +24,7 @@ namespace hurchalla {
 
 template <typename T>
 struct safely_promote_unsigned_helper {
-    using type = typename std::make_unsigned<
-                           decltype(static_cast<T>(1)*static_cast<T>(1))>::type;
+    using type = decltype(0u + static_cast<T>(0));
 };
 template <typename T>
 struct safely_promote_unsigned_helper<const T> {

@@ -35,11 +35,12 @@ add_executable(test_hurchalla_util
                test_extensible_make_signed.cpp
                test_extensible_make_unsigned.cpp
                test_safely_promote_unsigned.cpp
-               test_ut_numeric_limits.cpp
+               test_signed_multiply_to_hilo_product.cpp
                test_sized_uint.cpp
                test_unreachable.cpp
                test_Unroll.cpp
-               test_unsigned_multiply_to_hilo_product.cpp)
+               test_unsigned_multiply_to_hilo_product.cpp
+               test_ut_numeric_limits.cpp)
 
 EnableMaxWarnings(test_hurchalla_util)
 

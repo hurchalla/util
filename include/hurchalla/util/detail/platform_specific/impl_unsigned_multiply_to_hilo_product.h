@@ -24,7 +24,8 @@ namespace hurchalla { namespace detail {
 //   Returns the high portion of the product.
 // Notes:
 //   - I adapted this code from https://stackoverflow.com/a/58381061
-//     On ARM32 with clang it compiles nicely, using the UMAAL instruction.
+//     On ARM32 with clang it compiles nicely with T=uint64_t, using the UMAAL
+//     instruction (you may need -march=armv7-a or similar)
 //   - Uses static member function to disallow ADL.
 struct slow_unsigned_multiply_to_hilo_product {
   template <typename T>
@@ -170,8 +171,8 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
     // since the C++ standard doesn't disallow 'int' type larger than 64 bit, we
     // should write code that's safe after the C++ "usual arithmetic conversion"
     // rules apply.
-    using P = typename safely_promote_unsigned<std::uint64_t>::type;
-    lowProduct = static_cast<std::uint64_t>(static_cast<P>(u)*v);
+    using P = typename safely_promote_unsigned<uint64_t>::type;
+    lowProduct = static_cast<uint64_t>(static_cast<P>(u)*v);
     if (HPBC_POSTCONDITION3_MACRO_IS_ACTIVE) {
         uint64_t tmpHi, tmpLo;
         tmpHi = slow_unsigned_multiply_to_hilo_product::call(tmpLo, u, v);

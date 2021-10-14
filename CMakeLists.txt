@@ -45,11 +45,13 @@ target_sources(hurchalla_util INTERFACE
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/compiler_macros.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/count_trailing_zeros.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/programming_by_contract.h>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/signed_multiply_to_hilo_product.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/sized_uint.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/unreachable.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/Unroll.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/unsigned_multiply_to_hilo_product.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/impl_count_trailing_zeros.h>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/platform_specific/impl_signed_multiply_to_hilo_product.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/platform_specific/impl_unsigned_multiply_to_hilo_product.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/traits/extensible_make_signed.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/traits/extensible_make_unsigned.h>
