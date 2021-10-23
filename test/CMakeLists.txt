@@ -34,6 +34,7 @@ add_executable(test_hurchalla_util
                test_count_trailing_zeros.cpp
                test_extensible_make_signed.cpp
                test_extensible_make_unsigned.cpp
+               test_is_equality_comparable.cpp
                test_safely_promote_unsigned.cpp
                test_signed_multiply_to_hilo_product.cpp
                test_sized_uint.cpp
