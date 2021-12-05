@@ -36,20 +36,18 @@ template <typename T>
 struct is_equality_comparable : detail::impl_is_equality_comparable<T> {};
 
 
-//is_equality_comparable<CanonicalValue>::value
-
+// Unfortunately, is_equality_comparable<CanonicalValue>::value is only capable
+// of letting us know if an equality operator exists (and that it returns bool).
+// In a perfect world we would like to also get assurance that the following is
+// true:
 // x == x
-// x == y -> y == x
-// x == y and y ==z -> x == z
-
-// converableToT == T
-// T == convertableToT
-
+// (x == y) == (y == x)
 // !(x == y) == (x != y)
 // !(x != y) == (x == y)
-
-// has ops == and !=, such that there exists  converableToT (op) T  and  T (op) convertableToT
-// and they return bool.
+// if (x == y && y == z) then (x == z)
+// Has ops == and !=, such that there exists  convertableToT (op) T  and
+// T (op) convertableToT  and they return bool.  (we only have assurance that
+// there exists a function for T == convertableToT)
 
 
 #endif

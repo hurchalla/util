@@ -61,7 +61,7 @@ struct slow_signed_multiply_to_hilo_product {
     // perhaps work for non-two's complement.  Note that non-two's complement
     // representation is incredibly incredibly rare these days, and C++20
     // mandates two's complement for signed integers.
-    static_assert(-1 == ~0, "");
+    static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
     // This function's logic requires arithmetic right shift for signed
     // integers.  By the C++ standard (at least prior to C++20), the behavior of
     // right shift on a negative number is implementation defined, and so we
@@ -73,7 +73,7 @@ struct slow_signed_multiply_to_hilo_product {
     // using unsigned multiplication and post-processing.  It's slightly less
     // efficient but would likely work if you need a different implementation.
     // Note that arithmetic right appears to be mandated by C++20.
-    static_assert((-1 >> 1) == -1, "");
+    static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
 
     using S = T;                                           // S for signed
     using U = typename extensible_make_unsigned<T>::type;  // U for unsigned
