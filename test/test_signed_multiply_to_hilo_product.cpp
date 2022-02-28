@@ -19,8 +19,11 @@ void test_signed_multiply_to_hilo_product()
 
     // As with signed_multiply_to_hilo_product, this file assumes two's
     // complement and arithmetic right shift for signed integers.
-    static_assert(-1 == ~0, "");         // two's complement
-    static_assert((-1 >> 1) == -1, "");  // arithmetic right shift
+
+    // Assert two's complement
+    static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
+    // Assert arithmetic right shift
+    static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
 
     using U = typename hc::extensible_make_unsigned<T>::type;
 

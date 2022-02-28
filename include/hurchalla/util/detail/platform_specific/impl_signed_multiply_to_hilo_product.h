@@ -72,7 +72,7 @@ struct slow_signed_multiply_to_hilo_product {
     // alternate way to multiply signed words to get a double-word product,
     // using unsigned multiplication and post-processing.  It's slightly less
     // efficient but would likely work if you need a different implementation.
-    // Note that arithmetic right appears to be mandated by C++20.
+    // Note that arithmetic right shift appears to be mandated by C++20.
     static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
 
     using S = T;                                           // S for signed

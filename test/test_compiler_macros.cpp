@@ -103,11 +103,12 @@ TEST(HurchallaUtil, compiler_macros) {
     if HURCHALLA_UNLIKELY(a > b)
         test_foo();
 
-    int srcdst = 2;
-    int val = 3;
-    // this is (hopefully) an optimized form of  srcdst = (0<N) ? val : srcdst;
-    HURCHALLA_CMOV(0 < N, srcdst, val);
-    if (srcdst == 3)
+    int src1 = 3;
+    int src2 = 4;
+    int dest;
+    // this is (hopefully) an optimized form of  dest = (0<N) ? src1 : src2;
+    HURCHALLA_CSELECT(dest, 0 < N, src1, src2);
+    if (dest == 3)
         test_foo();
 }
 

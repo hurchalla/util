@@ -82,6 +82,15 @@
 #    define HURCHALLA_TARGET_ISA_ARM_64 1
 #  elif defined(__arm__) || defined(_M_ARM)
 #    define HURCHALLA_TARGET_ISA_ARM_32 1
+#  elif defined(__riscv) && defined(__riscv_xlen)
+     // see https://groups.google.com/a/groups.riscv.org/g/sw-dev/c/E8EO-Fd4t3s
+#    if (__riscv_xlen == 64)
+#      define HURCHALLA_TARGET_ISA_RISCV_64 1
+#    elif (__riscv_xlen == 32)
+#      define HURCHALLA_TARGET_ISA_RISCV_32 1
+#    else
+#      error "unknown target ISA for RISC-V"
+#    endif
 #  endif
 #endif
 
@@ -202,15 +211,49 @@
 #endif
 
 
-#define HURCHALLA_CMOV(cond, srcdst, val) \
-      do { srcdst = (!!(cond)) ? (val) : (srcdst); } while (0)
-/*
-#if defined(__clang__) && ((__clang_major__ > 3) || \
-                           ((__clang_major__ == 3) && (__clang_minor__ >= 8)))
-#  define HURCHALLA_CMOV(cond, srcdst, val) \
-      do { if (__builtin_unpredictable(!!(cond))) { srcdst = (val); } } while(0)
+// RISC-V has no conditional move or conditional select instructions.
+#if (!defined(HURCHALLA_AVOID_CSELECT)) && \
+        (defined(HURCHALLA_TARGET_ISA_RISCV_64) || \
+         defined(HURCHALLA_TARGET_ISA_RISCV_32))
+#  define HURCHALLA_AVOID_CSELECT
 #endif
+
+#ifndef HURCHALLA_AVOID_CSELECT
+   // It would be nice if there were a compiler intrinsic for emitting a
+   // conditional move (cmov x86) or conditional select (csel ARM), but so far
+   // no compiler provides it.  Nonetheless, the ternary operator generally
+   // causes compilers to emit cmov on x86 and csel on ARM.
+   // Note: implementing this with inline asm would probably work poorly.  The
+   // compiler has an efficiency advantage that we do not, because it knows what
+   // condition code flags were set by previous arithmetic instructions.  If we
+   // used inline asm, we would be forcing the compiler to write the condition
+   // code from some previous instruction into a register, and then we would
+   // need to retest that register in asm to regenerate the condition code.
+#  define HURCHALLA_CSELECT(dest, cond, src1, src2) \
+       do { dest = (!!(cond)) ? (src1) : (src2); } while (0)
+/*
+   // clang's __builtin_unpredictable is interesting, though in practice it
+   // doesn't seem to make any difference in generating cmov/csel.
+#  if defined(__clang__) && ((__clang_major__ > 3) || \
+                           ((__clang_major__ == 3) && (__clang_minor__ >= 8)))
+#    define HURCHALLA_CSELECT(dest, cond, src1, src2) \
+       do { dest = (__builtin_unpredictable(!!(cond))) ? (src1) : (src2); } \
+       while (0)
+#  else
+#    define HURCHALLA_CSELECT(dest, cond, src1, src2) \
+       do { dest = (!!(cond)) ? (src1) : (src2); } while (0)
+#  endif
 */
+#else
+#  define HURCHALLA_CSELECT(dest, cond, src1, src2) \
+      do { \
+          using T = decltype(dest); \
+          bool b = (!!(cond)); \
+          T mask = static_cast<T>(-static_cast<T>(b)); \
+          T maskflip = static_cast<T>(static_cast<T>(b) - static_cast<T>(1)); \
+          dest = static_cast<T>((mask & src1) | (maskflip & src2)); \
+      } while (0)
+#endif
 
 
 #endif
