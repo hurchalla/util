@@ -247,11 +247,17 @@
 #else
 #  define HURCHALLA_CSELECT(dest, cond, src1, src2) \
       do { \
-          using T = decltype(dest); \
-          dest = static_cast<T>( \
-             (static_cast<T>(-static_cast<T>((!!(cond)))) & src1) | \
-             (static_cast<T>(static_cast<T>((!!(cond))) - static_cast<T>(1)) \
-                & src2)); \
+          dest = static_cast<decltype(dest)>( \
+                    (   static_cast<decltype(dest)>( \
+                           -static_cast<decltype(dest)>((!!(cond))) \
+                       ) & src1 \
+                    ) | \
+                    (   static_cast<decltype(dest)>( \
+                           static_cast<decltype(dest)>((!!(cond))) - \
+                           static_cast<decltype(dest)>(1) \
+                       ) & src2 \
+                    ) \
+                 ); \
       } while (0)
 #endif
 
