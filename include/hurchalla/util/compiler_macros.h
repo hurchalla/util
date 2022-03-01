@@ -248,10 +248,10 @@
 #  define HURCHALLA_CSELECT(dest, cond, src1, src2) \
       do { \
           using T = decltype(dest); \
-          bool b = (!!(cond)); \
-          T mask = static_cast<T>(-static_cast<T>(b)); \
-          T maskflip = static_cast<T>(static_cast<T>(b) - static_cast<T>(1)); \
-          dest = static_cast<T>((mask & src1) | (maskflip & src2)); \
+          dest = static_cast<T>( \
+             (static_cast<T>(-static_cast<T>((!!(cond)))) & src1) | \
+             (static_cast<T>(static_cast<T>((!!(cond))) - static_cast<T>(1)) \
+                & src2)); \
       } while (0)
 #endif
 
