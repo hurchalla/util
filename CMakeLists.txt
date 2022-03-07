@@ -43,6 +43,7 @@ add_library(hurchalla_util INTERFACE)
 target_sources(hurchalla_util INTERFACE
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/assert_handler.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/compiler_macros.h>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/conditional_select.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/count_trailing_zeros.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/programming_by_contract.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/signed_multiply_to_hilo_product.h>
@@ -50,6 +51,7 @@ target_sources(hurchalla_util INTERFACE
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/unreachable.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/Unroll.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/unsigned_multiply_to_hilo_product.h>
+               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/impl_conditional_select.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/impl_count_trailing_zeros.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/platform_specific/impl_signed_multiply_to_hilo_product.h>
                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/hurchalla/util/detail/platform_specific/impl_unsigned_multiply_to_hilo_product.h>

@@ -31,6 +31,7 @@ include(GoogleTest)
 
 add_executable(test_hurchalla_util
                test_compiler_macros.cpp
+               test_conditional_select.cpp
                test_count_trailing_zeros.cpp
                test_extensible_make_signed.cpp
                test_extensible_make_unsigned.cpp
