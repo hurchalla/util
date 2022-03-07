@@ -15,6 +15,7 @@ namespace hurchalla {
 
 using CSelectStandardTag = detail::ImplCSelectStandardTag;
 using CSelectMaskedTag = detail::ImplCSelectMaskedTag;
+using CSelectDefaultTag = detail::ImplCSelectDefaultTag;
 
 // Returns (cond) ? a : b.
 // If PerfTag is ConditionalSelectStandardTag, this will be evaluated (usually)
@@ -22,7 +23,7 @@ using CSelectMaskedTag = detail::ImplCSelectMaskedTag;
 // from the ternary operation ((cond) ? a : b).
 // If PerfTag is ConditionalSelectMaskedTag, it will be evaluated using
 // bitwise operations via bitmasks.  
-template <typename T, class PerfTag = detail::ImplCSelectDefaultTag>
+template <typename T, class PerfTag = CSelectDefaultTag>
 HURCHALLA_FORCE_INLINE T conditional_select(bool cond, T a, T b)
 {
     static_assert(ut_numeric_limits<T>::is_integer, "");
