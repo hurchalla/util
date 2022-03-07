@@ -7,6 +7,7 @@
 
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/traits/extensible_make_unsigned.h"
+#include "hurchalla/util/traits/safely_promote_unsigned.h"
 #include "hurchalla/util/compiler_macros.h"
 #include "hurchalla/util/programming_by_contract.h"
 #include <type_traits>
@@ -59,15 +60,16 @@ struct impl_conditional_select<T, ImplCSelectMaskedTag> {
   {
     static_assert(ut_numeric_limits<T>::is_integer, "");
     using U = typename extensible_make_unsigned<T>::type;
+    using P = typename safely_promote_unsigned<U>::type;
     static_assert(!(ut_numeric_limits<T>::is_signed) ||
                     ((static_cast<T>(-1) == ~(static_cast<T>(0))) &&
-                     (static_cast<T>(static_cast<U>(static_cast<T>(-1))) ==
+                     (static_cast<T>(static_cast<P>(static_cast<T>(-1))) ==
                         static_cast<T>(-1))),
                  "If T is signed, it must use two's complement representation");
-    U ucond = static_cast<U>(cond);
-    U mask = static_cast<U>(-ucond);
-    U maskflip = static_cast<U>(ucond - static_cast<U>(1));
-    U selection = (mask & static_cast<U>(a)) | (maskflip & static_cast<U>(b));
+    P condp = static_cast<P>(cond);
+    P mask = static_cast<P>(-condp);
+    P maskflip = static_cast<P>(condp - static_cast<P>(1));
+    P selection = (mask & static_cast<P>(a)) | (maskflip & static_cast<P>(b));
     T result = static_cast<T>(selection);
     HPBC_POSTCONDITION2(result == ((cond) ? a : b));
     return result;
