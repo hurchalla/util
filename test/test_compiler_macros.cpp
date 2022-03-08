@@ -102,14 +102,6 @@ TEST(HurchallaUtil, compiler_macros) {
 
     if HURCHALLA_UNLIKELY(a > b)
         test_foo();
-
-    int src1 = 3;
-    int src2 = 4;
-    int dest;
-    // this is (hopefully) an optimized form of  dest = (0<N) ? src1 : src2;
-    HURCHALLA_CSELECT(dest, 0 < N, src1, src2);
-    if (dest == 3)
-        test_foo();
 }
 
 } // end namespace
