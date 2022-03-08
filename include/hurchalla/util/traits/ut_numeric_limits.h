@@ -230,7 +230,7 @@ struct ut_numeric_limits<__uint128_t, U> {
     static constexpr bool traps= std::numeric_limits<unsigned long long>::traps;
     static constexpr bool tinyness_before = false;
     static constexpr __uint128_t min() noexcept  { return 0; }
-    static constexpr __uint128_t lowest() noexcept { return min(); }
+    static constexpr __uint128_t lowest() noexcept { return 0; }
     static constexpr __uint128_t max() noexcept
     {
         // rely upon modulo (2^128) wrap-around on subtraction below

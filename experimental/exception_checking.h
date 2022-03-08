@@ -22,7 +22,9 @@
 #   if !defined(HPBC_ENABLE_FULL_FEATURES)
 #      error exception_checking.h requires HPBC_ENABLE_FULL_FEATURES
 #   endif
-    namespace hurchalla { inline namespace v1 {
+namespace hurchalla { inline namespace v1 {
+
+    namespace hc = ::hurchalla;
 
     template<typename Func>
     inline void runAndCheckExceptionParams(Func&& f, bool& wasHandled)
@@ -36,7 +38,7 @@
     {
         try {
             // if runAndCheckExceptionParams throws, wasHandled won't change
-            runAndCheckExceptionParams<Func, Exceptions...>(
+            hc::runAndCheckExceptionParams<Func, Exceptions...>(
                             std::forward<Func>(f), wasHandled);
         } catch (const Ex1&) {
             wasHandled = true;
@@ -49,7 +51,7 @@
     {
         bool wasHandled = false;
         try {
-            runAndCheckExceptionParams<Func, Exceptions...>
+            hc::runAndCheckExceptionParams<Func, Exceptions...>
                                       (std::forward<Func>(f), wasHandled);
         } catch (const std::exception& e) {
             if (!wasHandled) {
@@ -63,29 +65,29 @@
                    << " [yet unknown exception was thrown, explanation: "
                    << e.what() << "]";
 #endif
-                hpbcAssertHandler(ss.str().c_str(), filename, line);
+                ::hpbcAssertHandler(ss.str().c_str(), filename, line);
             }
             throw;
         } catch (...) {
             if (!wasHandled) {
                 std::ostringstream ss;
                 ss << assertMessage << " [yet unknown exception was thrown]";
-                hpbcAssertHandler(ss.str().c_str(), filename, line);
+                ::hpbcAssertHandler(ss.str().c_str(), filename, line);
             }
             throw;
         }
     }
 
-    }}  // end namespaces
+}}  // end namespaces
 
 #   define HPBC_VERIFY_THROWS(EXPRESSION_BODY, ...) \
-                 hurchalla::runWithCheckedExceptions<__VA_ARGS__>( \
+                 ::hurchalla::runWithCheckedExceptions<__VA_ARGS__>( \
                      [&]{EXPRESSION_BODY;}, \
                      "HPBC_VERIFY_THROWS should only throw expected exceptions",\
                      __FILE__, __LINE__ \
                      )
 #   define HPBC_VERIFY_NOTHROW(EXPRESSION_BODY) \
-                hurchalla::runWithCheckedExceptions<>( \
+                ::hurchalla::runWithCheckedExceptions<>( \
                      [&]{EXPRESSION_BODY;}, \
                      "HPBC_VERIFY_NOTHROW should not throw exceptions", \
                      __FILE__, __LINE__ \

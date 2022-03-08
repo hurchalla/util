@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <utility>
 
+namespace hurchalla {
+
 
 namespace detail {   // internal impl for is_equality_comparable
 #if 1
@@ -30,7 +32,7 @@ namespace detail {   // internal impl for is_equality_comparable
       decltype(std::declval<T>()==std::declval<T>(), void(), void())>
       : std::true_type {};
 #endif
-} // end namespace
+} // end namespace detail
 
 template <typename T>
 struct is_equality_comparable : detail::impl_is_equality_comparable<T> {};
@@ -49,5 +51,7 @@ struct is_equality_comparable : detail::impl_is_equality_comparable<T> {};
 // T (op) convertableToT  and they return bool.  (we only have assurance that
 // there exists a function for T == convertableToT)
 
+
+}  // end namespace hurchalla
 
 #endif

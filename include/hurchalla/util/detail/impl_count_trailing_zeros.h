@@ -97,7 +97,7 @@ struct impl_count_trailing_zeros<unsigned long long> {
     _BitScanForward64(&index, x);
     return static_cast<int>(index);
 # else
-    return default_count_trailing_zeros(x);
+    return default_count_trailing_zeros<unsigned long long>::call(x);
 # endif
 #else
     return __builtin_ctzll(x);

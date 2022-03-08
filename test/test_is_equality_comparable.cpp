@@ -38,20 +38,23 @@ struct CannotK {
 
 
 namespace {
-static_assert(!is_equality_comparable<NS::CannotA>::value, "");
-static_assert(is_equality_comparable<NS::CanB>::value, "");
-static_assert(is_equality_comparable<NS::CanC>::value, "");
-static_assert(is_equality_comparable<NS::CanD>::value, "");
-static_assert(is_equality_comparable<NS::CanE>::value, "");
+
+namespace hc = ::hurchalla;
+static_assert(!hc::is_equality_comparable<NS::CannotA>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanB>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanC>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanD>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanE>::value, "");
 // is_equality_comparable expects operator== to return bool (not int)
-static_assert(!is_equality_comparable<NS::CannotF>::value, "");
+static_assert(!hc::is_equality_comparable<NS::CannotF>::value, "");
 // ADL will identify CanD as an associated class of CanG and find operator==
-static_assert(is_equality_comparable<NS::CanG>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanG>::value, "");
 // ADL will identify NS as an associated namespace of CanH and find operator==
-static_assert(is_equality_comparable<NS::CanH>::value, "");
-static_assert(is_equality_comparable<NS::CanI>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanH>::value, "");
+static_assert(hc::is_equality_comparable<NS::CanI>::value, "");
 // ADL does not identify Base2 as an associated class of CannotJ,
 // and thus won't find operator==
-static_assert(!is_equality_comparable<NS::CannotJ>::value, "");
-static_assert(!is_equality_comparable<NS::CannotK>::value, "");
+static_assert(!hc::is_equality_comparable<NS::CannotJ>::value, "");
+static_assert(!hc::is_equality_comparable<NS::CannotK>::value, "");
+
 } // end namespace
