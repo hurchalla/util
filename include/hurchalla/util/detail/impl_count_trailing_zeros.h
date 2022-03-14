@@ -32,7 +32,7 @@ struct default_count_trailing_zeros {
 #endif
     HPBC_PRECONDITION2(x != 0);
     int count = 0;
-    while ((x & 1) == 0) {
+    while ((x & 1u) == 0u) {
         x = x >> 1;
         ++count;
     }
