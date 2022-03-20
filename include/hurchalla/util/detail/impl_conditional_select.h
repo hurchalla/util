@@ -79,7 +79,7 @@ struct impl_conditional_select<T, ImplCSelectMaskedTag> {
 // specialization for ImplCSelectDefaultTag
 template <typename T>
 struct impl_conditional_select<T, ImplCSelectDefaultTag> {
-#ifdef HURCHALLA_AVOID_CSELECT
+#ifdef HURCHALLA_USE_MASKED_CSELECT
   // For this default implementation, let's use masks only if T is equal or
   // smaller in size to the native register size.
   template <typename T1 = T>

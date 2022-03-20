@@ -212,10 +212,14 @@
 
 
 // RISC-V has no conditional move or conditional select instructions.
-#if (!defined(HURCHALLA_AVOID_CSELECT)) && \
-        (defined(HURCHALLA_TARGET_ISA_RISCV_64) || \
-         defined(HURCHALLA_TARGET_ISA_RISCV_32))
-#  define HURCHALLA_AVOID_CSELECT
+#if defined(HURCHALLA_TARGET_ISA_RISCV_64) || \
+            defined(HURCHALLA_TARGET_ISA_RISCV_32)
+#  if !defined(HURCHALLA_USE_MASKED_CSELECT)
+#     define HURCHALLA_USE_MASKED_CSELECT
+#  endif
+#  if !defined(HURCHALLA_AVOID_CSELECT)
+#     define HURCHALLA_AVOID_CSELECT
+#  endif
 #endif
 
 
