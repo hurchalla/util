@@ -79,7 +79,7 @@ struct impl_conditional_select<T, ImplCSelectMaskedTag> {
 // specialization for ImplCSelectDefaultTag
 template <typename T>
 struct impl_conditional_select<T, ImplCSelectDefaultTag> {
-#ifdef HURCHALLA_USE_MASKED_CSELECT
+#ifdef HURCHALLA_PREFER_MASKING_WITHIN_CSELECT
   // For this default implementation, let's use masks only if T is equal or
   // smaller in size to the native register size.
   template <typename T1 = T>
@@ -96,7 +96,7 @@ struct impl_conditional_select<T, ImplCSelectDefaultTag> {
                              HURCHALLA_TARGET_BIT_WIDTH), T>::type
   call(bool cond, T a, T b)
   {
-    return impl_conditional_select<T, ImplCSelectStandardTag>::call(cond, a, b);
+    return (cond) ? a : b;
   }
 #else
   HURCHALLA_FORCE_INLINE static T call(bool cond, T a, T b)
