@@ -20,10 +20,10 @@ option(TEST_HURCHALLA_LIBS
 # if this is the top level CMakeLists.txt, add testing options, and enable
 # testing when testing options have been set to ON.
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    option(TEST_HURCHALLA_TOP_LEVEL
-           "Build tests for the top level Hurchalla library project."
+    option(TEST_HURCHALLA_UTIL
+           "Build tests for the Hurchalla util library project."
            OFF)
-    if(TEST_HURCHALLA_TOP_LEVEL OR TEST_HURCHALLA_LIBS)
+    if(TEST_HURCHALLA_UTIL OR TEST_HURCHALLA_LIBS)
         enable_testing()
         #include(CTest)
     endif()
@@ -110,7 +110,7 @@ endif()
 
 # if this is the top level CMakeLists.txt
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    if(TEST_HURCHALLA_TOP_LEVEL OR TEST_HURCHALLA_LIBS)
+    if(TEST_HURCHALLA_UTIL OR TEST_HURCHALLA_LIBS)
         add_subdirectory(test)
     endif()
 elseif(TEST_HURCHALLA_LIBS)
