@@ -34,8 +34,6 @@ TEST(HurchallaUtil, sized_uint) {
 #if HURCHALLA_COMPILER_HAS_UINT128_T()
     EXPECT_TRUE(hc::sized_uint<128>::is_valid);
 #endif
-    
-    EXPECT_TRUE(false); // temporary, to check whether github actions sees the failure
 
     static_assert(!hc::sized_uint<4>::is_valid, "");
     static_assert(!hc::sized_uint<9>::is_valid, "");
