@@ -22,7 +22,7 @@ option(TEST_HURCHALLA_LIBS
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     option(TEST_HURCHALLA_UTIL
            "Build tests for the Hurchalla util library project."
-           OFF)
+           ON)
     if(TEST_HURCHALLA_UTIL OR TEST_HURCHALLA_LIBS)
         enable_testing()
         #include(CTest)
