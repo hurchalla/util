@@ -54,7 +54,9 @@ static_assert(hc::is_equality_comparable<NS::CanH>::value, "");
 static_assert(hc::is_equality_comparable<NS::CanI>::value, "");
 // ADL does not identify Base2 as an associated class of CannotJ,
 // and thus won't find operator==
+#ifndef _MSC_VER   // MSVC gets this wrong (compiler bug), so skip it
 static_assert(!hc::is_equality_comparable<NS::CannotJ>::value, "");
+#endif
 static_assert(!hc::is_equality_comparable<NS::CannotK>::value, "");
 
 } // end namespace

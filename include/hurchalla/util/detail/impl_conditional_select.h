@@ -63,11 +63,11 @@ struct impl_conditional_select<T, ImplCSelectMaskedTag> {
     using P = typename safely_promote_unsigned<U>::type;
     static_assert(!(ut_numeric_limits<T>::is_signed) ||
                     ((static_cast<T>(-1) == ~(static_cast<T>(0))) &&
-                     (static_cast<T>(static_cast<P>(static_cast<T>(-1))) ==
+                     (static_cast<T>(static_cast<U>(static_cast<T>(-1))) ==
                         static_cast<T>(-1))),
                  "If T is signed, it must use two's complement representation");
     P condp = static_cast<P>(cond);
-    P mask = static_cast<P>(-condp);
+    P mask = static_cast<P>(static_cast<P>(0) - condp);
     P maskflip = static_cast<P>(condp - static_cast<P>(1));
     P selection = (mask & static_cast<P>(a)) | (maskflip & static_cast<P>(b));
     T result = static_cast<T>(selection);
