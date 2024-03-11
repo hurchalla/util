@@ -26,37 +26,42 @@ template <int BITS, typename DUMMY=void> struct sized_uint
     static constexpr bool is_valid = false;
     using type = void;
 };
+// This section is only needed prior to C++17, and can cause deprecation
+// warnings if enabled after C++17
+#if __cplusplus < 201703L
 template <int BITS, typename DUMMY>
 constexpr bool sized_uint<BITS, DUMMY>::is_valid;
-
+#endif
 
 template <typename DUMMY> struct sized_uint<8, DUMMY>
 {
     static constexpr bool is_valid = true;
     using type = std::uint8_t;
 };
-template <typename DUMMY> constexpr bool sized_uint<8, DUMMY>::is_valid;
-
 template <typename DUMMY> struct sized_uint<16, DUMMY>
 {
     static constexpr bool is_valid = true;
     using type = std::uint16_t;
 };
-template <typename DUMMY> constexpr bool sized_uint<16, DUMMY>::is_valid;
-
 template <typename DUMMY> struct sized_uint<32, DUMMY>
 {
     static constexpr bool is_valid = true;
     using type = std::uint32_t;
 };
-template <typename DUMMY> constexpr bool sized_uint<32, DUMMY>::is_valid;
-
 template <typename DUMMY> struct sized_uint<64, DUMMY>
 {
     static constexpr bool is_valid = true;
     using type = std::uint64_t;
 };
+
+// This section is only needed prior to C++17, and can cause deprecation
+// warnings if enabled after C++17
+#if __cplusplus < 201703L
+template <typename DUMMY> constexpr bool sized_uint<8, DUMMY>::is_valid;
+template <typename DUMMY> constexpr bool sized_uint<16, DUMMY>::is_valid;
+template <typename DUMMY> constexpr bool sized_uint<32, DUMMY>::is_valid;
 template <typename DUMMY> constexpr bool sized_uint<64, DUMMY>::is_valid;
+#endif
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T())
   // Some compilers support __uint128_t, so we'll specialize with it if possible
@@ -65,7 +70,9 @@ template <typename DUMMY> constexpr bool sized_uint<64, DUMMY>::is_valid;
       static constexpr bool is_valid = true;
       using type = __uint128_t;
   };
+# if __cplusplus < 201703L
   template <typename DUMMY> constexpr bool sized_uint<128, DUMMY>::is_valid;
+# endif
 #elif (HURCHALLA_TARGET_BIT_WIDTH >= 128)
   // presumably if a CPU target is >= 128bit, type uint128_t will exist.
   template <typename DUMMY> struct sized_uint<128, DUMMY>
@@ -73,7 +80,9 @@ template <typename DUMMY> constexpr bool sized_uint<64, DUMMY>::is_valid;
       static constexpr bool is_valid = true;
       using type = std::uint128_t;
   };
+# if __cplusplus < 201703L
   template <typename DUMMY> constexpr bool sized_uint<128, DUMMY>::is_valid;
+# endif
 #endif
 
 

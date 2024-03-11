@@ -156,6 +156,9 @@ struct ut_numeric_limits<__int128_t, U> {
     static constexpr __int128_t signaling_NaN() noexcept { return 0; }
     static constexpr __int128_t denorm_min() noexcept { return 0; }
 };
+// This section is only needed prior to C++17, and can cause deprecation
+// warnings if enabled after C++17
+#if __cplusplus < 201703L
 template <typename U>
 constexpr bool ut_numeric_limits<__int128_t, U>::is_specialized;
 template <typename U>
@@ -202,6 +205,7 @@ template <typename U>
 constexpr bool ut_numeric_limits<__int128_t, U>::traps;
 template <typename U>
 constexpr bool ut_numeric_limits<__int128_t, U>::tinyness_before;
+#endif
 
 template<typename U>
 struct ut_numeric_limits<__uint128_t, U> {
@@ -243,6 +247,9 @@ struct ut_numeric_limits<__uint128_t, U> {
     static constexpr __uint128_t signaling_NaN() noexcept { return 0; }
     static constexpr __uint128_t denorm_min() noexcept { return 0; }
 };
+// This section is only needed prior to C++17, and can cause deprecation
+// warnings if enabled after C++17
+#if __cplusplus < 201703L
 template <typename U>
 constexpr bool ut_numeric_limits<__uint128_t, U>::is_specialized;
 template <typename U>
@@ -289,6 +296,7 @@ template <typename U>
 constexpr bool ut_numeric_limits<__uint128_t, U>::traps;
 template <typename U>
 constexpr bool ut_numeric_limits<__uint128_t, U>::tinyness_before;
+#endif
 
 #endif
 
