@@ -74,6 +74,15 @@ void test_flatten()
     test_foo();  // HURCHALLA_FLATTEN should cause test_foo() to be inlined
 }
 
+void test_foo128()
+{
+#if HURCHALLA_COMPILER_HAS_UINT128_T()
+    for (__uint128_t i=0; i<2; ++i)
+        test_foo();
+#endif
+}
+
+
 TEST(HurchallaUtil, compiler_macros) {
     int a = 2;
     int b = 2;
@@ -92,10 +101,7 @@ TEST(HurchallaUtil, compiler_macros) {
     HURCHALLA_REQUEST_UNROLL_LOOP for (int i=0; i<N; ++i)
         test_never_inline();
 
-#if HURCHALLA_COMPILER_HAS_UINT128_T()
-    for (__uint128_t i=0; i<2; ++i)
-        test_foo();
-#endif
+    test_foo128();
 
     if HURCHALLA_LIKELY(a <= b)
         test_foo();

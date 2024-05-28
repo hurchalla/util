@@ -8,7 +8,7 @@
 # This is my working convenience script for invoking the testing builds and then
 # running the tests.
 # The syntax is 
-# ./build_tests [-c<compiler_name>] [-r] [-s] [-m<Release|Debug>]
+# ./build_tests [-c<compiler_name>] [-r] [-s] [-m<Release|Debug>] [-l<standard_library_name>]
 #
 # -c allows you to select the compiler, rather than using the default.
 # -r specifies to run all tests after the build.  Without -r, no tests will run.
@@ -18,6 +18,7 @@
 #    conditional select or conditional move instructions.
 # -m allows you to choose between Release and Debug build configuration, rather
 #    than using the default.
+# -l allows you to choose between either libstdc++ or libc++ when using clang.
 #
 # Currently it supports clang, gcc, and icc but you'll need to customize the
 # section under "#Compiler commands" to match the compilers on your system.  The
@@ -162,7 +163,7 @@ while getopts ":m:l:c:h-:rs" opt; do
     h)
       ;&
     -)
-      echo "Usage: build_tests [-c<compiler_name>] [-r] [-s] [-m<Release|Debug>]" >&2
+      echo "Usage: build_tests [-c<compiler_name>] [-r] [-s] [-m<Release|Debug>] [-l<standard_library_name>]" >&2
       exit 1
       ;;
     c)
