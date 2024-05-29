@@ -13,7 +13,12 @@
 #include <type_traits>
 #include <stdexcept>
 
-namespace hurchalla {
+#if defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable : 4127)
+#endif
+
+namespace hurchalla { namespace detail {
 
 
 template <typename U, unsigned int element_bitlen>
@@ -24,7 +29,11 @@ struct ImplBitpackedUintVector
     static_assert(element_bitlen > 0, "");
     static_assert(element_bitlen <= std::numeric_limits<U>::digits, "");
 
-    using size_type = std::uint64_t;
+    // if element_bitlen < 8, in theory we can hold an element count that is
+    // larger than max size_t.  We presume(!) uint64_t will always be enough.
+    using size_type = typename std::conditional<
+            (element_bitlen < 8 && sizeof(std::uint64_t) > sizeof(std::size_t)),
+            std::uint64_t, std::size_t>::type;
 private:
     const size_type packed_count;
     const std::size_t vec8_bytes;
@@ -47,7 +56,9 @@ public:
           vec8_bytes(data_bytes),
           vec8(std::move(data))
     {
-        HPBC_PRECONDITION2(data_bytes >= getBytesFromCount(element_count));
+        std::size_t bytes_needed = getBytesFromCount(element_count);
+        if (data_bytes != bytes_needed)
+            throw std::length_error("data_bytes doesn't match expected bytes needed for element_count");
     }
 
     // returns the number of packed elements in this vector
@@ -92,7 +103,7 @@ private:
     // each of size element_bitlen.
     static std::size_t getBytesFromCount(size_type count)
     {
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         bool overflowed;
         attemptGetLocationFromIndex(count, starting_byte, bit_offset, overflowed);
         if (overflowed)
@@ -101,15 +112,16 @@ private:
         // Since attemptGetLocationFromIndex() returned without overflow, we
         // know that any value <= 'count' can be converted into 'starting_byte'
         // and 'bit_offset' correctly (i.e. without overflow).  This lets us
-        // establish the class invariant that any  index < count  will be
-        // converted without overflow by attemptGetLocationFromIndex().
+        // establish the class invariant that any index that satisfies
+        // (index < count) will be converted without overflow by
+        // attemptGetLocationFromIndex().
 
-        constexpr size_type MAX_ST = std::numeric_limits<size_type>::max();
+        constexpr std::size_t MAXSIZET= std::numeric_limits<std::size_t>::max();
 
-        size_type bytes_needed = starting_byte;
+        std::size_t bytes_needed = starting_byte;
         if (bit_offset != 0) {
             HPBC_ASSERT2(bit_offset < 8);
-            if (bytes_needed == MAX_ST)
+            if (bytes_needed == MAXSIZET)
                 throw std::length_error("BitpackedUintVector size too large, would overflow");
             else
                 ++bytes_needed;
@@ -117,19 +129,12 @@ private:
 
         // We want to allocate one byte more than we strictly need, so that
         // setAt() can safely write one byte beyond where it strictly should.
-        if (bytes_needed == MAX_ST)
+        if (bytes_needed == MAXSIZET)
             throw std::length_error("BitpackedUintVector size too large, would overflow");
         else
             ++bytes_needed;
 
-        // According to https://en.cppreference.com/w/cpp/types/size_t,
-        // "std::size_t can store the maximum size of a theoretically possible
-        // object of any type (including array)."
-        // Therefore bytes_needed must be able to fit within size_t.
-        if (bytes_needed >= std::numeric_limits<std::size_t>::max())
-            throw std::length_error("BitpackedUintVector size too large for std::size_t");
-
-        return static_cast<std::size_t>(bytes_needed);
+        return bytes_needed;
     }
 
 
@@ -137,8 +142,8 @@ private:
     // then it guarantees any value <= 'index' can be converted into
     // 'starting_byte' and 'bit_offset' correctly (i.e. without overflow).
     HURCHALLA_FORCE_INLINE static
-    void attemptGetLocationFromIndex(size_type index, size_type& starting_byte,
-                             size_type& bit_offset, bool& overflowed)
+    void attemptGetLocationFromIndex(size_type index,
+          std::size_t& starting_byte, std::size_t& bit_offset, bool& overflowed)
     {
         constexpr size_type MAX_ST = std::numeric_limits<size_type>::max();
         static_assert(element_bitlen <= MAX_ST, "");
@@ -164,18 +169,26 @@ private:
            overflowed = true;
 
         size_type part1_bytes = (index/8) * ELEM_BITLEN;
-        // static assert that (index%8) *ELEM_BITLEN will not overflow.
+        // static assert that (index%8)*ELEM_BITLEN will not overflow.
         static_assert(ELEM_BITLEN <= MAX_ST / (8-1), "");
         size_type part2_bytes = (index%8) * ELEM_BITLEN / 8;
         // if (part1_bytes + part2_bytes > MAX_ST)
         if (part1_bytes > MAX_ST - part2_bytes)
            overflowed = true;
-        starting_byte = part1_bytes + part2_bytes;
+        size_type sum = part1_bytes + part2_bytes;
+
+        // According to https://en.cppreference.com/w/cpp/types/size_t,
+        // "std::size_t can store the maximum size of a theoretically possible
+        // object of any type (including array)."
+        // Therefore starting_byte must be able to fit within size_t.
+        if (sum > std::numeric_limits<std::size_t>::max())
+           overflowed = true;
+        starting_byte = static_cast<std::size_t>(sum);
 
         using P = safely_promote_unsigned<size_type>::type;
         // Below: (index*ELEM_BITLEN) might overflow, but since we use the
         // product mod 8, that's ok so long as we use unsigned arithmetic.
-        bit_offset = static_cast<size_type>(
+        bit_offset = static_cast<std::size_t>(
                                      (static_cast<P>(index) * ELEM_BITLEN) % 8);
 #endif
         HPBC_POSTCONDITION2(bit_offset < 8);
@@ -188,7 +201,7 @@ private:
     template <int BITS = element_bitlen>
     HURCHALLA_FORCE_INLINE typename std::enable_if<(BITS % 8 == 0), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
 
@@ -197,11 +210,11 @@ private:
           // The constructor established a class invariant that any
           // index < size() will convert correctly by attemptGetLocationFromIndex().
           // Thus we don't need to check for overflow of  index * element_bytes
-        starting_byte = index * element_bytes;
+        starting_byte = static_cast<std::size_t>(index * element_bytes);
         bit_offset = 0;
 
         if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
-            size_type start, offset;
+            std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
             HPBC_ASSERT2(overflowed == false);
@@ -219,14 +232,16 @@ public:
     {
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
-        vec8[index] = static_cast<unsigned char>(value);
+        std::size_t index_st = static_cast<std::size_t>(index);
+        vec8[index_st] = static_cast<unsigned char>(value);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 8), U>::type
     getAt(size_type index) const
     {
         HPBC_PRECONDITION2(index < size());
-        U value = vec8[index];
+        std::size_t index_st = static_cast<std::size_t>(index);
+        U value = vec8[index_st];
         HPBC_POSTCONDITION2(value <= max_allowed_value());
         return value;
     }
@@ -239,7 +254,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 16, "");
@@ -252,7 +267,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 16, "");
@@ -270,7 +285,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 24, "");
@@ -284,7 +299,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 24, "");
@@ -303,7 +318,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 32, "");
@@ -318,7 +333,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 32, "");
@@ -338,23 +353,23 @@ private:
     HURCHALLA_FORCE_INLINE
     typename std::enable_if<(BITS == 1)||(BITS == 2)||(BITS == 4), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
 
         static_assert(8 % element_bitlen == 0, "");
-        constexpr decltype(element_bitlen) elements_per_byte= 8/element_bitlen;
+        constexpr decltype(element_bitlen) elements_per_byte = 8/element_bitlen;
         static_assert(elements_per_byte != 0, "");
 
-        starting_byte = index / elements_per_byte;
+        starting_byte = static_cast<std::size_t>(index / elements_per_byte);
         using P = safely_promote_unsigned<size_type>::type;
           // Note: (index*element_bitlen) might overflow, but that's ok so long
           // as we use unsigned arithmetic, since we use the product mod 8.
-        bit_offset = static_cast<size_type>(
+        bit_offset = static_cast<std::size_t>(
                                  (static_cast<P>(index) * element_bitlen) % 8);
 
         if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
-            size_type start, offset;
+            std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
             HPBC_ASSERT2(overflowed == false);
@@ -385,7 +400,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
           // from getLocationFromIndex() we know
         HPBC_ASSERT2(element_bitlen + bit_offset <= 8);
@@ -408,7 +423,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
           // from getLocationFromIndex() we know
         HPBC_ASSERT2(element_bitlen + bit_offset <= 8);
@@ -433,7 +448,7 @@ private:
     typename std::enable_if<(BITS == 3) || (BITS == 5) ||
                             (BITS == 6) || (BITS == 7), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
@@ -455,7 +470,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         HPBC_ASSERT2(bit_offset < 8);
@@ -483,7 +498,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         HPBC_ASSERT2(bit_offset < 8);
@@ -508,7 +523,7 @@ private:
     HURCHALLA_FORCE_INLINE
     typename std::enable_if<(BITS == 9)||(BITS == 10)||(BITS == 12), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
 
@@ -525,7 +540,7 @@ private:
         constexpr EBT spills_per_byte = 8 / spill;
           static_assert(spills_per_byte == 2 || spills_per_byte == 4 ||
                         spills_per_byte == 8, "");
-        starting_byte = index + index / spills_per_byte;
+        starting_byte = static_cast<std::size_t>(index + index/spills_per_byte);
           constexpr auto ST_MAX = std::numeric_limits<size_type>::max();
           // The constructor established a class invariant that any
           // index < size() can be converted correctly into starting_byte and
@@ -537,11 +552,11 @@ private:
         using P = safely_promote_unsigned<size_type>::type;
           // Below: (index*element_bitlen) might overflow, but since we use the
           // product mod 8, that's ok so long as we use unsigned arithmetic.
-        bit_offset = static_cast<size_type>(
+        bit_offset = static_cast<std::size_t>(
                                  (static_cast<P>(index) * element_bitlen) % 8);
 
         if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
-            size_type start, offset;
+            std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
             HPBC_ASSERT2(overflowed == false);
@@ -575,7 +590,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
           // from getLocationFromIndex() we know
@@ -601,7 +616,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
           // from getLocationFromIndex() we know
@@ -629,7 +644,7 @@ private:
     typename std::enable_if<(BITS == 11) || (BITS == 13) ||
                             (BITS == 14) || (BITS == 15), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
@@ -651,7 +666,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 16, "");
@@ -678,7 +693,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 16, "");
@@ -707,7 +722,7 @@ private:
     typename std::enable_if<((16 < BITS && BITS < 24) ||
                              (24 < BITS && BITS < 32)), void>::type
     getLocationFromIndex(size_type index,
-                         size_type& starting_byte, size_type& bit_offset) const
+                      std::size_t& starting_byte, std::size_t& bit_offset) const
     {
         HPBC_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
@@ -728,7 +743,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 24, "");
@@ -755,7 +770,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 24, "");
@@ -782,7 +797,7 @@ public:
         HPBC_PRECONDITION2(value <= max_allowed_value());
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 32, "");
@@ -812,7 +827,7 @@ public:
     {
         HPBC_PRECONDITION2(index < size());
 
-        size_type starting_byte, bit_offset;
+        std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
         HPBC_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 32, "");
@@ -1069,6 +1084,11 @@ public:
 #endif
 
 
-} // end namespace
+}} // end namespace
+
+
+#if defined(_MSC_VER)
+#  pragma warning(pop)
+#endif
 
 #endif

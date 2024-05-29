@@ -21,8 +21,8 @@ struct BitpackedUintVector
     static_assert(!std::numeric_limits<U>::is_signed, "");
     static_assert(element_bitlen <= std::numeric_limits<U>::digits, "");
     static_assert(0 < element_bitlen && element_bitlen <= 32, "");
-    using size_type =
-                 typename ImplBitpackedUintVector<U, element_bitlen>::size_type;
+    using size_type = typename
+                  detail::ImplBitpackedUintVector<U, element_bitlen>::size_type;
 
     BitpackedUintVector(size_type count) : impl_buv(count) {}
 
@@ -58,7 +58,8 @@ struct BitpackedUintVector
     // returns the maximum value that fits within element_bitlen bits.
     HURCHALLA_FORCE_INLINE static constexpr U max_allowed_value()
     {
-        return ImplBitpackedUintVector<U, element_bitlen>::max_allowed_value();
+        return detail::
+                ImplBitpackedUintVector<U, element_bitlen>::max_allowed_value();
     }
 
     HURCHALLA_FORCE_INLINE std::size_t dataSizeBytes() const
@@ -78,11 +79,11 @@ struct BitpackedUintVector
     // data (for the BitpackedUintVector constructor).
     HURCHALLA_FORCE_INLINE static constexpr uint64_t getFormatID()
     {
-        return ImplBitpackedUintVector<U, element_bitlen>::getFormatID();
+        return detail::ImplBitpackedUintVector<U,element_bitlen>::getFormatID();
     }
 
 private:
-    ImplBitpackedUintVector<U, element_bitlen> impl_buv;
+    detail::ImplBitpackedUintVector<U, element_bitlen> impl_buv;
 };
 
 

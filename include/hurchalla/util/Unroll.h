@@ -7,6 +7,7 @@
 
 #include "hurchalla/util/compiler_macros.h"
 #include <cstdint>
+#include <cstddef>
 
 namespace hurchalla {
 

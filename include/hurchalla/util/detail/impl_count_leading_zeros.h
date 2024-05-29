@@ -111,14 +111,13 @@ struct impl_count_leading_zeros {
         HPBC_PRECONDITION2(a != 0);
         using U = unsigned int;
         U x = static_cast<U>(a);
+        constexpr int digitsT = ut_numeric_limits<T>::digits;
 #ifndef _MSC_VER
         constexpr int digitsU = ut_numeric_limits<U>::digits;
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return __builtin_clz(x) - (digitsU - digitsT);
 #else
         unsigned long index;
         _BitScanReverse(&index, x);
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return static_cast<int>(digitsT) - 1 - static_cast<int>(index);
 #endif
     }
@@ -137,14 +136,13 @@ struct impl_count_leading_zeros {
         HPBC_PRECONDITION2(a != 0);
         using U = unsigned long;
         U x = static_cast<U>(a);
+        constexpr int digitsT = ut_numeric_limits<T>::digits;
 #ifndef _MSC_VER
         constexpr int digitsU = ut_numeric_limits<U>::digits;
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return __builtin_clzl(x) - (digitsU - digitsT);
 #else
         unsigned long index;
         _BitScanReverse(&index, x);
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return static_cast<int>(digitsT) - 1 - static_cast<int>(index);
 #endif
     }
@@ -164,16 +162,15 @@ struct impl_count_leading_zeros {
         HPBC_PRECONDITION2(a != 0);
         using U = unsigned long long;
         U x = static_cast<U>(a);
+        constexpr int digitsT = ut_numeric_limits<T>::digits;
 #ifndef _MSC_VER
         constexpr int digitsU = ut_numeric_limits<U>::digits;
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return __builtin_clzll(x) - (digitsU - digitsT);
 #else
 # if HURCHALLA_TARGET_BIT_WIDTH >= 64
         static_assert(sizeof(U) == sizeof(unsigned __int64), "");
         unsigned long index;
         _BitScanReverse64(&index, x);
-        constexpr int digitsT = ut_numeric_limits<T>::digits;
         return static_cast<int>(digitsT) - 1 - static_cast<int>(index);
 # else
         static_assert(ut_numeric_limits<U>::digits == 64, "");
@@ -184,7 +181,6 @@ struct impl_count_leading_zeros {
         if (hi != 0) {
             unsigned long index;
             _BitScanReverse(&index, hi);
-            constexpr int digitsT = ut_numeric_limits<T>::digits;
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 32);
         } else {
             // given that hi == 0, the precondition of a != 0 means that lo != 0
@@ -257,6 +253,7 @@ struct impl_count_leading_zeros {
         if (word0 != 0) {
             _BitScanReverse(&index, word0);
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 96);
+        }
         else if (word1 != 0) {
             _BitScanReverse(&index, word1);
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 64);

@@ -249,6 +249,7 @@ struct impl_count_trailing_zeros {
         if (word3 != 0) {
             _BitScanForward(&index, word3);
             return static_cast<int>(index);
+        }
         else if (word2 != 0) {
             _BitScanForward(&index, word2);
             return static_cast<int>(index + 32);

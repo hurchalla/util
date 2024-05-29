@@ -34,12 +34,12 @@ void check_buv(std::vector<uint64_t>& vec)
     (void)id;
 
     for (size_type i = 0; i < vec.size(); ++i) {
-        U val = static_cast<U>(mask & vec[i]);
+        U val = static_cast<U>(mask & vec[static_cast<std::size_t>(i)]);
         buv.setAt(i, val);
         EXPECT_TRUE(val == buv.getAt(i));
     }
     for (size_type i = 0; i < vec.size(); ++i) {
-        U val = static_cast<U>(mask & vec[i]);
+        U val = static_cast<U>(mask & vec[static_cast<std::size_t>(i)]);
         EXPECT_TRUE(val == buv.getAt(i));
     }
 
@@ -61,7 +61,7 @@ void check_buv(std::vector<uint64_t>& vec)
     EXPECT_TRUE(buv2.size() == vec.size());
 
     for (size_type i = 0; i < buv2.size(); ++i) {
-        U val = static_cast<U>(mask & vec[i]);
+        U val = static_cast<U>(mask & vec[static_cast<std::size_t>(i)]);
         EXPECT_TRUE(buv2.getAt(i) == val);
         EXPECT_TRUE(buv2.getAt(i) == buv.getAt(i));
     }

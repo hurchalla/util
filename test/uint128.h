@@ -22,6 +22,11 @@ struct uint128 {
         static_assert(hurchalla::ut_numeric_limits<unsigned long long>::digits == 64, "");
         return lo;
     }
+    explicit operator unsigned long() const
+    {
+        static_assert(hurchalla::ut_numeric_limits<unsigned long>::digits <= 64, "");
+        return static_cast<unsigned long>(lo);
+    }
     uint128& operator=(uint128 u)
     {
         hi = u.hi;
@@ -34,7 +39,8 @@ struct uint128 {
     }
 #ifdef __GNUC__ 
 #pragma GCC diagnostic push 
-#pragma GCC diagnostic ignored "-Wstrict-overflow" 
+#pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
     uint128 operator<<(int shift) const
     {
         uint128 tmp = *this;
@@ -67,6 +73,7 @@ struct uint128 {
         }
         return tmp;
     }
+#ifdef __GNUC__ 
 #pragma GCC diagnostic pop 
 #endif
     uint128 operator+(uint128 x) const
