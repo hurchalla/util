@@ -78,13 +78,41 @@ public:
                 - 1 + (static_cast<U>(1) << (element_bitlen-1));
     }
 
-    static constexpr uint64_t getFormatID()
+    static constexpr uint32_t getFormatID()
     {
         // The constant used below should never be changed (change the
         // internal dataVersion if this file changes to use a different
         // data format/data encoding).  The exact constant value used below
         // was just a random number, but it needs to stay constant.
-        return UINT64_C(6595123244124255148) + dataVersion;
+        return UINT32_C(2132441242) + dataVersion;
+    }
+
+    // returns 0 if count is an invalid size
+    static constexpr
+    std::size_t dataSizeBytes(size_type count)
+    {
+        std::size_t starting_byte, bit_offset;
+        bool overflowed;
+        attemptGetLocationFromIndex(count, starting_byte, bit_offset, overflowed);
+        if (overflowed)
+           return 0;
+
+        constexpr std::size_t MAXSIZET= std::numeric_limits<std::size_t>::max();
+        std::size_t bytes_needed = starting_byte;
+        if (bit_offset != 0) {
+            HPBC_CONSTEXPR_ASSERT(bit_offset < 8);
+            if (bytes_needed == MAXSIZET)
+                return 0;
+            else
+                ++bytes_needed;
+        }
+        // We want to allocate one byte more than we strictly need, so that
+        // setAt() can safely write one byte beyond where it strictly should.
+        if (bytes_needed == MAXSIZET)
+            return 0;
+        else
+            ++bytes_needed;
+        return bytes_needed;
     }
 
     std::size_t dataSizeBytes() const
@@ -103,36 +131,16 @@ private:
     // each of size element_bitlen.
     static std::size_t getBytesFromCount(size_type count)
     {
-        std::size_t starting_byte, bit_offset;
-        bool overflowed;
-        attemptGetLocationFromIndex(count, starting_byte, bit_offset, overflowed);
-        if (overflowed)
+        std::size_t bytes_needed = dataSizeBytes(count);
+        if (bytes_needed == 0)
            throw std::length_error("BitpackedUintVector size too large, would overflow");
 
-        // Since attemptGetLocationFromIndex() returned without overflow, we
-        // know that any value <= 'count' can be converted into 'starting_byte'
-        // and 'bit_offset' correctly (i.e. without overflow).  This lets us
+        // Since dataSizeBytes() returned without overflow, we know that any
+        // value <= 'count' can be converted into 'starting_byte' and
+        // 'bit_offset' correctly (i.e. without overflow).  This lets us
         // establish the class invariant that any index that satisfies
         // (index < count) will be converted without overflow by
         // attemptGetLocationFromIndex().
-
-        constexpr std::size_t MAXSIZET= std::numeric_limits<std::size_t>::max();
-
-        std::size_t bytes_needed = starting_byte;
-        if (bit_offset != 0) {
-            HPBC_ASSERT2(bit_offset < 8);
-            if (bytes_needed == MAXSIZET)
-                throw std::length_error("BitpackedUintVector size too large, would overflow");
-            else
-                ++bytes_needed;
-        }
-
-        // We want to allocate one byte more than we strictly need, so that
-        // setAt() can safely write one byte beyond where it strictly should.
-        if (bytes_needed == MAXSIZET)
-            throw std::length_error("BitpackedUintVector size too large, would overflow");
-        else
-            ++bytes_needed;
 
         return bytes_needed;
     }
@@ -141,7 +149,7 @@ private:
     // if this function returns with overflowed == false,
     // then it guarantees any value <= 'index' can be converted into
     // 'starting_byte' and 'bit_offset' correctly (i.e. without overflow).
-    HURCHALLA_FORCE_INLINE static
+    HURCHALLA_FORCE_INLINE static constexpr
     void attemptGetLocationFromIndex(size_type index,
           std::size_t& starting_byte, std::size_t& bit_offset, bool& overflowed)
     {
@@ -191,7 +199,7 @@ private:
         bit_offset = static_cast<std::size_t>(
                                      (static_cast<P>(index) * ELEM_BITLEN) % 8);
 #endif
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_CONSTEXPR_POSTCONDITION(bit_offset < 8);
     }
 
 

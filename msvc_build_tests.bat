@@ -8,7 +8,7 @@ REM cmake -S. -B.\%build_dir% -DTEST_HURCHALLA_LIBS=ON -G "Visual Studio 15"
 REM the above line appears to build x86-32.  To get x64:
 REM cmake -S. -B.\%build_dir% -DTEST_HURCHALLA_LIBS=ON -G "Visual Studio 15 2017 Win64"
 
-cmake -DTEST_HURCHALLA_LIBS=ON -S. -B.\%build_dir%
+cmake -S. -B.\%build_dir% -DTEST_HURCHALLA_LIBS=ON -G "Visual Studio 17 2022" -A Win32
 if %errorlevel% neq 0 exit /b %errorlevel%
 cmake --build .\%build_dir% --config Release
 if %errorlevel% neq 0 exit /b %errorlevel%

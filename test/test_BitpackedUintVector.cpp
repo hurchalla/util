@@ -30,7 +30,7 @@ void check_buv(std::vector<uint64_t>& vec)
     EXPECT_TRUE(buv.max_allowed_value() == mask);
 
     // nothing to test with getFormatID() except to check it compiles
-    uint64_t id = buv.getFormatID();
+    constexpr uint32_t id = buv.getFormatID();
     (void)id;
 
     for (size_type i = 0; i < vec.size(); ++i) {
@@ -47,8 +47,12 @@ void check_buv(std::vector<uint64_t>& vec)
 
     // serialize
     const unsigned char* data = buv.data();
-    std::size_t num_bytes = buv.dataSizeBytes();
     size_type num_elements = buv.size();
+    std::size_t num_bytes = buv.dataSizeBytes();
+
+        // side test that the constexpr dataSizeBytes() is valid
+    std::size_t num_bytes2 = decltype(buv)::dataSizeBytes(num_elements);
+    EXPECT_TRUE(num_bytes == num_bytes2);
 
     // use memcpy to roughly fake write/read to file, network, etc.
     std::unique_ptr<unsigned char[]> buffer(new unsigned char[num_bytes]());

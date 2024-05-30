@@ -14,6 +14,19 @@
 namespace hurchalla {
 
 
+// This class is intended to provide the following, in order of importance:
+// 1) Provides a very large integer buffer (often expected to be above
+//    1 billion integers) with minimal memory use, when all of the integers
+//    are known to use only a limited number of bits (e.g. uint16_t values
+//    that never use more than 13 bits).
+// 2) Provides portable serialization and deserialization functions (i.e.
+//    endianness and alignment are non-issues).
+// 3) Excellent performance, with efficient utilization of CPU caches.
+//    Requirements 1 and 2 may acceptably cause loss in performance, though
+//    read/write speed should be extremely good (perhaps near optimal) when
+//    accesses of memory or CPU cache is a bottleneck.
+
+
 template <typename U, unsigned int element_bitlen>
 struct BitpackedUintVector
 {
@@ -58,8 +71,14 @@ struct BitpackedUintVector
     // returns the maximum value that fits within element_bitlen bits.
     HURCHALLA_FORCE_INLINE static constexpr U max_allowed_value()
     {
-        return detail::
-                ImplBitpackedUintVector<U, element_bitlen>::max_allowed_value();
+        return decltype(impl_buv)::max_allowed_value();
+    }
+
+    // returns 0 if element_count is an invalid size
+    HURCHALLA_FORCE_INLINE static constexpr
+    std::size_t dataSizeBytes(size_type element_count)
+    {
+        return decltype(impl_buv)::dataSizeBytes(element_count);
     }
 
     HURCHALLA_FORCE_INLINE std::size_t dataSizeBytes() const
@@ -77,9 +96,9 @@ struct BitpackedUintVector
     // Then later you or another person can call getFormatID() as part of a
     // handshake to ensure matching format ID, prior to using that serialized
     // data (for the BitpackedUintVector constructor).
-    HURCHALLA_FORCE_INLINE static constexpr uint64_t getFormatID()
+    HURCHALLA_FORCE_INLINE static constexpr uint32_t getFormatID()
     {
-        return detail::ImplBitpackedUintVector<U,element_bitlen>::getFormatID();
+        return decltype(impl_buv)::getFormatID();
     }
 
 private:
