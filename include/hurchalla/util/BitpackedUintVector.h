@@ -37,6 +37,10 @@ struct BitpackedUintVector
     using size_type = typename
                   detail::ImplBitpackedUintVector<U, element_bitlen>::size_type;
 
+    BitpackedUintVector(const BitpackedUintVector&) = delete;
+    BitpackedUintVector(BitpackedUintVector&& other) :
+            impl_buv(std::move(other.impl_buv)) {}
+
     BitpackedUintVector(size_type count) : impl_buv(count) {}
 
     // constructor for deserialization.  Note: use data(), dataSizeBytes(), and

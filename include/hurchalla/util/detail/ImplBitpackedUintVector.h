@@ -42,6 +42,10 @@ private:
     std::unique_ptr<unsigned char[]> vec8;
 
 public:
+    ImplBitpackedUintVector(const ImplBitpackedUintVector&) = delete;
+    ImplBitpackedUintVector(ImplBitpackedUintVector&& other) :
+          vec8(std::move(other.vec8)) {}
+
     ImplBitpackedUintVector(size_type count) :
           packed_count(count),
           vec8_bytes(getBytesFromCount(count)),
@@ -91,8 +95,9 @@ public:
     static constexpr
     std::size_t dataSizeBytes(size_type count)
     {
-        std::size_t starting_byte, bit_offset;
-        bool overflowed;
+        std::size_t starting_byte = 0;
+        std::size_t bit_offset = 0;
+        bool overflowed = false;
         attemptGetLocationFromIndex(count, starting_byte, bit_offset, overflowed);
         if (overflowed)
            return 0;
