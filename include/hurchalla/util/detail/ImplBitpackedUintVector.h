@@ -44,7 +44,10 @@ private:
 public:
     ImplBitpackedUintVector(const ImplBitpackedUintVector&) = delete;
     ImplBitpackedUintVector(ImplBitpackedUintVector&& other) :
-          vec8(std::move(other.vec8)) {}
+          packed_count(other.packed_count),
+          vec8_bytes(other.vec8_bytes),
+          vec8(std::move(other.vec8))
+    {}
 
     ImplBitpackedUintVector(size_type count) :
           packed_count(count),
