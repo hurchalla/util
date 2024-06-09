@@ -7,6 +7,7 @@
 
 #include "hurchalla/util/programming_by_contract.h"
 #include "hurchalla/util/traits/safely_promote_unsigned.h"
+#include "hurchalla/util/compiler_macros.h"
 #include <limits>
 #include <cstdint>
 #include <memory>
@@ -34,25 +35,60 @@ struct ImplBitpackedUintVector
     using size_type = typename std::conditional<
             (element_bitlen < 8 && sizeof(std::uint64_t) > sizeof(std::size_t)),
             std::uint64_t, std::size_t>::type;
+
+// Reading/writing to a pointer obtained via
+// reinterpret_cast<NoAliasUchar*>(some unsigned char pointer)
+// would officially by undefined behavior prior to C++20, since that's when
+// P0593R6 (https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p0593r6.html)
+// was acceptd into the standard.  P0593R6 formally standardizes compilers'
+// already existing practice of implicitly creating objects as needed within
+// unsigned char* buffers.  See the paper for details.  My understanding of it
+// is that you can view the unsigned char* as being an alias to the implicitly
+// created objects, rather than the implicitly created objects being an alias
+// to the unsigned char* buffer.  Note: Unsigned char* is permitted to alias
+// anything; if we read/write to a reinterpret_cast<NoAliasUchar*>(uchar*), then
+// NoAliasUchar objects would implicitly be created in the uchar* buffer.
+//
+// Avoid the undefined behavior that would exist prior to C++20.
+#if (__cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+    // unsigned char* is allowed to alias almost everything, so it can be
+    // a performance hit to use it.  Just using __restrict__ (as we do in #else)
+    // isn't enough since with restrict nothing can alias to it, but it can
+    // itself still alias other things like *this.  It's awkward at best trying
+    // to specify that *this doesn't alias it.
+    // char8_t is an unsigned type introduced in C++20, with the same size as
+    // unsigned char, and a char8_t pointer is assumed to never alias any type
+    // other than its own (unlike char* and unsigned char*).
+    // Again, the acceptance of P0593R6 into C++20 is what makes using char8_t*
+    // reinterpret_casts on unsigned char* (in our particular case) a defined
+    // behavior.  See the paper.
+    using NoAliasUcharPtr = char8_t*;
+#else
+    using NoAliasUcharPtr = unsigned char* HURCHALLA_RESTRICT;
+#endif
+
 private:
     const size_type packed_count;
     const std::size_t vec8_bytes;
     static_assert(std::numeric_limits<unsigned char>::digits == 8, "");
     static constexpr uint8_t dataVersion = 1;
-    std::unique_ptr<unsigned char[]> vec8;
+    std::unique_ptr<unsigned char[]> upvec;
+    NoAliasUcharPtr vec8;
 
 public:
     ImplBitpackedUintVector(const ImplBitpackedUintVector&) = delete;
     ImplBitpackedUintVector(ImplBitpackedUintVector&& other) :
           packed_count(other.packed_count),
           vec8_bytes(other.vec8_bytes),
-          vec8(std::move(other.vec8))
+          upvec(std::move(other.upvec)),
+          vec8(reinterpret_cast<NoAliasUcharPtr>(upvec.get()))
     {}
 
     ImplBitpackedUintVector(size_type count) :
           packed_count(count),
           vec8_bytes(getBytesFromCount(count)),
-          vec8(std::unique_ptr<unsigned char[]>(new unsigned char[vec8_bytes]()))
+          upvec(std::unique_ptr<unsigned char[]>(new unsigned char[vec8_bytes]())),
+          vec8(reinterpret_cast<NoAliasUcharPtr>(upvec.get()))
     {}
     // constructor for deserialization.  Note: use data(), dataSizeBytes(), and
     // size() to serialize.
@@ -61,7 +97,8 @@ public:
                         size_type element_count) :
           packed_count(element_count),
           vec8_bytes(data_bytes),
-          vec8(std::move(data))
+          upvec(std::move(data)),
+          vec8(reinterpret_cast<NoAliasUcharPtr>(upvec.get()))
     {
         std::size_t bytes_needed = getBytesFromCount(element_count);
         if (data_bytes != bytes_needed)
@@ -130,7 +167,7 @@ public:
 
     const unsigned char* data() const
     {
-        return vec8.get();
+        return upvec.get();
     }
 
 
@@ -212,7 +249,7 @@ private:
 
 
 
-// 8 bit, 16 bit, 24, 32, 40 etc functions
+// 8 bit, 16 bit, 24, 32 etc functions
 private:
     template <int BITS = element_bitlen>
     HURCHALLA_FORCE_INLINE typename std::enable_if<(BITS % 8 == 0), void>::type
@@ -274,8 +311,10 @@ public:
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 16, "");
-        vec8[starting_byte + 0] = static_cast<unsigned char>(value);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(value);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 16), U>::type
@@ -305,9 +344,11 @@ public:
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 24, "");
-        vec8[starting_byte + 0] = static_cast<unsigned char>(value);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
-        vec8[starting_byte + 2] = static_cast<unsigned char>(value >> 16);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(value);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
+        ptr[starting_byte + 2] = static_cast<unsigned char>(value >> 16);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 24), U>::type
@@ -338,10 +379,12 @@ public:
         getLocationFromIndex(index, starting_byte, bit_offset);
 
         static_assert(std::numeric_limits<U>::digits >= 32, "");
-        vec8[starting_byte + 0] = static_cast<unsigned char>(value);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
-        vec8[starting_byte + 2] = static_cast<unsigned char>(value >> 16);
-        vec8[starting_byte + 3] = static_cast<unsigned char>(value >> 24);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(value);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(value >> 8);
+        ptr[starting_byte + 2] = static_cast<unsigned char>(value >> 16);
+        ptr[starting_byte + 3] = static_cast<unsigned char>(value >> 24);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 32), U>::type
@@ -503,8 +546,10 @@ public:
                                   ~(static_cast<uint16_t>(mask) << bit_offset));
         uint16_t word = static_cast<uint16_t>((mask2 & oldword) | newword);
 
-        vec8[starting_byte + 0] = static_cast<unsigned char>(word);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(word);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
     }
     // note that this function should work for any element_bitlen < 8
     template <int BITS = element_bitlen>
@@ -623,8 +668,10 @@ public:
         uint16_t mask2 = static_cast<uint16_t>( ~(mask << bit_offset) );
         uint16_t word = (mask2 & oldword) | newword;
 
-        vec8[starting_byte + 0] = static_cast<unsigned char>(word);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(word);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 9)||(BITS == 10)||(BITS == 12), U>::type
@@ -697,9 +744,11 @@ public:
         uint32_t mask2 = ~(static_cast<uint32_t>(mask) << bit_offset);
         uint32_t word = (mask2 & oldword) | newword;
 
-        vec8[starting_byte + 0] = static_cast<unsigned char>(word);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
-        vec8[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(word);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
+        ptr[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
     }
     // note that this function should work for any  8 < element_bitlen < 16
     template <int BITS = element_bitlen>
@@ -775,10 +824,12 @@ public:
         uint32_t mask2 = ~(static_cast<uint32_t>(mask) << bit_offset);
         uint32_t word = (mask2 & oldword) | newword;
 
-        vec8[starting_byte + 0] = static_cast<unsigned char>(word);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
-        vec8[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
-        vec8[starting_byte + 3] = static_cast<unsigned char>(word >> 24);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(word);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
+        ptr[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
+        ptr[starting_byte + 3] = static_cast<unsigned char>(word >> 24);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(16 < BITS && BITS < 24), U>::type
@@ -831,11 +882,13 @@ public:
         uint64_t mask2 = ~(static_cast<uint64_t>(mask) << bit_offset);
         uint64_t word = (mask2 & oldword) | newword;
 
-        vec8[starting_byte + 0] = static_cast<unsigned char>(word);
-        vec8[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
-        vec8[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
-        vec8[starting_byte + 3] = static_cast<unsigned char>(word >> 24);
-        vec8[starting_byte + 4] = static_cast<unsigned char>(word >> 32);
+        // mitigate the perf hit if the compiler assumes vec8 could alias *this
+        NoAliasUcharPtr ptr = vec8;
+        ptr[starting_byte + 0] = static_cast<unsigned char>(word);
+        ptr[starting_byte + 1] = static_cast<unsigned char>(word >> 8);
+        ptr[starting_byte + 2] = static_cast<unsigned char>(word >> 16);
+        ptr[starting_byte + 3] = static_cast<unsigned char>(word >> 24);
+        ptr[starting_byte + 4] = static_cast<unsigned char>(word >> 32);
     }
     template <int BITS = element_bitlen>
     typename std::enable_if<(24 < BITS && BITS < 32), U>::type

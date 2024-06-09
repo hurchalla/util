@@ -73,7 +73,12 @@
 #if !defined(HURCHALLA_TARGET_ISA_X86_64) && \
     !defined(HURCHALLA_TARGET_ISA_X86_32) && \
     !defined(HURCHALLA_TARGET_ISA_ARM_64) && \
-    !defined(HURCHALLA_TARGET_ISA_ARM_32)
+    !defined(HURCHALLA_TARGET_ISA_ARM_32) && \
+    !defined(HURCHALLA_TARGET_ISA_RISCV_64) && \
+    !defined(HURCHALLA_TARGET_ISA_RISCV_32) && \
+    !defined(HURCHALLA_TARGET_ISA_PPC_64) && \
+    !defined(HURCHALLA_TARGET_ISA_PPC_32) && \
+    !defined(HURCHALLA_TARGET_ISA_ITANIUM)
 #  if defined(__x86_64__) || defined(_M_X64)
 #    define HURCHALLA_TARGET_ISA_X86_64 1
 #  elif defined(__i386) || defined(_M_IX86)
@@ -91,30 +96,35 @@
 #    else
 #      error "unknown target ISA for RISC-V"
 #    endif
+#  elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)
+#    if defined(__powerpc64__) || defined(__ppc64__) || defined(__PPC64__) || \
+               defined(_ARCH_PPC64) || defined(__64BIT__) || defined(_LP64) || \
+               defined(__LP64__)
+#      define HURCHALLA_TARGET_ISA_PPC_64 1
+#    else
+#      define HURCHALLA_TARGET_ISA_PPC_32 1
+#    endif
+#  elif defined(__ia64) || defined(__itanium__) || defined(_M_IA64) || \
+                                                               defined(__ia64__)
+#    define HURCHALLA_TARGET_ISA_ITANIUM 1
+#  else
+#    error "unknown target ISA"
 #  endif
 #endif
 
 
 #ifndef HURCHALLA_TARGET_BIT_WIDTH
-#  if defined(__x86_64__) || defined(_M_X64)
+#  if defined(HURCHALLA_TARGET_ISA_X86_64) || \
+      defined(HURCHALLA_TARGET_ISA_ARM_64) || \
+      defined(HURCHALLA_TARGET_ISA_RISCV_64) || \
+      defined(HURCHALLA_TARGET_ISA_PPC_64) || \
+      defined(HURCHALLA_TARGET_ISA_ITANIUM)
 #    define HURCHALLA_TARGET_BIT_WIDTH 64
-#  elif defined(__i386) || defined(_M_IX86)
+#  elif defined(HURCHALLA_TARGET_ISA_X86_32) || \
+        defined(HURCHALLA_TARGET_ISA_ARM_32) || \
+        defined(HURCHALLA_TARGET_ISA_RISCV_32) || \
+        defined(HURCHALLA_TARGET_ISA_PPC_32)
 #    define HURCHALLA_TARGET_BIT_WIDTH 32
-#  elif defined(__aarch64__) || defined(_M_ARM64)
-#    define HURCHALLA_TARGET_BIT_WIDTH 64
-#  elif defined(__arm__) || defined(_M_ARM)
-#    define HURCHALLA_TARGET_BIT_WIDTH 32
-#  elif defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)
-#    if defined(__powerpc64__) || defined(__ppc64__) || defined(__PPC64__) || \
-               defined(_ARCH_PPC64) || defined(__64BIT__) || defined(_LP64) || \
-               defined(__LP64__)
-#      define HURCHALLA_TARGET_BIT_WIDTH 64
-#    else
-#      define HURCHALLA_TARGET_BIT_WIDTH 32
-#    endif
-#  elif defined(__ia64) || defined(__itanium__) || defined(_M_IA64) || \
-                                                               defined(__ia64__)
-#    define HURCHALLA_TARGET_BIT_WIDTH 64
 #  else
      // fallback if we couldn't find the target ALU's native bit depth after
      // looking at predefined compiler macros
