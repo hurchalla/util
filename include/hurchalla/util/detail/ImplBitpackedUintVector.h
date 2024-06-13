@@ -77,12 +77,21 @@ private:
 
 public:
     ImplBitpackedUintVector(const ImplBitpackedUintVector&) = delete;
-    ImplBitpackedUintVector(ImplBitpackedUintVector&& other) :
+    ImplBitpackedUintVector(ImplBitpackedUintVector&& other) noexcept :
           packed_count(other.packed_count),
           vec8_bytes(other.vec8_bytes),
           upvec(std::move(other.upvec)),
           vec8(reinterpret_cast<NoAliasUcharPtr>(upvec.get()))
     {}
+
+    ImplBitpackedUintVector& operator=(const ImplBitpackedUintVector&) = delete;
+    ImplBitpackedUintVector& operator=(ImplBitpackedUintVector&& other) noexcept
+    {
+        packed_count = other.packed_count;
+        vec8_bytes = other.vec8_bytes;
+        upvec = std::move(other.upvec);
+        vec8 = reinterpret_cast<NoAliasUcharPtr>(upvec.get());
+    }
 
     ImplBitpackedUintVector(size_type count) :
           packed_count(count),
@@ -238,7 +247,7 @@ private:
            overflowed = true;
         starting_byte = static_cast<std::size_t>(sum);
 
-        using P = safely_promote_unsigned<size_type>::type;
+        using P = typename safely_promote_unsigned<size_type>::type;
         // Below: (index*ELEM_BITLEN) might overflow, but since we use the
         // product mod 8, that's ok so long as we use unsigned arithmetic.
         bit_offset = static_cast<std::size_t>(
@@ -421,7 +430,7 @@ private:
         static_assert(elements_per_byte != 0, "");
 
         starting_byte = static_cast<std::size_t>(index / elements_per_byte);
-        using P = safely_promote_unsigned<size_type>::type;
+        using P = typename safely_promote_unsigned<size_type>::type;
           // Note: (index*element_bitlen) might overflow, but that's ok so long
           // as we use unsigned arithmetic, since we use the product mod 8.
         bit_offset = static_cast<std::size_t>(
@@ -610,7 +619,7 @@ private:
           HPBC_ASSERT2(index <= ST_MAX - index / spills_per_byte);
           // Thus we know the sum in starting_byte couldn't have overflowed.
 
-        using P = safely_promote_unsigned<size_type>::type;
+        using P = typename safely_promote_unsigned<size_type>::type;
           // Below: (index*element_bitlen) might overflow, but since we use the
           // product mod 8, that's ok so long as we use unsigned arithmetic.
         bit_offset = static_cast<std::size_t>(
