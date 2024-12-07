@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # --- This file is distributed under the MIT Open Source License, as detailed
 # by the file "LICENSE.TXT" in the root of this repository ---
@@ -340,23 +340,46 @@ if [ "$compiler_name" = "gcc" ]; then
 
   : # do nothing, at least for now
 
+# note that clang-tidy includes the clang static analyzer
 elif [ "$compiler_name" = "clang" ]; then
-#  clang_static_analysis=(-DCMAKE_CXX_CLANG_TIDY="clang-tidy;-checks=-*,clang-analyzer-*")
+#  clang_static_analysis=(-DCMAKE_CXX_CLANG_TIDY="clang-tidy;-extra-arg=-Wno-unknown-warning-option;-checks=*,clang-analyzer-*")
   : # do nothing, at least for now
 fi
+#-analyzer-checker=core
+#-analyzer-checker=cpp
+#-analyzer-checker=unix
+#-analyzer-checker=deadcode
 
 
 #undefined behavior sanitizers
-#-----
+#-----------------------------
+# note according to https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html:
+# "[The] UndefinedBehaviorSanitizer ... test suite is integrated into the CMake
+# build and can be run with check-ubsan command."
+
 if [ "$compiler_name" = "gcc" ]; then
-  gcc_ubsan="-fsanitize=undefined -fno-sanitize-recover \
-           -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow"
+  if [[ $(uname -m) == 'arm64' ]]; then
+    # At the time of this writing, gcc does not seem to have implemented sanitizers
+    # (at least not ubsan) for Silicon MacOS.  I get link errors if compiling
+    # with them on mac.  See  https://github.com/orgs/Homebrew/discussions/3384
+    # https://github.com/orgs/Homebrew/discussions/3260
+    # https://stackoverflow.com/questions/65259300/detect-apple-silicon-from-command-line
 
-elif [ "$compiler_name" = "clang" ]; then
-  # My installed version of clang doesn't support -fsanitize=implicit-conversion
-  clang_ubsan="-fsanitize=undefined -fsanitize=nullability -fsanitize=bounds \
-             -fsanitize=float-divide-by-zero"
-
+    : # do nothing, at least for now
+  else
+    gcc_ubsan="-fsanitize=undefined -fno-sanitize-recover \
+             -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow"
+  fi
+elif [ "$compiler_name" = "clang" ] && [[ $compiler_version -ge 6 ]]; then
+  # clang6 doesn't support -fsanitize=implicit-conversion.  Clang10 does support
+  # it.  I don't know if clang7,8,9 support it.
+  if [[ $compiler_version -ge 10 ]]; then
+    clang_ubsan="-fsanitize=undefined -fsanitize=nullability -fsanitize=bounds \
+                 -fsanitize=float-divide-by-zero -fsanitize=implicit-conversion"
+  else
+    clang_ubsan="-fsanitize=undefined -fsanitize=nullability -fsanitize=bounds \
+                 -fsanitize=float-divide-by-zero"
+  fi
   # The next line in a perfect world wouldn't be needed, but for some versions
   # of clang (clang 10 for me), the linker doesn't find __muloti4 when using the
   # undefined behavior sanitizers.  __muloti4 is defined in compiler-rt.
@@ -366,7 +389,7 @@ fi
 
 
 #address sanitizers
-#-----
+#------------------
 clang_asan=""
 gcc_asan="-fsanitize=address"
 # clang -fsanitize=address -O1 -fno-omit-frame-pointer -g   tests/use-after-free.c
@@ -413,6 +436,9 @@ gcc_asan="-fsanitize=address"
 # endif()
 
 
+#LeakSanitizer (LSan)
+#ThreadSanitizer (TSan)
+#MemorySanitizer (MSan)
 
 #modes
 # 1. Asan+UBsan+Lsan
@@ -422,7 +448,7 @@ gcc_asan="-fsanitize=address"
 
 # a run of "splint" and/or cppcheck
 # cpplint
-# include what you use (iwyu), and lwyu
+# include what you use (iwyu), and lwyu (link what you use)
 # Clang-Tidy
 # CppCoreCheck
 
@@ -434,6 +460,11 @@ gcc_asan="-fsanitize=address"
 # <LANG>_INCLUDE_WHAT_YOU_USE
 # LINK_WHAT_YOU_USE
 
+# fuzz testing
+
+# valgrind/purity
+
+# code coverage tools - gcov
 
 
 

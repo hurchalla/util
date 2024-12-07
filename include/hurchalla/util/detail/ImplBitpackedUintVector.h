@@ -22,6 +22,24 @@
 namespace hurchalla { namespace detail {
 
 
+// ImplBitpackedUintVector is a storage class for unsigned integers (of
+// template type U) that are known to be (and guaranteed by the user to be)
+// less than 2^element_bitlen.  Element_bitlen is also a template argument.
+// Using this constraint, this class provides extremely space-efficient storage
+// in memory.  This class provides random access, so reads and writes should
+// be close to as optimal as an array or std::vector, though this class has
+// additional overhead because the accesses are in general not aligned.
+//
+// This class is named after a bit vector, but instead of working on elements
+// that are single bit sized (like a bit vector), the elements in this class
+// each take up a number of bits equal to element_bitlen.
+//
+// This class has some similarity to an array, in that after being constructed,
+// the maximum number of elements it can hold is constant, and any element can
+// be read or written.  However, similarly to a std::vector, its storage is
+// allocated on the heap.
+
+
 template <typename U, unsigned int element_bitlen>
 struct ImplBitpackedUintVector
 {
@@ -77,21 +95,14 @@ private:
 
 public:
     ImplBitpackedUintVector(const ImplBitpackedUintVector&) = delete;
+    ImplBitpackedUintVector& operator=(const ImplBitpackedUintVector&) = delete;
+
     ImplBitpackedUintVector(ImplBitpackedUintVector&& other) noexcept :
           packed_count(other.packed_count),
           vec8_bytes(other.vec8_bytes),
           upvec(std::move(other.upvec)),
           vec8(reinterpret_cast<NoAliasUcharPtr>(upvec.get()))
     {}
-
-    ImplBitpackedUintVector& operator=(const ImplBitpackedUintVector&) = delete;
-    ImplBitpackedUintVector& operator=(ImplBitpackedUintVector&& other) noexcept
-    {
-        packed_count = other.packed_count;
-        vec8_bytes = other.vec8_bytes;
-        upvec = std::move(other.upvec);
-        vec8 = reinterpret_cast<NoAliasUcharPtr>(upvec.get());
-    }
 
     ImplBitpackedUintVector(size_type count) :
           packed_count(count),

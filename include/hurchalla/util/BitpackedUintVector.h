@@ -38,6 +38,8 @@ struct BitpackedUintVector
                   detail::ImplBitpackedUintVector<U, element_bitlen>::size_type;
 
     BitpackedUintVector(const BitpackedUintVector&) = delete;
+    BitpackedUintVector& operator=(const BitpackedUintVector&) = delete;
+
     BitpackedUintVector(BitpackedUintVector&& other) :
             impl_buv(std::move(other.impl_buv)) {}
 
