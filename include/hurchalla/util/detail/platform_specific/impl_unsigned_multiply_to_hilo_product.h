@@ -87,15 +87,19 @@ struct umult_to_hilo_product {
 // primary template
 template <typename T>
 struct impl_unsigned_multiply_to_hilo_product {
-#ifdef HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH
-  // cause a compile error instead of falling back to slow multiplication.
-  HURCHALLA_FORCE_INLINE static T call(T& lowProduct, T u, T v) = delete;
-#else
   HURCHALLA_FORCE_INLINE static T call(T& lowProduct, T u,T v)
   {
+#ifdef HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH
+#  ifndef HURCHALLA_TARGET_BIT_WIDTH
+#    error "HURCHALLA_TARGET_BIT_WIDTH must be defined"
+#  endif
+      static_assert(ut_numeric_limits<T>::is_integer, "");
+      static_assert(!(ut_numeric_limits<T>::is_signed), "");
+      static_assert(ut_numeric_limits<T>::digits > HURCHALLA_TARGET_BIT_WIDTH,
+        "For T <= the native bit depth, it makes sense to issue the compile error requested by HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH.  Note for T larger than the native bit depth, there would be no way to avoid using a slow math routine.");
+#endif
       return slow_unsigned_multiply_to_hilo_product::call(lowProduct, u, v);
   }
-#endif
 };
 
 // Note that when using these simple specializations, the generated asm from

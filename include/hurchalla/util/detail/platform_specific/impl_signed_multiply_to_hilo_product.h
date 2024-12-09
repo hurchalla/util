@@ -179,18 +179,23 @@ struct smult_to_hilo_product {
 // primary template
 template <typename T>
 struct impl_signed_multiply_to_hilo_product {
-#ifdef HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH
-  // cause a compile error instead of falling back to slow multiplication.
-  HURCHALLA_FORCE_INLINE static
-  T call(typename extensible_make_unsigned<T>::type& lowProduct, T u, T v)
-      = delete;
-#else
   HURCHALLA_FORCE_INLINE static
   T call(typename extensible_make_unsigned<T>::type& lowProduct, T u, T v)
   {
+#ifdef HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH
+#  ifndef HURCHALLA_TARGET_BIT_WIDTH
+#    error "HURCHALLA_TARGET_BIT_WIDTH must be defined"
+#  endif
+      static_assert(ut_numeric_limits<T>::is_integer, "");
+      static_assert(ut_numeric_limits<T>::is_signed, "");
+      // Since T is signed, ut_numeric_limits<T>::digits is always
+      // T's bit width minus one.  E.g. int64_t has 63 digits.
+      static constexpr int T_bit_width = ut_numeric_limits<T>::digits + 1;
+      static_assert(T_bit_width > HURCHALLA_TARGET_BIT_WIDTH,
+        "For T with bit width <= the native bit width, it makes sense to issue the compile error requested by HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH.  Note for T larger than the native bit depth, there would be no way to avoid using a slow math routine.");
+#endif
       return slow_signed_multiply_to_hilo_product::call(lowProduct, u, v);
   }
-#endif
 };
 
 // Note that when using these simple specializations, the generated asm from
