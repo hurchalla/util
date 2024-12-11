@@ -160,18 +160,26 @@ struct smult_to_hilo_product {
     static_assert(ut_numeric_limits<T>::is_signed, "");
     static_assert(ut_numeric_limits<T2>::is_integer, "");
     static_assert(ut_numeric_limits<T2>::is_signed, "");
-    static_assert(ut_numeric_limits<T2>::digits >=
-                  2*ut_numeric_limits<T>::digits, "");
-    T2 product = static_cast<T2>(static_cast<T2>(u) * static_cast<T2>(v));
+    static_assert(ut_numeric_limits<T2>::digits ==
+                  2*ut_numeric_limits<T>::digits + 1, "");
 
     using U1 = typename extensible_make_unsigned<T>::type;
-    // for example, if U1==uint64_t, digitsU1 ought to == 64
+    using U2 = typename extensible_make_unsigned<T2>::type;
     static constexpr int digitsU1 = ut_numeric_limits<U1>::digits;
-    // for example, if U1==uint64_t, maskU1 ought to == 0xFFFFFFFFFFFFFFFF
-    static constexpr T2 maskU1 = (static_cast<T2>(1) << digitsU1) - 1;
+    // for example, if U1==uint64_t, digitsU1 ought to == 64
+    static_assert(ut_numeric_limits<U2>::digits == 2 * digitsU1, "");
 
-    lowProduct = static_cast<U1>(product & maskU1);
-    return static_cast<T>(product >> digitsU1);
+    U2 product = static_cast<U2>(static_cast<T2>(u) * static_cast<T2>(v));
+
+    lowProduct = static_cast<U1>(product);
+    U1 hiProduct = static_cast<U1>(product >> digitsU1);
+
+    // Assert the CPU architecture uses two's complement representation for
+    // signed integers.  We need two's complement because before c++20, the next
+    // cast from unsigned to signed would be implementation defined.
+    static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
+
+    return static_cast<T>(hiProduct);
   }
 };
 
