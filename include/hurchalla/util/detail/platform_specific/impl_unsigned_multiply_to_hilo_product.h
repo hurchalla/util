@@ -7,6 +7,7 @@
 
 #include "hurchalla/util/traits/safely_promote_unsigned.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
+#include "hurchalla/util/sized_uint.h"
 #include "hurchalla/util/compiler_macros.h"
 #include "hurchalla/util/programming_by_contract.h"
 #include <cstdint>
@@ -39,30 +40,79 @@ struct slow_unsigned_multiply_to_hilo_product {
     // for example, if T==uint64_t, lowmask ought to == 0xFFFFFFFF
     static constexpr T lowmask = (static_cast<T>(1)<<shift) - static_cast<T>(1);
 
-    T u0 = u & lowmask;
-    T v0 = v & lowmask;
-    T u1 = u >> shift;
-    T v1 = v >> shift;
+#if __cplusplus >= 201703L
+    // The intent here is to find out if T is an integral type that the compiler
+    // has in-built support for (and thus, that it could optimize well).  If
+    // it is not, then we use this if clause - which ensures via recursion that
+    // the compiler gets a type that it can optimize well.
+    // To use the contents of this if clause, we also need sized_uint<shift> to
+    // be valid, which is why we test for that too.
+    //
+    // It's not ideal currently that the clause relies on sized_uint<shift>,
+    // since effectively that means the clause can only run when T is twice as
+    // big as the largest integer the compiler supports.  E.g. - currently this
+    // clause will not run when T is 4x or 8x the size of largest integer the
+    // compiler knows, which is not ideal.
+    if constexpr (!is_valid_sized_uint<ut_numeric_limits<T>::digits>::value &&
+                  is_valid_sized_uint<shift>::value)
+    {
+      using U = typename sized_uint<shift>::type;
 
-    // Calculate all the cross products.
-    T lo_lo = u0 * v0;
-    T hi_lo = u1 * v0;
-    T lo_hi = u0 * v1;
-    T hi_hi = u1 * v1;
+      U u0 = static_cast<U>(u);
+      U v0 = static_cast<U>(v);
+      U u1 = static_cast<U>(u >> shift);
+      U v1 = static_cast<U>(v >> shift);
 
-    // The next statement will not overflow.  Proof: let S=2^(shift). We can see
-    // that both (lo_lo >> shift) and (hi_lo & lowmask) must be less than S.
-    // Therefore the max possible value of cross= (S-1) + (S-1) + (S-1)*(S-1) ==
-    // S-1 + S-1 + S*S - 2*S + 1 == S*S - 1, which is the max value that can be
-    // represented in type T.  Thus the calculation will never overflow.
-    T cross = (lo_lo >> shift) + (hi_lo & lowmask) + lo_hi;
-    // The next statement will not overflow, for the same reason as above.
-    T high = (hi_lo >> shift) + (cross >> shift) + hi_hi;
+      // Calculate all the cross products.
+      U lo_lo_0;  U lo_lo_1 = impl_unsigned_multiply_to_hilo_product<U>::call(
+                                                               lo_lo_0, u0, v0);
+      U hi_lo_0;  U hi_lo_1 = impl_unsigned_multiply_to_hilo_product<U>::call(
+                                                               hi_lo_0, u1, v0);
+      U lo_hi_0;  U lo_hi_1 = impl_unsigned_multiply_to_hilo_product<U>::call(
+                                                               lo_hi_0, u0, v1);
+      U hi_hi_0;  U hi_hi_1 = impl_unsigned_multiply_to_hilo_product<U>::call(
+                                                               hi_hi_0, u1, v1);
 
-    lowProduct = (cross << shift) | (lo_lo & lowmask);
-    return high;
+      T lo_hi = (static_cast<T>(lo_hi_1) << shift) | static_cast<T>(lo_hi_0);
+      T hi_hi = (static_cast<T>(hi_hi_1) << shift) | static_cast<T>(hi_hi_0);
+
+      // See the else clause below for why this works.  It is a direct
+      // translation of the corresponding part of the else clause.
+      T cross = static_cast<T>(lo_lo_1) + static_cast<T>(hi_lo_0) + lo_hi;
+      T high = static_cast<T>(hi_lo_1) + (cross >> shift) + hi_hi;
+
+      lowProduct = (cross << shift) | static_cast<T>(lo_lo_0);
+      return high;
+    }
+    else
+#endif
+    {
+      T u0 = u & lowmask;
+      T v0 = v & lowmask;
+      T u1 = u >> shift;
+      T v1 = v >> shift;
+
+      // Calculate all the cross products.
+      T lo_lo = u0 * v0;
+      T hi_lo = u1 * v0;
+      T lo_hi = u0 * v1;
+      T hi_hi = u1 * v1;
+
+      // The next statement will not overflow.  Proof: let S=2^(shift). We can see
+      // that both (lo_lo >> shift) and (hi_lo & lowmask) must be less than S.
+      // Therefore the max possible value of cross= (S-1) + (S-1) + (S-1)*(S-1) ==
+      // S-1 + S-1 + S*S - 2*S + 1 == S*S - 1, which is the max value that can be
+      // represented in type T.  Thus the calculation will never overflow.
+      T cross = (lo_lo >> shift) + (hi_lo & lowmask) + lo_hi;
+      // The next statement will not overflow, for the same reason as above.
+      T high = (hi_lo >> shift) + (cross >> shift) + hi_hi;
+
+      lowProduct = (cross << shift) | (lo_lo & lowmask);
+      return high;
+    }
   }
 };
+
 
 
 // Intended as a helper for the functions below.
