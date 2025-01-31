@@ -16,6 +16,10 @@
 #  pragma warning(push)
 #  pragma warning(disable : 4127)
 #endif
+#ifdef __clang__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wc++98-c++11-c++14-compat"
+#endif
 
 namespace hurchalla { namespace detail {
 
@@ -253,6 +257,9 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
 }} // end namespace
 
 
+#ifdef __clang__
+#  pragma GCC diagnostic pop
+#endif
 #if defined(_MSC_VER)
 #  pragma warning(pop)
 #endif
