@@ -57,9 +57,9 @@ struct slow_unsigned_multiply_to_hilo_product {
     // clause will not run when T is 4x or 8x the size of largest integer the
     // compiler knows, which is not ideal.
     if constexpr (!is_valid_sized_uint<ut_numeric_limits<T>::digits>::value &&
-                  is_valid_sized_uint<shift>::value)
+                  is_valid_sized_uint<static_cast<int>(shift)>::value)
     {
-      using U = typename sized_uint<shift>::type;
+      using U = typename sized_uint<static_cast<int>(shift)>::type;
 
       U u0 = static_cast<U>(u);
       U v0 = static_cast<U>(v);
