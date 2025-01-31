@@ -20,6 +20,9 @@
 namespace hurchalla { namespace detail {
 
 
+template <typename T>
+struct impl_unsigned_multiply_to_hilo_product;
+
 // Slow implementation that works for all compilers and architectures.
 // Return Value:
 //   Returns the high portion of the product.
