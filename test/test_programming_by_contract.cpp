@@ -12,6 +12,11 @@
 
 #include "gtest/gtest.h"
 
+#if defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable : 4127)
+#endif
+
 
 #if defined(__cpp_lib_optional) || __cplusplus >= 201703L || \
    (defined(_HAS_CXX17) && _HAS_CXX17 > 0)
@@ -340,5 +345,9 @@ namespace {
         }
     }
 
-}
+}  // end namespace
 
+
+#if defined(_MSC_VER)
+#  pragma warning(pop)
+#endif
