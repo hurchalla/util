@@ -190,6 +190,13 @@
 #  define HURCHALLA_CPP14_CONSTEXPR
 #endif
 
+#if (__cplusplus >= 201703L) || \
+        (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L && _MSC_VER >= 1910)
+#  define HURCHALLA_CPP17_CONSTEXPR constexpr
+#else
+#  define HURCHALLA_CPP17_CONSTEXPR
+#endif
+
 
 #if defined(__has_builtin)
 #  define HURCHALLA_COMPILER_HAS_BUILTIN(builtin) __has_builtin(builtin)
