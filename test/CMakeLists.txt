@@ -20,6 +20,36 @@ if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 endif()
 
 
+
+# This library's main CMakeLists.txt specifies little for the C++ standard, and
+# will thus compile using whatever standard has been set (or has been defaulted)
+# by a CMakeLists.txt that is using/consuming the library.  However, inside this
+# unit-testing CMakeLists.txt, we want precise control of the standard and so we
+# set the standard below.
+#
+# We set CMAKE_CXX_EXTENSIONS to OFF because otherwise CMake will pass to gcc
+# (and probably clang) -std=gnu++XX instead of -std=c++XX (replace XX with 11
+# or 14 or some other C++ version).  Note this may not always even be sufficient
+# for all circumstances -
+# A while ago I used a 'modern CMake' approach by writing
+#    target_compile_features(MyTarget INTERFACE cxx_std_11)
+#    set_target_properties(MyTarget PROPERTIES CXX_EXTENSIONS OFF)
+# and when I used CMake to compile with gcc version 7, CMake didn't pass any
+# flags to the compiler for the compiler standard at all.  Presumably this was
+# because gcc7 compiler used as its default C++11, and CMake thus saw no reason
+# to pass a flag for the standard.  But in fact gcc7 was defaulting to gnu++11,
+# so effectively my request was ignored to have CXX_EXTENSIONS off.  I'm not
+# sure if this remains a potential problem with the approach below.
+
+
+# for testing, we'll ensure the library compiles and runs correctly using
+# simply standard C++11, with nothing beyond that required:
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+
+
 include(FetchGoogleTest.cmake)
 include(EnableMaxWarnings.cmake)
 

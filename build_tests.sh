@@ -141,13 +141,10 @@
 #     for me.  Regardless, for whatever version of gcc that you are currently
 #     using as the system default (via update-alteratives), you'll have to try
 #     compiling with icc using -std=c++17 in order to know if your default gcc
-#     version is making icc vulnerable to compile errors.  For example, with
-#     this present script here when using icc, if you start getting unexpected
-#     compile errors when you change this script's line that sets cpp_standard
-#     to use cpp_standard="-std=c++17", then you'll know you need to default to
-#     an older gcc version (via update-alternatives).  Either that, or figure
-#     out how to make sure compilervars.sh always consistently places the intel
-#     directories first in PATH. ]
+#     version is making icc vulnerable to compile errors.  If it's a problem,
+#     then update-alternatives should work around it, or I suppose you could
+#     figure out how to make sure compilervars.sh always consistently places
+#     the intel directories first in PATH. ]
 # sudo update-alternatives --config g++
 #   [ You *MUST* set the default g++ to be the same version as you just chose
 #     for update-alternatives --config gcc.  For me, that meant g++-7. ]
@@ -261,72 +258,6 @@ fi
 
 echo Using compiler $compiler_name ...
 echo Using build mode $mode ...
-
-
-
-cpp_standard="-std=c++11"
-
-# A long note about issues setting the C++ standard when using CMake
-# ------------------------------------------------------------------
-# In this bash file we're setting up the C++ standard as a compiler argument.
-# This is not a normal or recommended method.  The normal/recommended method
-# would be to set the standard in CMakeLists.txt.  However, in practice doing it
-# that way is difficult to get to reliably work right for testing purposes, and
-# more generally, it introduces potential issues with mixed standards.  For
-# reference--- getting CMake to handle the standard would require two lines in
-# CMakeLists.txt:
-#    target_compile_features(MyTarget INTERFACE cxx_std_14)
-#    set_target_properties(MyTarget PROPERTIES CXX_EXTENSIONS OFF)
-# We'd need the second line since gcc will use -std=gnu++14 instead of
-# -std=c++14, unless we turn off CXX_EXTENSIONS.  But these two things are still
-# not enough in some circumstances: if we use cxx_std_11 instead of cxx_std_14
-# above, cmake won't use any flags for the compiler standard for gcc (at least
-# this is what I saw for gcc version 7) and this means that gcc will use gnu++11
-# by default -- even though we specified cxx_std_11 and set CXX_EXTENSIONS off.
-# It was at this point I gave up on setting the C++ standard within CMake.
-#
-# Instead, strictly for testing, I'm setting the standard as a compiler argument
-# that gets passed to CMake.  Keep in mind that setting the standard via the
-# command line is *only* done for testing.  My library CMakeLists.txt specifies
-# nothing for the standard, and it will thus compile using whatever standard has
-# been set (or has been defaulted) by a CMakeLists.txt that is using/consuming
-# the library.  For these tests, the consuming CMakeLists.txt is
-# test/CMakeLists.txt, but this CMakeLists.txt happens to be a special case of
-# testing, where I need precise control of the standard and thus for the reasons
-# given above I do it via compiler arguments.
-#
-# In principle it'd be easy to argue that my library CMakeLists.txt ought to
-# specify that it needs at least C++11, and that it should do this via
-# target_compile_features, but I have reasons above and below that go against
-# doing that, and in practice in 2020 it would be fairly unusual for someone to
-# use a C++ compiler (or to set the compiler standard in a way) that doesn't
-# support C++11.  In such a case the worst thing that would happen, during
-# compilation, is that the library would compile with errors that would probably
-# be obvious missing C++11 features.  It'd much easier to make the argument that
-# I ought to specify the standard in CMakeLists.txt for a library that needs
-# C++17 or C++ 20, simply because it's much less likely (in 2020) that a
-# compiler would happen to be set to use a high enough standard.  I'd still
-# consider the related problem below though, even in that case.
-# 
-# A related problem is that setting the standard in my library's CMakeLists.txt
-# could potentially lead to multiple standards being used to compile different
-# parts of someone's project (e.g. C++11 for one library target and C++17 for
-# another target, which then get linked together).  Although it'd be unusual for
-# a problem to result from this, it isn't a good idea, and if/when it causes a
-# problem it won't be obvious what went wrong.  So I avoid setting the standard
-# anywhere in the CMakeLists.txt for the libraries I produce. There will still
-# remain some scenarios where the standards could get mixed, but this reduces
-# the exposure to it and it prevents my CMakeLists.txt from being a contributing
-# cause of it.  For info on how/why mixing the standard could potentially result
-# in errors, see:
-# https://github.com/abseil/abseil-cpp/issues/259
-# https://cgold.readthedocs.io/en/latest/tutorials/toolchain/globals/cxx-standard.html
-# https://stackoverflow.com/questions/10717106/can-different-gcc-dialects-be-linked-together
-# https://stackoverflow.com/questions/46746878/is-it-safe-to-link-c17-c14-and-c11-objects
-# https://gcc.gnu.org/wiki/Cxx11AbiCompatibility
-# https://cullmann.io/posts/cpp-standard-version-mix-up/
-
-
 
 
 # Note: Gcc static analyzer was added in gcc version 10
@@ -484,8 +415,7 @@ if [ "${mode,,}" = "release" ]; then
     mkdir -p $build_dir
     cmake -S. -B./$build_dir -DTEST_HURCHALLA_LIBS=ON \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_FLAGS="$cpp_standard  $cpp_stdlib \
-            $test_avoid_cselect \
+            -DCMAKE_CXX_FLAGS="$cpp_stdlib  $test_avoid_cselect \
             $gcc_static_analysis"  "${clang_static_analysis[@]}" \
             $cmake_cpp_compiler $cmake_c_compiler
     exit_on_failure
@@ -499,9 +429,8 @@ elif [ "${mode,,}" = "debug" ]; then
     cmake -S. -B./$build_dir -DTEST_HURCHALLA_LIBS=ON \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_EXE_LINKER_FLAGS="$clang_ubsan_link_flags" \
-            -DCMAKE_CXX_FLAGS="$cpp_standard  $cpp_stdlib  \
-            $clang_ubsan  $gcc_ubsan  \
-            $test_avoid_cselect \
+            -DCMAKE_CXX_FLAGS="$cpp_stdlib  $clang_ubsan  \
+            $gcc_ubsan  $test_avoid_cselect \
             $gcc_static_analysis"  "${clang_static_analysis[@]}" \
             $cmake_cpp_compiler $cmake_c_compiler
     exit_on_failure

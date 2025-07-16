@@ -82,6 +82,31 @@ target_include_directories(hurchalla_util
 #               INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>)
 
 
+
+#   This CMakeLists.txt specifies very little for the C++ standard, and will
+# thus mostly compile using whatever standard has been set (or has been
+# defaulted) by a CMakeLists.txt that is using/consuming the library.
+#   We limit our checking for C++11 to a few features that we use (see below).
+# In principle it would be nice for this CMakeLists.txt to specify that it needs
+# at least C++11, and check for it... but to be safe I want to avoid giving
+# CMake extra temptation to set the C++ standard.  An example of the danger - we
+# don't want one library's target to get compiled with -std=c++11 due to its
+# CMakeLists.txt specifying C++11, and then another different library's target
+# to get compiled with -std=c++17 due to its CMakeLists.txt specifying C++17,
+# and then for those two different object files to get linked together.  Perhaps
+# CMake carefully ensures that mixing standards never happens, but maybe not.
+# We don't have a strong reason to check for C++11 beyond the feature checks
+# below; it's unlikely any compiler in this day wouldn't support C++11, and if
+# not, there would be fairly obvious compile errors.  In any event, ABI
+# compatibility is a pain, with few guarantees.  See
+# https://stackoverflow.com/questions/46746878/is-it-safe-to-link-c17-c14-and-c11-objects
+# For info on how/why mixing the standard could potentially result in errors:
+# https://github.com/abseil/abseil-cpp/issues/259
+# https://cgold.readthedocs.io/en/latest/tutorials/toolchain/globals/cxx-standard.html
+# https://stackoverflow.com/questions/10717106/can-different-gcc-dialects-be-linked-together
+# https://gcc.gnu.org/wiki/Cxx11AbiCompatibility
+# https://cullmann.io/posts/cpp-standard-version-mix-up/
+
 # Check for required C++ features only if the C++ compiler ID is non-empty.
 target_compile_features(hurchalla_util INTERFACE
           $<$<NOT:$<CXX_COMPILER_ID:>>:
@@ -89,7 +114,6 @@ target_compile_features(hurchalla_util INTERFACE
                cxx_decltype
                cxx_deleted_functions
            >)
-
 target_compile_features(hurchalla_util INTERFACE
           $<$<NOT:$<C_COMPILER_ID:>>:
                c_variadic_macros
