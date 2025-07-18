@@ -5,7 +5,9 @@ if(TARGET test_hurchalla_util)
     return()
 endif()
 
-cmake_minimum_required(VERSION 3.14)
+# later versions are probably fine, but are untested
+cmake_minimum_required(VERSION 3.14...4.03)
+
 #project(test_hurchalla_util VERSION 1.0.0 LANGUAGES CXX)
 
 
@@ -42,9 +44,17 @@ endif()
 # sure if this remains a potential problem with the approach below.
 
 
-# for testing, we'll ensure the library compiles and runs correctly using
-# simply standard C++11, with nothing beyond that required:
-set(CMAKE_CXX_STANDARD 11)
+# for testing, we can ensure the library compiles and runs correctly using
+# standard C++11 (with the exception of BitpackedUintVector which needs C++14).
+# Note that test_BitpackedUintVector.cpp will not be built/run when
+# FORCE_TEST_HURCHALLA_CPP11_STANDARD is defined, since BitpackedUintVector
+# needs C++14.
+
+if(FORCE_TEST_HURCHALLA_CPP11_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+else()
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -60,7 +70,6 @@ include(GoogleTest)
 
 
 add_executable(test_hurchalla_util
-               test_BitpackedUintVector.cpp
                test_compiler_macros.cpp
                test_conditional_select.cpp
                test_count_leading_zeros.cpp
@@ -85,6 +94,23 @@ target_link_libraries(test_hurchalla_util
                       gtest_main)
 #add_test(test_hurchalla_util  test_hurchalla_util)
 gtest_discover_tests(test_hurchalla_util)
+
+
+
+if(NOT FORCE_TEST_HURCHALLA_CPP11_STANDARD)
+    add_executable(test_hurchalla_util_cpp14
+                   test_BitpackedUintVector.cpp)
+
+    EnableMaxWarnings(test_hurchalla_util_cpp14)
+
+    set_target_properties(test_hurchalla_util_cpp14
+                          PROPERTIES FOLDER "Tests")
+    target_link_libraries(test_hurchalla_util_cpp14
+                          hurchalla_util
+                          gtest_main)
+    #add_test(test_hurchalla_util_cpp14  test_hurchalla_util_cpp14)
+    gtest_discover_tests(test_hurchalla_util_cpp14)
+endif()
 
 
 
