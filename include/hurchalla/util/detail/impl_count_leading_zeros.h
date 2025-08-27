@@ -6,7 +6,7 @@
 
 
 #include "hurchalla/util/traits/ut_numeric_limits.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <cstdint>
 #include <type_traits>
@@ -35,7 +35,7 @@ struct default_count_leading_zeros {
     template <typename T>
     static HURCHALLA_FORCE_INLINE int call(T x)
     {
-        HPBC_PRECONDITION2(x != 0);
+        HPBC_UTIL_PRECONDITION2(x != 0);
         constexpr int digitsT = ut_numeric_limits<T>::digits;
 /*
     // I commented this out so that I can test this function with all types.
@@ -49,7 +49,7 @@ struct default_count_leading_zeros {
 */
 /*
         // simple version, suboptimal
-        HPBC_PRECONDITION2(x != 0);
+        HPBC_UTIL_PRECONDITION2(x != 0);
         constexpr int initial_shift = digitsT - 1;
         int shift = initial_shift;
         while (((x >> shift) & 1) == 0) {
@@ -75,7 +75,7 @@ struct default_count_leading_zeros {
             // become is 0, because at that point we would get a word != 0.
             static_assert(digitsT % digitsU == 0, "");
             shift = shift - digitsU;
-            HPBC_ASSERT2(shift >= 0);
+            HPBC_UTIL_ASSERT2(shift >= 0);
             word = static_cast<U>(x >> shift);
         }
 #ifndef _MSC_VER
@@ -108,7 +108,7 @@ struct impl_count_leading_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         using U = unsigned int;
         U x = static_cast<U>(a);
         constexpr int digitsT = ut_numeric_limits<T>::digits;
@@ -133,7 +133,7 @@ struct impl_count_leading_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         using U = unsigned long;
         U x = static_cast<U>(a);
         constexpr int digitsT = ut_numeric_limits<T>::digits;
@@ -159,7 +159,7 @@ struct impl_count_leading_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         using U = unsigned long long;
         U x = static_cast<U>(a);
         constexpr int digitsT = ut_numeric_limits<T>::digits;
@@ -184,7 +184,7 @@ struct impl_count_leading_zeros {
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 32);
         } else {
             // given that hi == 0, the precondition of a != 0 means that lo != 0
-            HPBC_ASSERT2(lo != 0);
+            HPBC_UTIL_ASSERT2(lo != 0);
             unsigned long index;
             _BitScanReverse(&index, lo);
             return static_cast<int>(digitsT) - 1 - static_cast<int>(index);
@@ -204,7 +204,7 @@ struct impl_count_leading_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         T x = a;
         constexpr int digitsT = ut_numeric_limits<T>::digits;
         static_assert(digitsT == 128, "");
@@ -219,7 +219,7 @@ struct impl_count_leading_zeros {
             return __builtin_clzll(hi);
         else {
             // given that hi == 0, the precondition of a != 0 means that lo != 0.
-            HPBC_ASSERT2(lo != 0);
+            HPBC_UTIL_ASSERT2(lo != 0);
             return __builtin_clzll(lo) + 64;
         }
 #else   // MSVC++
@@ -237,7 +237,7 @@ struct impl_count_leading_zeros {
         }
         else {
             // given that hi == 0, the precondition of a != 0 means that lo != 0.
-            HPBC_ASSERT2(lo != 0);
+            HPBC_UTIL_ASSERT2(lo != 0);
             unsigned long index;
             _BitScanReverse64(&index, lo);
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 0);
@@ -264,7 +264,7 @@ struct impl_count_leading_zeros {
         } else {
             // given that  word0 == 0 && word1 == 0 && word2 == 0, the precondition
             // of a != 0 means that word3 != 0.
-            HPBC_ASSERT2(word3 != 0);
+            HPBC_UTIL_ASSERT2(word3 != 0);
             _BitScanReverse(&index, word3);
             return static_cast<int>(digitsT) - 1 - (static_cast<int>(index) + 0);
         }
@@ -283,7 +283,7 @@ struct impl_count_leading_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         return default_count_leading_zeros::call(a);
     }
 };

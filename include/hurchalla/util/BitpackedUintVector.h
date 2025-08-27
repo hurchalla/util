@@ -6,7 +6,7 @@
 
 
 #include "hurchalla/util/detail/ImplBitpackedUintVector.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -55,16 +55,16 @@ struct BitpackedUintVector
 
     HURCHALLA_FORCE_INLINE void setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_API_PRECONDITION(value <= max_allowed_value());
+        HPBC_UTIL_API_PRECONDITION(index < size());
         impl_buv.setAt(index, value);
     }
 
     HURCHALLA_FORCE_INLINE U getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_API_PRECONDITION(index < size());
         U value = impl_buv.getAt(index);
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION(value <= max_allowed_value());
         return value;
     }
 

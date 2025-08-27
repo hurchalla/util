@@ -108,7 +108,7 @@ void test_bpuv(std::vector<uint64_t>& vec1, std::vector<uint64_t>& vec2,
 
 
 
-TEST(HurchallaUtil, BitpackedUintVector) {
+TEST(HurchallaUtilCpp14, BitpackedUintVector) {
     constexpr uint64_t max64 = std::numeric_limits<uint64_t>::max();
     std::mt19937_64 mt;
     std::vector<uint64_t> vec1, vec2, vec3, vec4, vec5, vec6;

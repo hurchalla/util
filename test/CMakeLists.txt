@@ -115,9 +115,7 @@ endif()
 
 
 add_executable(test_programming_by_contract
-               test_programming_by_contract.cpp
-               testhelper_assert_handler.cpp
-               testhelper_assert_handler.h)
+               test_programming_by_contract.cpp)
 
 EnableMaxWarnings(test_programming_by_contract)
 
@@ -131,18 +129,16 @@ gtest_discover_tests(test_programming_by_contract)
 
 
 
-add_executable(test_ndebug_programming_by_contract
-               test_ndebug_programming_by_contract.cpp
-               testhelper_assert_handler.cpp
-               testhelper_assert_handler.h)
+add_executable(test_inactive_programming_by_contract
+               test_inactive_programming_by_contract.cpp)
 
-EnableMaxWarnings(test_ndebug_programming_by_contract)
+EnableMaxWarnings(test_inactive_programming_by_contract)
 
-set_target_properties(test_ndebug_programming_by_contract
+set_target_properties(test_inactive_programming_by_contract
                       PROPERTIES FOLDER "Tests")
-target_link_libraries(test_ndebug_programming_by_contract
+target_link_libraries(test_inactive_programming_by_contract
                       hurchalla_util
                       gtest_main)
-#add_test(test_ndebug_programming_by_contract
-#          test_ndebug_programming_by_contract)
-gtest_discover_tests(test_ndebug_programming_by_contract)
+#add_test(test_inactive_programming_by_contract
+#          test_inactive_programming_by_contract)
+gtest_discover_tests(test_inactive_programming_by_contract)

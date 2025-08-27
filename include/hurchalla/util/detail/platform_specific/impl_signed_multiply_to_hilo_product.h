@@ -9,7 +9,7 @@
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/traits/extensible_make_unsigned.h"
 #include "hurchalla/util/compiler_macros.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include <cstdint>
 #if defined(_MSC_VER)
 #  include <intrin.h>
@@ -258,10 +258,10 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
     using std::int64_t;  using std::uint64_t;
     int64_t highProduct;
     lowProduct = static_cast<uint64_t>(_mul128(u, v, &highProduct));
-    if (HPBC_POSTCONDITION3_MACRO_IS_ACTIVE) {
+    if (HPBC_UTIL_POSTCONDITION3_MACRO_IS_ACTIVE) {
         uint64_t tmpLo;  int64_t tmpHi;
         tmpHi = slow_signed_multiply_to_hilo_product::call(tmpLo, u, v);
-        HPBC_POSTCONDITION3(highProduct == tmpHi && lowProduct == tmpLo);
+        HPBC_UTIL_POSTCONDITION3(highProduct == tmpHi && lowProduct == tmpLo);
     }
     return highProduct;
   }
@@ -281,10 +281,10 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
     // rules apply.
     using P = typename safely_promote_unsigned<uint64_t>::type;
     lowProduct = static_cast<uint64_t>(static_cast<P>(u) * static_cast<P>(v));
-    if (HPBC_POSTCONDITION3_MACRO_IS_ACTIVE) {
+    if (HPBC_UTIL_POSTCONDITION3_MACRO_IS_ACTIVE) {
         uint64_t tmpLo;  int64_t tmpHi;
         tmpHi = slow_signed_multiply_to_hilo_product::call(tmpLo, u, v);
-        HPBC_POSTCONDITION3(highProduct == tmpHi && lowProduct == tmpLo);
+        HPBC_UTIL_POSTCONDITION3(highProduct == tmpHi && lowProduct == tmpLo);
     }
     return highProduct;
   }

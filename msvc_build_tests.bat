@@ -29,13 +29,16 @@ type tmp_test_results.txt | find /v "Running main()"
 del tmp_test_results.txt
 if %result% neq 0 exit /b %result%
 
-%build_dir%\Release\test_ndebug_programming_by_contract.exe>tmp_test_results.txt
+%build_dir%\Release\test_inactive_programming_by_contract.exe>tmp_test_results.txt
 set result=%errorlevel%
 type tmp_test_results.txt | find /v "Running main()"
 del tmp_test_results.txt
 if %result% neq 0 exit /b %result%
 
 %build_dir%\Release\test_hurchalla_util.exe
+if %result% neq 0 exit /b %result%
+
+%build_dir%\Release\test_hurchalla_util_cpp14.exe
 if %result% neq 0 exit /b %result%
 
 
@@ -46,11 +49,14 @@ type tmp_test_results.txt | find /v "Running main()"
 del tmp_test_results.txt
 if %result% neq 0 exit /b %result%
 
-%build_dir%\Debug\test_ndebug_programming_by_contract.exe > tmp_test_results.txt
+%build_dir%\Debug\test_inactive_programming_by_contract.exe > tmp_test_results.txt
 set result=%errorlevel%
 type tmp_test_results.txt | find /v "Running main()"
 del tmp_test_results.txt
 if %result% neq 0 exit /b %result%
 
 %build_dir%\Debug\test_hurchalla_util.exe
+if %result% neq 0 exit /b %result%
+
+%build_dir%\Debug\test_hurchalla_util_cpp14.exe
 if %result% neq 0 exit /b %result%

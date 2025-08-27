@@ -9,7 +9,7 @@
 #include "hurchalla/util/traits/extensible_make_unsigned.h"
 #include "hurchalla/util/traits/safely_promote_unsigned.h"
 #include "hurchalla/util/compiler_macros.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include <type_traits>
 
 namespace hurchalla { namespace detail {
@@ -71,7 +71,7 @@ struct impl_conditional_select<T, ImplCSelectMaskedTag> {
     P maskflip = static_cast<P>(condp - static_cast<P>(1));
     P selection = (mask & static_cast<P>(a)) | (maskflip & static_cast<P>(b));
     T result = static_cast<T>(selection);
-    HPBC_POSTCONDITION2(result == ((cond) ? a : b));
+    HPBC_UTIL_POSTCONDITION2(result == ((cond) ? a : b));
     return result;
   }
 };

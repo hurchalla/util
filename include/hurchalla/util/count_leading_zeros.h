@@ -7,7 +7,7 @@
 
 #include "hurchalla/util/detail/impl_count_leading_zeros.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include "hurchalla/util/compiler_macros.h"
 
 namespace hurchalla {
@@ -21,7 +21,7 @@ HURCHALLA_FORCE_INLINE int count_leading_zeros(T x)
 {
     static_assert(ut_numeric_limits<T>::is_integer, "");
     static_assert(!ut_numeric_limits<T>::is_signed, "");
-    HPBC_PRECONDITION2(x != 0);
+    HPBC_UTIL_API_PRECONDITION(x != 0);
 
     return detail::impl_count_leading_zeros::call(x);
 }

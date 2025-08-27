@@ -6,7 +6,7 @@
 
 
 #include "hurchalla/util/traits/ut_numeric_limits.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include <cstdint>
 
 
@@ -44,7 +44,7 @@ struct uint128 {
     uint128 operator<<(int shift) const
     {
         uint128 tmp = *this;
-        HPBC_ASSERT2(shift < 128 && shift >= 0);
+        HPBC_UTIL_ASSERT2(shift < 128 && shift >= 0);
         if (shift == 0) {
         }
         else if (shift >= 64) {
@@ -60,7 +60,7 @@ struct uint128 {
     uint128 operator>>(int shift) const
     {
         uint128 tmp = *this;
-        HPBC_ASSERT2(shift < 128 && shift >= 0);
+        HPBC_UTIL_ASSERT2(shift < 128 && shift >= 0);
         if (shift == 0) {
         }
         else if (shift >= 64) {

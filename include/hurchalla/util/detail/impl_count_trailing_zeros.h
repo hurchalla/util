@@ -6,7 +6,7 @@
 
 
 #include "hurchalla/util/traits/ut_numeric_limits.h"
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <cstdint>
 #include <type_traits>
@@ -35,7 +35,7 @@ struct default_count_trailing_zeros {
     template <typename T>
     static HURCHALLA_FORCE_INLINE int call(T x)
     {
-        HPBC_PRECONDITION2(x != 0);
+        HPBC_UTIL_PRECONDITION2(x != 0);
 /*
     // I commented this out so that I can test this function with all types.
     // ...impl_count_trailing_zeros should have handled the types listed below.
@@ -67,10 +67,10 @@ struct default_count_trailing_zeros {
         int shift = 0;
         U word = static_cast<U>(x);
 
-        HPBC_INVARIANT2(0 <= shift && shift < digitsT);
+        HPBC_UTIL_INVARIANT2(0 <= shift && shift < digitsT);
         while (word == 0) {
             shift = shift + digitsU;
-            HPBC_INVARIANT2(0 <= shift && shift < digitsT);
+            HPBC_UTIL_INVARIANT2(0 <= shift && shift < digitsT);
             // proof of invariant:  assume prior to assignment above we had
             // shift < digitsT.  Then since digitsT % digitsU == 0, and the
             // initial value of shift == 0, after the assignment above we
@@ -114,7 +114,7 @@ struct impl_count_trailing_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         unsigned int x = static_cast<unsigned int>(a);
 #ifdef _MSC_VER
         unsigned long index;
@@ -136,7 +136,7 @@ struct impl_count_trailing_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         unsigned long x = static_cast<unsigned long>(a);
 #ifdef _MSC_VER
         unsigned long index;
@@ -159,7 +159,7 @@ struct impl_count_trailing_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         unsigned long long x = static_cast<unsigned long long>(a);
 #ifndef _MSC_VER
         return __builtin_ctzll(x);
@@ -180,7 +180,7 @@ struct impl_count_trailing_zeros {
             return static_cast<int>(index);
         } else {
             // given that lo == 0, the precondition of a != 0 means that hi != 0
-            HPBC_ASSERT2(hi != 0);
+            HPBC_UTIL_ASSERT2(hi != 0);
             unsigned long index;
             _BitScanForward(&index, hi);
             return static_cast<int>(index + 32);
@@ -200,7 +200,7 @@ struct impl_count_trailing_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         T x = a;
         constexpr int digitsT = ut_numeric_limits<T>::digits;
         static_assert(digitsT == 128, "");
@@ -215,7 +215,7 @@ struct impl_count_trailing_zeros {
             return __builtin_ctzll(lo);
         else {
             // given that lo == 0, the precondition of a != 0 means that hi != 0.
-            HPBC_ASSERT2(hi != 0);
+            HPBC_UTIL_ASSERT2(hi != 0);
             return __builtin_ctzll(hi) + 64;
         }
 #else   // MSVC++
@@ -233,7 +233,7 @@ struct impl_count_trailing_zeros {
         }
         else {
             // given that lo == 0, the precondition of a != 0 means that hi != 0.
-            HPBC_ASSERT2(hi != 0);
+            HPBC_UTIL_ASSERT2(hi != 0);
             unsigned long index;
             _BitScanForward64(&index, hi);
             return static_cast<int>(index + 64);
@@ -260,7 +260,7 @@ struct impl_count_trailing_zeros {
         } else {
             // given that  word3 == 0 && word2 == 0 && word1 == 0, the precondition
             // of a != 0 means that word0 != 0.
-            HPBC_ASSERT2(word0 != 0);
+            HPBC_UTIL_ASSERT2(word0 != 0);
             _BitScanForward(&index, word0);
             return static_cast<int>(index + 96);
         }
@@ -279,7 +279,7 @@ struct impl_count_trailing_zeros {
        , int>::type
     call(T a)
     {
-        HPBC_PRECONDITION2(a != 0);
+        HPBC_UTIL_PRECONDITION2(a != 0);
         return default_count_trailing_zeros::call(a);
     }
 };

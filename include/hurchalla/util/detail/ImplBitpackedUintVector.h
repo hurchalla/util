@@ -5,7 +5,7 @@
 #define HURCHALLA_UTIL_IMPL_BITPACKED_UINT_VECTOR_H_INCLUDED
 
 
-#include "hurchalla/util/programming_by_contract.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include "hurchalla/util/traits/safely_promote_unsigned.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <limits>
@@ -165,7 +165,7 @@ public:
         constexpr std::size_t MAXSIZET= std::numeric_limits<std::size_t>::max();
         std::size_t bytes_needed = starting_byte;
         if (bit_offset != 0) {
-            HPBC_CONSTEXPR_ASSERT(bit_offset < 8);
+            HPBC_UTIL_CONSTEXPR_ASSERT(bit_offset < 8);
             if (bytes_needed == MAXSIZET)
                 return 0;
             else
@@ -264,7 +264,7 @@ private:
         bit_offset = static_cast<std::size_t>(
                                      (static_cast<P>(index) * ELEM_BITLEN) % 8);
 #endif
-        HPBC_CONSTEXPR_POSTCONDITION(bit_offset < 8);
+        HPBC_UTIL_CONSTEXPR_POSTCONDITION(bit_offset < 8);
     }
 
 
@@ -276,7 +276,7 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         constexpr decltype(element_bitlen) element_bytes =
                       static_cast<decltype(element_bitlen)>(element_bitlen / 8);
@@ -286,13 +286,13 @@ private:
         starting_byte = static_cast<std::size_t>(index * element_bytes);
         bit_offset = 0;
 
-        if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
+        if (HPBC_UTIL_ASSERT2_MACRO_IS_ACTIVE) {
             std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
-            HPBC_ASSERT2(overflowed == false);
-            HPBC_ASSERT2(offset == bit_offset);
-            HPBC_ASSERT2(start == starting_byte);
+            HPBC_UTIL_ASSERT2(overflowed == false);
+            HPBC_UTIL_ASSERT2(offset == bit_offset);
+            HPBC_UTIL_ASSERT2(start == starting_byte);
         }
     }
 
@@ -303,8 +303,8 @@ public:
     typename std::enable_if<(BITS == 8), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
         std::size_t index_st = static_cast<std::size_t>(index);
         vec8[index_st] = static_cast<unsigned char>(value);
     }
@@ -312,10 +312,10 @@ public:
     typename std::enable_if<(BITS == 8), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
         std::size_t index_st = static_cast<std::size_t>(index);
         U value = vec8[index_st];
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return value;
     }
 
@@ -324,8 +324,8 @@ public:
     typename std::enable_if<(BITS == 16), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -340,7 +340,7 @@ public:
     typename std::enable_if<(BITS == 16), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -348,7 +348,7 @@ public:
         static_assert(std::numeric_limits<U>::digits >= 16, "");
         U value = static_cast<U>( vec8[starting_byte + 0] +
                                (static_cast<U>(vec8[starting_byte + 1]) << 8) );
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return value;
     }
 
@@ -357,8 +357,8 @@ public:
     typename std::enable_if<(BITS == 24), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -374,7 +374,7 @@ public:
     typename std::enable_if<(BITS == 24), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -383,7 +383,7 @@ public:
         U value = vec8[starting_byte + 0] +
                   (static_cast<U>(vec8[starting_byte + 1]) << 8) +
                   (static_cast<U>(vec8[starting_byte + 2]) << 16);
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return value;
     }
 
@@ -392,8 +392,8 @@ public:
     typename std::enable_if<(BITS == 32), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -410,7 +410,7 @@ public:
     typename std::enable_if<(BITS == 32), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
@@ -420,7 +420,7 @@ public:
                   (static_cast<U>(vec8[starting_byte + 1]) << 8) +
                   (static_cast<U>(vec8[starting_byte + 2]) << 16) +
                   (static_cast<U>(vec8[starting_byte + 3]) << 24);
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return value;
     }
 
@@ -434,7 +434,7 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         static_assert(8 % element_bitlen == 0, "");
         constexpr decltype(element_bitlen) elements_per_byte = 8/element_bitlen;
@@ -447,19 +447,19 @@ private:
         bit_offset = static_cast<std::size_t>(
                                  (static_cast<P>(index) * element_bitlen) % 8);
 
-        if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
+        if (HPBC_UTIL_ASSERT2_MACRO_IS_ACTIVE) {
             std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
-            HPBC_ASSERT2(overflowed == false);
-            HPBC_ASSERT2(offset == bit_offset);
-            HPBC_ASSERT2(start == starting_byte);
+            HPBC_UTIL_ASSERT2(overflowed == false);
+            HPBC_UTIL_ASSERT2(offset == bit_offset);
+            HPBC_UTIL_ASSERT2(start == starting_byte);
         }
           // We know  bit_offset ≡ index*element_bitlen  (mod 8)
           // thus     bit_offset + k*8 = index*element_bitlen  for some k
           // Since    8 ≡ 0  (mod element_bitlen)
           // we have  bit_offset ≡ 0  (mod element_bitlen)
-        HPBC_ASSERT2(bit_offset % element_bitlen == 0);
+        HPBC_UTIL_ASSERT2(bit_offset % element_bitlen == 0);
           // If element_bitlen == 1, then since bit_offset < 8,
           //    element_bitlen + bit_offset <= 8.
           // If element_bitlen == 2, then since bit_offset < 8,
@@ -468,23 +468,23 @@ private:
           // If element_bitlen == 4, then since bit_offset < 8,
           //    bit_offset must be 0 or 4.  Thus
           //    element_bitlen + bit_offset <= 8.
-        HPBC_POSTCONDITION2(element_bitlen + bit_offset <= 8);
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_UTIL_POSTCONDITION2(element_bitlen + bit_offset <= 8);
+        HPBC_UTIL_POSTCONDITION2(bit_offset < 8);
     }
 public:
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 1)||(BITS == 2)||(BITS == 4), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
           // from getLocationFromIndex() we know
-        HPBC_ASSERT2(element_bitlen + bit_offset <= 8);
+        HPBC_UTIL_ASSERT2(element_bitlen + bit_offset <= 8);
 
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 8, "");
 
         uint8_t newbits = static_cast<uint8_t>(
@@ -500,21 +500,21 @@ public:
     typename std::enable_if<(BITS == 1) || (BITS == 2) || (BITS == 4), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
           // from getLocationFromIndex() we know
-        HPBC_ASSERT2(element_bitlen + bit_offset <= 8);
+        HPBC_UTIL_ASSERT2(element_bitlen + bit_offset <= 8);
 
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 8, "");
 
         uint8_t byte = static_cast<uint8_t>(vec8[starting_byte] >> bit_offset);
         constexpr uint8_t mask = static_cast<uint8_t>((1 << element_bitlen) - 1);
         uint8_t value = mask & byte;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 
@@ -529,15 +529,15 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
           // index < size() will convert correctly by attemptGetLocationFromIndex().
           // Thus we don't need to check overflowed below- it is always false.
         bool overflowed;
         attemptGetLocationFromIndex(index, starting_byte, bit_offset, overflowed);
-        HPBC_ASSERT2(overflowed == false);
+        HPBC_UTIL_ASSERT2(overflowed == false);
         // attemptGetLocationFromIndex() guarantees bit_offset < 8
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_UTIL_POSTCONDITION2(bit_offset < 8);
     }
 public:
     // note that this function should work for any element_bitlen < 8
@@ -546,13 +546,13 @@ public:
                             (BITS == 6) || (BITS == 7), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 8, "");
 
         uint16_t oldword = static_cast<uint16_t>(
@@ -577,12 +577,12 @@ public:
                             (BITS == 6) || (BITS == 7), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 8, "");
 
         uint16_t word = static_cast<uint16_t>(
@@ -593,7 +593,7 @@ public:
         constexpr uint8_t mask = (static_cast<uint8_t>(1) << element_bitlen) - 1;
         uint16_t value = mask & word;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 
@@ -606,7 +606,7 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
           // We would like to set  starting_byte = (index * element_bitlen) / 8
           // but (index * element_bitlen) might overflow.  So instead:
@@ -627,7 +627,7 @@ private:
           // index < size() can be converted correctly into starting_byte and
           // bit_offset form, so long as the intermediate calculations are done
           // without overflow.  Therefore we can assert
-          HPBC_ASSERT2(index <= ST_MAX - index / spills_per_byte);
+          HPBC_UTIL_ASSERT2(index <= ST_MAX - index / spills_per_byte);
           // Thus we know the sum in starting_byte couldn't have overflowed.
 
         using P = typename safely_promote_unsigned<size_type>::type;
@@ -636,13 +636,13 @@ private:
         bit_offset = static_cast<std::size_t>(
                                  (static_cast<P>(index) * element_bitlen) % 8);
 
-        if (HPBC_ASSERT2_MACRO_IS_ACTIVE) {
+        if (HPBC_UTIL_ASSERT2_MACRO_IS_ACTIVE) {
             std::size_t start, offset;
             bool overflowed;
             attemptGetLocationFromIndex(index, start, offset, overflowed);
-            HPBC_ASSERT2(overflowed == false);
-            HPBC_ASSERT2(offset == bit_offset);
-            HPBC_ASSERT2(start == starting_byte);
+            HPBC_UTIL_ASSERT2(overflowed == false);
+            HPBC_UTIL_ASSERT2(offset == bit_offset);
+            HPBC_UTIL_ASSERT2(start == starting_byte);
         }
 
         static_assert(element_bitlen % spill == 0, "");
@@ -650,8 +650,8 @@ private:
           // thus     bit_offset + k*8 = index*element_bitlen  for some k
           // Since    8 ≡ 0  (mod spill)   And   element_bitlen ≡ 0  (mod spill)
           // we have  bit_offset ≡ 0  (mod spill)
-        HPBC_ASSERT2(bit_offset < 8);
-        HPBC_ASSERT2(bit_offset % spill == 0);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset % spill == 0);
           // If element_bitlen == 9, then since bit_offset <= 7,
           //    element_bitlen + bit_offset <= 16.
           // If element_bitlen == 10, then spill == 2 and so
@@ -660,23 +660,23 @@ private:
           // If element_bitlen == 12, then spill == 4 and so
           //    bit_offset must be 0 or 4.  Thus
           //    element_bitlen + bit_offset <= 16.
-        HPBC_POSTCONDITION2(element_bitlen + bit_offset <= 16);
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_UTIL_POSTCONDITION2(element_bitlen + bit_offset <= 16);
+        HPBC_UTIL_POSTCONDITION2(bit_offset < 8);
     }
 public:
     template <int BITS = element_bitlen>
     typename std::enable_if<(BITS == 9)||(BITS == 10)||(BITS == 12), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
           // from getLocationFromIndex() we know
-        HPBC_ASSERT2(element_bitlen + bit_offset <= 16);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(element_bitlen + bit_offset <= 16);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         uint16_t oldword = static_cast<uint16_t>(
                 (static_cast<uint16_t>(vec8[starting_byte + 0]) << 0) +
                 (static_cast<uint16_t>(vec8[starting_byte + 1]) << 8) );
@@ -697,14 +697,14 @@ public:
     typename std::enable_if<(BITS == 9)||(BITS == 10)||(BITS == 12), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
 
           // from getLocationFromIndex() we know
-        HPBC_ASSERT2(element_bitlen + bit_offset <= 16);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(element_bitlen + bit_offset <= 16);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         uint16_t word = static_cast<uint16_t>(
                 (static_cast<uint16_t>(vec8[starting_byte + 0]) << 0) +
                 (static_cast<uint16_t>(vec8[starting_byte + 1]) << 8) );
@@ -714,7 +714,7 @@ public:
         constexpr uint16_t mask = (static_cast<uint16_t>(1) << element_bitlen) - 1;
         uint16_t value = mask & word;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 
@@ -729,15 +729,15 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
           // index < size() will convert correctly by attemptGetLocationFromIndex().
           // Thus we don't need to check overflowed below- it is always false.
         bool overflowed;
         attemptGetLocationFromIndex(index, starting_byte, bit_offset, overflowed);
-        HPBC_ASSERT2(overflowed == false);
+        HPBC_UTIL_ASSERT2(overflowed == false);
         // attemptGetLocationFromIndex() guarantees bit_offset < 8
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_UTIL_POSTCONDITION2(bit_offset < 8);
     }
 public:
     // note that this function should work for any  8 < element_bitlen < 16
@@ -746,12 +746,12 @@ public:
                             (BITS == 14) || (BITS == 15), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 16, "");
 
         uint32_t oldword =
@@ -776,11 +776,11 @@ public:
                             (BITS == 14) || (BITS == 15), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 16, "");
 
         uint32_t word =
@@ -792,7 +792,7 @@ public:
         constexpr uint16_t mask = (static_cast<uint16_t>(1) << element_bitlen) - 1;
         uint32_t value = mask & word;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 
@@ -809,15 +809,15 @@ private:
     getLocationFromIndex(size_type index,
                       std::size_t& starting_byte, std::size_t& bit_offset) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
           // The constructor established a class invariant that any
           // index < size() will convert correctly by attemptGetLocationFromIndex().
           // Thus we don't need to check overflowed below- it is always false.
         bool overflowed;
         attemptGetLocationFromIndex(index, starting_byte, bit_offset, overflowed);
-        HPBC_ASSERT2(overflowed == false);
+        HPBC_UTIL_ASSERT2(overflowed == false);
         // attemptGetLocationFromIndex() guarantees bit_offset < 8
-        HPBC_POSTCONDITION2(bit_offset < 8);
+        HPBC_UTIL_POSTCONDITION2(bit_offset < 8);
     }
 public:
 // 17 to 23 bit:
@@ -825,12 +825,12 @@ public:
     typename std::enable_if<(16 < BITS && BITS < 24), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 24, "");
 
         uint32_t oldword =
@@ -855,11 +855,11 @@ public:
     typename std::enable_if<(16 < BITS && BITS < 24), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 24, "");
 
         uint32_t word =
@@ -872,7 +872,7 @@ public:
         constexpr uint32_t mask = (static_cast<uint32_t>(1) << element_bitlen) - 1;
         uint32_t value = mask & word;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 
@@ -881,12 +881,12 @@ public:
     typename std::enable_if<(24 < BITS && BITS < 32), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 32, "");
 
         uint32_t oldword32 =
@@ -914,11 +914,11 @@ public:
     typename std::enable_if<(24 < BITS && BITS < 32), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
 
         std::size_t starting_byte, bit_offset;
         getLocationFromIndex(index, starting_byte, bit_offset);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
         static_assert(element_bitlen < 32, "");
 
         uint32_t word32 =
@@ -933,7 +933,7 @@ public:
         constexpr uint32_t mask = (static_cast<uint32_t>(1) << element_bitlen) - 1;
         uint32_t value = mask & word;
 
-        HPBC_POSTCONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
         return static_cast<U>(value);
     }
 };
@@ -955,8 +955,8 @@ public:
     typename std::enable_if<(16 < BITS), void>::type
     setAt(size_type index, U value)
     {
-        HPBC_PRECONDITION2(value <= max_allowed_value());
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(value <= max_allowed_value());
+        HPBC_UTIL_PRECONDITION2(index < size());
         // The constructor and resize() maintain a class invariant that any
         // index < size() will convert correctly by attemptGetLocationFromIndex().
         // Thus we don't need to check overflowed below- it is always false
@@ -964,8 +964,8 @@ public:
         size_type starting_byte, bit_offset;
         bool overflowed;
         attemptGetLocationFromIndex(index, starting_byte, bit_offset, overflowed);
-        HPBC_ASSERT2(overflowed == false);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(overflowed == false);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
 
         uint8_t mask = (static_cast<uint8_t>(1) << bit_offset) - 1;
         uint8_t oldbits = mask & vec8[starting_byte + 0];
@@ -1019,7 +1019,7 @@ public:
 
 
         if constexpr (element_bitlen % 8 == 0) {
-            HPBC_ASSERT2(bit_offset == 0);
+            HPBC_UTIL_ASSERT2(bit_offset == 0);
             // there's nothing more to do.
         } else {
               // when 8 <= element_bitlen < 16, we need (conceptually at least)
@@ -1041,10 +1041,10 @@ public:
               // And since  bit_offset < 8
               // element_bitlen > bit_offset + element_bitlen % 8 == num_mask_newbits
               // Therefore
-            HPBC_ASSERT2(element_bitlen > num_mask_newbits);
+            HPBC_UTIL_ASSERT2(element_bitlen > num_mask_newbits);
               // Since bit_offset <= 7 and (element_bitlen % 8) <= 7,
               // num_mask_newbits == bit_offset + (element_bitlen % 8) <= 14
-            HPBC_ASSERT2(0 <= num_mask_newbits && num_mask_newbits <= 14);
+            HPBC_UTIL_ASSERT2(0 <= num_mask_newbits && num_mask_newbits <= 14);
 
             uint16_t mask2 = ~((static_cast<uint16_t>(1) << num_mask_newbits) - 1);
 
@@ -1084,7 +1084,7 @@ public:
     typename std::enable_if<(16 < BITS), U>::type
     getAt(size_type index) const
     {
-        HPBC_PRECONDITION2(index < size());
+        HPBC_UTIL_PRECONDITION2(index < size());
         // The constructor and resize() maintain a class invariant that any
         // index < size() will convert correctly by attemptGetLocationFromIndex().
         // Thus we don't need to check overflowed below- it is always false
@@ -1092,8 +1092,8 @@ public:
         size_type starting_byte, bit_offset;
         bool overflowed;
         attemptGetLocationFromIndex(index, starting_byte, bit_offset, overflowed);
-        HPBC_ASSERT2(overflowed == false);
-        HPBC_ASSERT2(bit_offset < 8);
+        HPBC_UTIL_ASSERT2(overflowed == false);
+        HPBC_UTIL_ASSERT2(bit_offset < 8);
 
         static_assert(element_bitlen >= 8, "");
         U value = (static_cast<U>(vec8[starting_byte + 0]) << 0);
@@ -1135,7 +1135,7 @@ public:
         static_assert(element_bitlen <= 128, "");
 
         if constexpr (element_bitlen % 8 == 0) {
-            HPBC_ASSERT2(bit_offset == 0);
+            HPBC_UTIL_ASSERT2(bit_offset == 0);
             return value;
         } else {
             value = value >> bit_offset;
@@ -1162,7 +1162,7 @@ public:
             static_assert(element_bitlen >= 16, "");
             value += (static_cast<U>(last_two_bytes) << (element_bitlen - num_mask_newbits));
 
-            HPBC_POSTCONDITION2(value <= max_allowed_value());
+            HPBC_UTIL_POSTCONDITION2(value <= max_allowed_value());
             return value;
 
             // TODO if constexpr (element_bitlen % 8 == 1 or 2 or 4) (?)  we could skip reading the final byte

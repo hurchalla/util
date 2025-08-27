@@ -451,7 +451,8 @@ elif [ "${mode,,}" = "debug" ]; then
             -DFORCE_TEST_HURCHALLA_CPP11_STANDARD=$force_cpp11_testing \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_EXE_LINKER_FLAGS="$clang_ubsan_link_flags" \
-            -DCMAKE_CXX_FLAGS="$cpp_stdlib  $clang_ubsan  \
+            -DCMAKE_CXX_FLAGS="-DHURCHALLA_UTIL_ENABLE_ASSERTS=1 \
+            $cpp_stdlib  $clang_ubsan  \
             $gcc_ubsan  $test_avoid_cselect \
             $gcc_static_analysis"  "${clang_static_analysis[@]}" \
             $cmake_cpp_compiler $cmake_c_compiler
@@ -471,7 +472,7 @@ fi
 
 
 if [ "$run_tests" = true ]; then
-  ./$build_dir/test_ndebug_programming_by_contract --gtest_break_on_failure
+  ./$build_dir/test_inactive_programming_by_contract --gtest_break_on_failure
   exit_on_failure
   ./$build_dir/test_programming_by_contract --gtest_break_on_failure
   exit_on_failure

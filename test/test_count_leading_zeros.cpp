@@ -5,7 +5,6 @@
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/count_leading_zeros.h"
 #include "hurchalla/util/compiler_macros.h"
-#include "hurchalla/util/programming_by_contract.h"
 #include "gtest/gtest.h"
 #include <type_traits>
 #include <cstdint>
