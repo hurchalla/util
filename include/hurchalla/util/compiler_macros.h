@@ -127,7 +127,7 @@
 #    define HURCHALLA_TARGET_BIT_WIDTH 32
 #  else
      // fallback if we couldn't find the target ALU's native bit depth after
-     // looking at predefined compiler macros
+     // looking at recently defined compiler macros
 #    include <cstdint>
 #    if SIZE_MAX == UINT64_MAX
 #      define HURCHALLA_TARGET_BIT_WIDTH 64
@@ -146,14 +146,14 @@
    static_assert(sizeof(std::size_t) * CHAR_BIT == HURCHALLA_TARGET_BIT_WIDTH,
       "[This may be a false positive, but] This error suggests that the "
       "preprocessor logic in this header file incorrectly set "
-      "HURCHALLA_TARGET_BIT_WIDTH.  You can predefine "
+      "HURCHALLA_TARGET_BIT_WIDTH.  You can define "
       "HURCHALLA_TARGET_BIT_WIDTH yourself, or change this file");
 #else
-   // sanity check the predefined value set for HURCHALLA_TARGET_BIT_WIDTH
+   // sanity check the value defined for HURCHALLA_TARGET_BIT_WIDTH
 #  include <type_traits>
    static_assert(std::is_integral<decltype(HURCHALLA_TARGET_BIT_WIDTH)>::value
                  && HURCHALLA_TARGET_BIT_WIDTH > 0,
-      "When you predefine the macro HURCHALLA_TARGET_BIT_WIDTH, it must be a "
+      "When you define the macro HURCHALLA_TARGET_BIT_WIDTH, it must be a "
       "positive integer");
 #endif
 
