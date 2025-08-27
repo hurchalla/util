@@ -33,7 +33,7 @@ jobs:
 
     - name: Test (NDEBUG) Programming by Contract
       working-directory: ${{github.workspace}}/build
-      run: ./test_ndebug_programming_by_contract
+      run: ./test_inactive_programming_by_contract
       
     - name: Test Programming by Contract
       working-directory: ${{github.workspace}}/build
