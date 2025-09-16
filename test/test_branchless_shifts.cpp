@@ -21,6 +21,10 @@ template <typename U>
 U generate_random_value(std::mt19937_64& gen,
                         std::uniform_int_distribution<uint64_t>& distrib64)
 {
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4127 4293)
+#endif
    if (hurchalla::ut_numeric_limits<U>::digits > 64) {
       uint64_t u1 = distrib64(gen);
       uint64_t u2 = distrib64(gen);
@@ -29,6 +33,9 @@ U generate_random_value(std::mt19937_64& gen,
    } else {
       return static_cast<U>(distrib64(gen));
    }
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 }
 
 
