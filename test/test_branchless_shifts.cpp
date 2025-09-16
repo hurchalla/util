@@ -21,7 +21,7 @@ template <typename U>
 U generate_random_value(std::mt19937_64& gen,
                         std::uniform_int_distribution<uint64_t>& distrib64)
 {
-   if HURCHALLA_CPP17_CONSTEXPR (hurchalla::ut_numeric_limits<U>::digits > 64) {
+   if (hurchalla::ut_numeric_limits<U>::digits > 64) {
       uint64_t u1 = distrib64(gen);
       uint64_t u2 = distrib64(gen);
       U val = static_cast<U>((static_cast<U>(u2) << 64u) | static_cast<U>(u1));
