@@ -2,11 +2,11 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
-#ifndef HURCHALLA_UTIL_SHIFT_RIGHT_LIMITED_H_INCLUDED
-#define HURCHALLA_UTIL_SHIFT_RIGHT_LIMITED_H_INCLUDED
+#ifndef HURCHALLA_UTIL_BRANCHLESS_SHIFT_LEFT_H_INCLUDED
+#define HURCHALLA_UTIL_BRANCHLESS_SHIFT_LEFT_H_INCLUDED
 
 
-#include "hurchalla/util/detail/platform_specific/impl_shift_right_limited.h"
+#include "hurchalla/util/detail/platform_specific/impl_branchless_shift_left.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/compiler_macros.h"
 #include "hurchalla/util/detail/util_programming_by_contract.h"
@@ -14,13 +14,10 @@
 namespace hurchalla {
 
 
-// The best performing version of right shift (much than operator ">>"), when
-// the type T is larger than the native register size, and the shift amount is
-// less than the native register bit width.  Performance is the same otherwise.
-// Requires as a precondition that shift < HURCHALLA_TARGET_BIT_WIDTH.
+// Left shift of unsigned integer type T.  Compiles with no conditional branches.
 template <typename T>
 HURCHALLA_FORCE_INLINE
-T shift_right_limited(T a, int shift)
+T branchless_shift_left(T a, int shift)
 {
     static_assert(ut_numeric_limits<T>::is_integer, "");
     static_assert(!(ut_numeric_limits<T>::is_signed), "");
@@ -28,9 +25,8 @@ T shift_right_limited(T a, int shift)
 
     HPBC_UTIL_PRECONDITION2(shift >= 0);
     HPBC_UTIL_PRECONDITION2(shift < ut_numeric_limits<T>::digits);
-    HPBC_UTIL_PRECONDITION2(shift < HURCHALLA_TARGET_BIT_WIDTH);
 
-    return detail::impl_shift_right_limited<T>::call(a, shift);
+    return detail::impl_branchless_shift_left<T>::call(a, shift);
 }
 
 

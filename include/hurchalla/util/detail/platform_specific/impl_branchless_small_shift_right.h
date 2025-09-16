@@ -2,8 +2,8 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
-#ifndef HURCHALLA_UTIL_IMPL_SHIFT_RIGHT_LIMITED_H_INCLUDED
-#define HURCHALLA_UTIL_IMPL_SHIFT_RIGHT_LIMITED_H_INCLUDED
+#ifndef HURCHALLA_UTIL_IMPL_BRANCHLESS_SMALL_SHIFT_RIGHT_H_INCLUDED
+#define HURCHALLA_UTIL_IMPL_BRANCHLESS_SMALL_SHIFT_RIGHT_H_INCLUDED
 
 
 #include "hurchalla/util/traits/ut_numeric_limits.h"
@@ -17,7 +17,7 @@ namespace hurchalla { namespace detail {
 
 // primary template
 template <typename T, class Enable = void>
-struct impl_shift_right_limited {
+struct impl_branchless_small_shift_right {
   // handles types T that are two times larger than the native bit width
   HURCHALLA_FORCE_INLINE static T call(T a, int shift)
   {
@@ -25,8 +25,7 @@ struct impl_shift_right_limited {
     static_assert(!(ut_numeric_limits<T>::is_signed), "");
 
     static_assert(ut_numeric_limits<T>::digits == 2 * HURCHALLA_TARGET_BIT_WIDTH, "");
-    HPBC_UTIL_PRECONDITION2(shift < HURCHALLA_TARGET_BIT_WIDTH);
-    HPBC_UTIL_PRECONDITION2(shift >= 0);
+    HPBC_UTIL_PRECONDITION2(0 <= shift && shift < HURCHALLA_TARGET_BIT_WIDTH);
 
 #if defined(HURCHALLA_TARGET_ISA_X86_64)
     // x86 clang and gcc produce optimal asm, if we limit the shift amount
@@ -51,7 +50,7 @@ struct impl_shift_right_limited {
 };
 
 template <typename T>
-struct impl_shift_right_limited<T, typename
+struct impl_branchless_small_shift_right<T, typename
         std::enable_if<(ut_numeric_limits<T>::digits <= HURCHALLA_TARGET_BIT_WIDTH)>::type> {
   // handles types T that are smaller than or the same size as the native bit width
   HURCHALLA_FORCE_INLINE static T call(T a, int shift)
@@ -59,9 +58,8 @@ struct impl_shift_right_limited<T, typename
     static_assert(ut_numeric_limits<T>::is_integer, "");
     static_assert(!(ut_numeric_limits<T>::is_signed), "");
 
-    HPBC_UTIL_PRECONDITION2(shift < ut_numeric_limits<T>::digits);
+    HPBC_UTIL_PRECONDITION2(0 <= shift && shift < ut_numeric_limits<T>::digits);
     HPBC_UTIL_PRECONDITION2(shift < HURCHALLA_TARGET_BIT_WIDTH);
-    HPBC_UTIL_PRECONDITION2(shift >= 0);
 
     return static_cast<T>(a >> shift);
   }
