@@ -4,6 +4,7 @@
 
 
 #include "hurchalla/util/shift_left.h"
+#include "hurchalla/util/shift_right.h"
 #include "hurchalla/util/shift_left_limited.h"
 #include "hurchalla/util/shift_right_limited.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
@@ -74,6 +75,7 @@ void test_shifts()
     for (auto val : vec) {
         for (int i=0; i<bitsT; ++i) {
             EXPECT_TRUE(hc::shift_left(val, i) == static_cast<T>(val << i));
+            EXPECT_TRUE(hc::shift_right(val, i) == static_cast<T>(val >> i));
         }
         for (int i=0; i<bitsLimited; ++i) {
             EXPECT_TRUE(hc::shift_left_limited(val, i) == static_cast<T>(val << i));
