@@ -64,7 +64,7 @@ TEST(HurchallaUtil, count_trailing_zeros) {
     EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint16_t>(258)) == 1);
     EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint16_t>(1)) == 0);
     EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint16_t>(24)) == 3);
-    EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint16_t>(1 << 15)) == 15);
+    EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint16_t>(static_cast<uint16_t>(1) << 15)) == 15);
 
     EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint32_t>(65536)) == 16);
     EXPECT_TRUE(hc::count_trailing_zeros(static_cast<uint32_t>(65537)) == 0);

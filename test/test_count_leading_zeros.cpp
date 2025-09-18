@@ -59,7 +59,7 @@ TEST(HurchallaUtil, count_leading_zeros) {
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned short>(260)) == digitsUS - 9);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned short>(512)) == digitsUS - 10);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned short>(1)) == digitsUS - 1);
-    EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned short>(1 << (digitsUS - 1))) == 0);
+    EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned short>(1u << (digitsUS - 1))) == 0);
     EXPECT_TRUE(hc::count_leading_zeros((static_cast<unsigned int>(1)<<(digitsUI - 2)) + 29) == 1);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<unsigned int>(1)) == digitsUI - 1);
     EXPECT_TRUE(hc::count_leading_zeros((static_cast<unsigned long>(1)<<(digitsUL - 4)) + 255) == 3);
@@ -77,7 +77,7 @@ TEST(HurchallaUtil, count_leading_zeros) {
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint16_t>(254)) == 8);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint16_t>(256)) == 7);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint16_t>(1)) == 15);
-    EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint16_t>(1 << 15)) == 0);
+    EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint16_t>(1u << 15)) == 0);
 
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint32_t>(65536)) == 15);
     EXPECT_TRUE(hc::count_leading_zeros(static_cast<uint32_t>(65535)) == 16);

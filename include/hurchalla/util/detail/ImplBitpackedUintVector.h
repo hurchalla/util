@@ -491,7 +491,7 @@ public:
                             static_cast<uint8_t>(value) << bit_offset);
 
         constexpr uint8_t mask = static_cast<uint8_t>((1 << element_bitlen) - 1);
-        auto mask2 = ~(mask << bit_offset);
+        auto mask2 = ~(static_cast<unsigned int>(mask << bit_offset));
         auto oldbits = mask2 & vec8[starting_byte];
 
         vec8[starting_byte] = static_cast<unsigned char>(oldbits | newbits);
