@@ -168,12 +168,12 @@ struct impl_cselect_on_bit {
 # define HURCHALLA_CMOVNZ_1_ARG1_TO_RESULT \
                  "cmovnzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0])
 # define HURCHALLA_CMOVZ_1_ARG1_TO_RESULT \
                  "cmovzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0])
 # define HURCHALLA_CMOVNS_1_ARG1_TO_RESULT \
                  "cmovnsq %[arg1_0], %[result_0] \n\t" \
@@ -190,13 +190,13 @@ struct impl_cselect_on_bit {
                  "cmovnzq %[arg1_0], %[result_0] \n\t" \
                  "cmovnzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 # define HURCHALLA_CMOVZ_2_ARG1_TO_RESULT \
                  "cmovzq %[arg1_0], %[result_0] \n\t" \
                  "cmovzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 # define HURCHALLA_CMOVNS_2_ARG1_TO_RESULT \
                  "cmovnsq %[arg1_0], %[result_0] \n\t" \
@@ -216,14 +216,14 @@ struct impl_cselect_on_bit {
                  "cmovnzq %[arg1_1], %[result_1] \n\t" \
                  "cmovnzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 # define HURCHALLA_CMOVZ_3_ARG1_TO_RESULT \
                  "cmovzq %[arg1_0], %[result_0] \n\t" \
                  "cmovzq %[arg1_1], %[result_1] \n\t" \
                  "cmovzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 # define HURCHALLA_CMOVNS_3_ARG1_TO_RESULT \
                  "cmovnsq %[arg1_0], %[result_0] \n\t" \
@@ -246,7 +246,7 @@ struct impl_cselect_on_bit {
                  "cmovnzq %[arg1_2], %[result_2] \n\t" \
                  "cmovnzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 # define HURCHALLA_CMOVZ_4_ARG1_TO_RESULT \
                  "cmovzq %[arg1_0], %[result_0] \n\t" \
@@ -254,7 +254,7 @@ struct impl_cselect_on_bit {
                  "cmovzq %[arg1_2], %[result_2] \n\t" \
                  "cmovzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"r"(value), \
+                 : [value]"rm"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 # define HURCHALLA_CMOVNS_4_ARG1_TO_RESULT \
                  "cmovnsq %[arg1_0], %[result_0] \n\t" \
