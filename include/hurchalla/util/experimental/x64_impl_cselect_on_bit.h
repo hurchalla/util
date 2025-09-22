@@ -53,109 +53,109 @@ struct impl_cselect_on_bit {
     // only use "r" here.  See https://github.com/llvm/llvm-project/issues/20571
 
 # define HURCHALLA_CMOVNZ_1_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0])
 # define HURCHALLA_CMOVZ_1_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0])
 # define HURCHALLA_CMOVNS_1_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0])
 # define HURCHALLA_CMOVS_1_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0])
 
 # define HURCHALLA_CMOVNZ_2_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t"\
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1])
 # define HURCHALLA_CMOVZ_2_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t"\
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1])
 # define HURCHALLA_CMOVNS_2_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t"\
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1])
 # define HURCHALLA_CMOVS_2_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t"\
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1])
 
 # define HURCHALLA_CMOVNZ_3_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t" \
-                 "cmovnz %[arg1_2], %[result_2] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2])
 # define HURCHALLA_CMOVZ_3_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t" \
-                 "cmovz %[arg1_2], %[result_2] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2])
 # define HURCHALLA_CMOVNS_3_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t" \
-                 "cmovns %[arg1_2], %[result_2] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnsq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2])
 # define HURCHALLA_CMOVS_3_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t" \
-                 "cmovs %[arg1_2], %[result_2] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovsq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2])
 
 # define HURCHALLA_CMOVNZ_4_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t" \
-                 "cmovnz %[arg1_2], %[result_2] \n\t" \
-                 "cmovnz %[arg1_3], %[result_3] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnzq %[arg1_2], %[result_2] \n\t" \
+                 "cmovnzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2]), [arg1_3]"r"(arg1[3])
 # define HURCHALLA_CMOVZ_4_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t" \
-                 "cmovz %[arg1_2], %[result_2] \n\t" \
-                 "cmovz %[arg1_3], %[result_3] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovzq %[arg1_2], %[result_2] \n\t" \
+                 "cmovzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2]), [arg1_3]"r"(arg1[3])
 # define HURCHALLA_CMOVNS_4_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t" \
-                 "cmovns %[arg1_2], %[result_2] \n\t" \
-                 "cmovns %[arg1_3], %[result_3] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnsq %[arg1_2], %[result_2] \n\t" \
+                 "cmovnsq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2]), [arg1_3]"r"(arg1[3])
 # define HURCHALLA_CMOVS_4_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t" \
-                 "cmovs %[arg1_2], %[result_2] \n\t" \
-                 "cmovs %[arg1_3], %[result_3] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovsq %[arg1_2], %[result_2] \n\t" \
+                 "cmovsq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
                  : [value]"r"(value), \
                    [arg1_0]"r"(arg1[0]), [arg1_1]"r"(arg1[1]), [arg1_2]"r"(arg1[2]), [arg1_3]"r"(arg1[3])
@@ -166,111 +166,111 @@ struct impl_cselect_on_bit {
     // we use "rm" here.  See https://github.com/llvm/llvm-project/issues/20571
 
 # define HURCHALLA_CMOVNZ_1_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0])
 # define HURCHALLA_CMOVZ_1_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0])
 # define HURCHALLA_CMOVNS_1_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0])
 # define HURCHALLA_CMOVS_1_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
                  : [result_0]"+r"(result[0]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0])
 
 # define HURCHALLA_CMOVNZ_2_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t"\
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 # define HURCHALLA_CMOVZ_2_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t"\
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 # define HURCHALLA_CMOVNS_2_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t"\
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 # define HURCHALLA_CMOVS_2_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t"\
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t"\
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1])
 
 # define HURCHALLA_CMOVNZ_3_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t" \
-                 "cmovnz %[arg1_2], %[result_2] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 # define HURCHALLA_CMOVZ_3_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t" \
-                 "cmovz %[arg1_2], %[result_2] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovzq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 # define HURCHALLA_CMOVNS_3_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t" \
-                 "cmovns %[arg1_2], %[result_2] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnsq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 # define HURCHALLA_CMOVS_3_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t" \
-                 "cmovs %[arg1_2], %[result_2] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovsq %[arg1_2], %[result_2] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2])
 
 # define HURCHALLA_CMOVNZ_4_ARG1_TO_RESULT \
-                 "cmovnz %[arg1_0], %[result_0] \n\t" \
-                 "cmovnz %[arg1_1], %[result_1] \n\t" \
-                 "cmovnz %[arg1_2], %[result_2] \n\t" \
-                 "cmovnz %[arg1_3], %[result_3] \n\t" \
+                 "cmovnzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnzq %[arg1_2], %[result_2] \n\t" \
+                 "cmovnzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 # define HURCHALLA_CMOVZ_4_ARG1_TO_RESULT \
-                 "cmovz %[arg1_0], %[result_0] \n\t" \
-                 "cmovz %[arg1_1], %[result_1] \n\t" \
-                 "cmovz %[arg1_2], %[result_2] \n\t" \
-                 "cmovz %[arg1_3], %[result_3] \n\t" \
+                 "cmovzq %[arg1_0], %[result_0] \n\t" \
+                 "cmovzq %[arg1_1], %[result_1] \n\t" \
+                 "cmovzq %[arg1_2], %[result_2] \n\t" \
+                 "cmovzq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 # define HURCHALLA_CMOVNS_4_ARG1_TO_RESULT \
-                 "cmovns %[arg1_0], %[result_0] \n\t" \
-                 "cmovns %[arg1_1], %[result_1] \n\t" \
-                 "cmovns %[arg1_2], %[result_2] \n\t" \
-                 "cmovns %[arg1_3], %[result_3] \n\t" \
+                 "cmovnsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovnsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovnsq %[arg1_2], %[result_2] \n\t" \
+                 "cmovnsq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 # define HURCHALLA_CMOVS_4_ARG1_TO_RESULT \
-                 "cmovs %[arg1_0], %[result_0] \n\t" \
-                 "cmovs %[arg1_1], %[result_1] \n\t" \
-                 "cmovs %[arg1_2], %[result_2] \n\t" \
-                 "cmovs %[arg1_3], %[result_3] \n\t" \
+                 "cmovsq %[arg1_0], %[result_0] \n\t" \
+                 "cmovsq %[arg1_1], %[result_1] \n\t" \
+                 "cmovsq %[arg1_2], %[result_2] \n\t" \
+                 "cmovsq %[arg1_3], %[result_3] \n\t" \
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3]) \
-                 : [value]"rm"(value), \
+                 : [value]"r"(value), \
                    [arg1_0]"rm"(arg1[0]), [arg1_1]"rm"(arg1[1]), [arg1_2]"rm"(arg1[2]), [arg1_3]"rm"(arg1[3])
 
 #endif
@@ -288,7 +288,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVZ_1_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -298,7 +298,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVZ_2_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -308,7 +308,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVZ_3_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -318,7 +318,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVZ_4_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -329,7 +329,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVNZ_1_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -339,7 +339,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVNZ_2_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -349,7 +349,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVNZ_3_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -359,7 +359,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<0 <= BITNUM && BITNUM
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %[mask], %b[value] \n\t"
+        __asm__ ("testb %[mask], %b[value] \n\t"
                  HURCHALLA_CMOVNZ_4_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -378,7 +378,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVZ_1_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -388,7 +388,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVZ_2_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -398,7 +398,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVZ_3_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -408,7 +408,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVZ_4_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -419,7 +419,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVNZ_1_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -429,7 +429,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVNZ_2_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -439,7 +439,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVNZ_3_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -449,7 +449,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<BITNUM != 15 && 8 <= 
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %[mask], %k[value] \n\t"
+        __asm__ ("testl %[mask], %k[value] \n\t"
                  HURCHALLA_CMOVNZ_4_ARG1_TO_RESULT,
                  [mask]"i"(mask)
                  : "cc");
@@ -467,7 +467,7 @@ struct impl_cselect_on_bit<7, void> {
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVNS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -476,7 +476,7 @@ struct impl_cselect_on_bit<7, void> {
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVNS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -485,7 +485,7 @@ struct impl_cselect_on_bit<7, void> {
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVNS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -494,7 +494,7 @@ struct impl_cselect_on_bit<7, void> {
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVNS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -504,7 +504,7 @@ struct impl_cselect_on_bit<7, void> {
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -513,7 +513,7 @@ struct impl_cselect_on_bit<7, void> {
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -522,7 +522,7 @@ struct impl_cselect_on_bit<7, void> {
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -531,7 +531,7 @@ struct impl_cselect_on_bit<7, void> {
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %b[value], %b[value] \n\t"
+        __asm__ ("testb %b[value], %b[value] \n\t"
                  HURCHALLA_CMOVS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -547,7 +547,7 @@ struct impl_cselect_on_bit<15, void> {
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVNS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -556,7 +556,7 @@ struct impl_cselect_on_bit<15, void> {
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVNS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -565,7 +565,7 @@ struct impl_cselect_on_bit<15, void> {
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVNS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -574,7 +574,7 @@ struct impl_cselect_on_bit<15, void> {
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVNS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -584,7 +584,7 @@ struct impl_cselect_on_bit<15, void> {
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -593,7 +593,7 @@ struct impl_cselect_on_bit<15, void> {
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -602,7 +602,7 @@ struct impl_cselect_on_bit<15, void> {
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -611,7 +611,7 @@ struct impl_cselect_on_bit<15, void> {
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %w[value], %w[value] \n\t"
+        __asm__ ("testw %w[value], %w[value] \n\t"
                  HURCHALLA_CMOVS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -627,7 +627,7 @@ struct impl_cselect_on_bit<31, void> {
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVNS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -636,7 +636,7 @@ struct impl_cselect_on_bit<31, void> {
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVNS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -645,7 +645,7 @@ struct impl_cselect_on_bit<31, void> {
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVNS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -654,7 +654,7 @@ struct impl_cselect_on_bit<31, void> {
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVNS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -664,7 +664,7 @@ struct impl_cselect_on_bit<31, void> {
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -673,7 +673,7 @@ struct impl_cselect_on_bit<31, void> {
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -682,7 +682,7 @@ struct impl_cselect_on_bit<31, void> {
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -691,7 +691,7 @@ struct impl_cselect_on_bit<31, void> {
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %k[value], %k[value] \n\t"
+        __asm__ ("testl %k[value], %k[value] \n\t"
                  HURCHALLA_CMOVS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -707,7 +707,7 @@ struct impl_cselect_on_bit<63, void> {
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVNS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -716,7 +716,7 @@ struct impl_cselect_on_bit<63, void> {
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVNS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -725,7 +725,7 @@ struct impl_cselect_on_bit<63, void> {
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVNS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -734,7 +734,7 @@ struct impl_cselect_on_bit<63, void> {
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVNS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -744,7 +744,7 @@ struct impl_cselect_on_bit<63, void> {
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVS_1_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -753,7 +753,7 @@ struct impl_cselect_on_bit<63, void> {
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVS_2_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -762,7 +762,7 @@ struct impl_cselect_on_bit<63, void> {
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVS_3_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -771,7 +771,7 @@ struct impl_cselect_on_bit<63, void> {
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("test %q[value], %q[value] \n\t"
+        __asm__ ("testq %q[value], %q[value] \n\t"
                  HURCHALLA_CMOVS_4_ARG1_TO_RESULT
                  : "cc");
         return result;
@@ -790,8 +790,8 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     eq_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovnc %[arg1_0], %[result_0] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovncq %[arg1_0], %[result_0] \n\t"
                  : [result_0]"+r"(result[0])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -807,9 +807,9 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     eq_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovnc %[arg1_0], %[result_0] \n\t"
-                 "cmovnc %[arg1_1], %[result_1] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovncq %[arg1_0], %[result_0] \n\t"
+                 "cmovncq %[arg1_1], %[result_1] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -825,10 +825,10 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     eq_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovnc %[arg1_0], %[result_0] \n\t"
-                 "cmovnc %[arg1_1], %[result_1] \n\t"
-                 "cmovnc %[arg1_2], %[result_2] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovncq %[arg1_0], %[result_0] \n\t"
+                 "cmovncq %[arg1_1], %[result_1] \n\t"
+                 "cmovncq %[arg1_2], %[result_2] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -844,11 +844,11 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     eq_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovnc %[arg1_0], %[result_0] \n\t"
-                 "cmovnc %[arg1_1], %[result_1] \n\t"
-                 "cmovnc %[arg1_2], %[result_2] \n\t"
-                 "cmovnc %[arg1_3], %[result_3] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovncq %[arg1_0], %[result_0] \n\t"
+                 "cmovncq %[arg1_1], %[result_1] \n\t"
+                 "cmovncq %[arg1_2], %[result_2] \n\t"
+                 "cmovncq %[arg1_3], %[result_3] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -865,8 +865,8 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     ne_0(uint64_t value, std::array<uint64_t, 1> arg1, std::array<uint64_t, 1> arg2)
     {
         std::array<uint64_t, 1> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovc %[arg1_0], %[result_0] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovcq %[arg1_0], %[result_0] \n\t"
                  : [result_0]"+r"(result[0])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -882,9 +882,9 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     ne_0(uint64_t value, std::array<uint64_t, 2> arg1, std::array<uint64_t, 2> arg2)
     {
         std::array<uint64_t, 2> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovc %[arg1_0], %[result_0] \n\t"
-                 "cmovc %[arg1_1], %[result_1] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovcq %[arg1_0], %[result_0] \n\t"
+                 "cmovcq %[arg1_1], %[result_1] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+r"(result[1])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -900,10 +900,10 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     ne_0(uint64_t value, std::array<uint64_t, 3> arg1, std::array<uint64_t, 3> arg2)
     {
         std::array<uint64_t, 3> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovc %[arg1_0], %[result_0] \n\t"
-                 "cmovc %[arg1_1], %[result_1] \n\t"
-                 "cmovc %[arg1_2], %[result_2] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovcq %[arg1_0], %[result_0] \n\t"
+                 "cmovcq %[arg1_1], %[result_1] \n\t"
+                 "cmovcq %[arg1_2], %[result_2] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+r"(result[2])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
@@ -919,11 +919,11 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
     ne_0(uint64_t value, std::array<uint64_t, 4> arg1, std::array<uint64_t, 4> arg2)
     {
         std::array<uint64_t, 4> result = arg2;
-        __asm__ ("bt %[bitnum], %q[value] \n\t"
-                 "cmovc %[arg1_0], %[result_0] \n\t"
-                 "cmovc %[arg1_1], %[result_1] \n\t"
-                 "cmovc %[arg1_2], %[result_2] \n\t"
-                 "cmovc %[arg1_3], %[result_3] \n\t"
+        __asm__ ("btq %[bitnum], %q[value] \n\t"
+                 "cmovcq %[arg1_0], %[result_0] \n\t"
+                 "cmovcq %[arg1_1], %[result_1] \n\t"
+                 "cmovcq %[arg1_2], %[result_2] \n\t"
+                 "cmovcq %[arg1_3], %[result_3] \n\t"
                  : [result_0]"+&r"(result[0]), [result_1]"+&r"(result[1]), [result_2]"+&r"(result[2]), [result_3]"+r"(result[3])
                  : [value]"r"(value),
 #if defined(__clang__)   // https://github.com/llvm/llvm-project/issues/20571
