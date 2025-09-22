@@ -74,6 +74,7 @@ add_executable(test_hurchalla_util
                test_conditional_select.cpp
                test_count_leading_zeros.cpp
                test_count_trailing_zeros.cpp
+               test_cselect_on_bit.cpp
                test_extensible_make_signed.cpp
                test_extensible_make_unsigned.cpp
                test_is_equality_comparable.cpp
