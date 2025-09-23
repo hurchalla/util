@@ -5,6 +5,10 @@
 #ifndef HURCHALLA_UTIL_BRANCHLESS_SHIFT_RIGHT_H_INCLUDED
 #define HURCHALLA_UTIL_BRANCHLESS_SHIFT_RIGHT_H_INCLUDED
 
+// note: in order to make this function use inline asm on x64, you must compile
+// with either gcc or clang, and define either  HURCHALLA_ALLOW_INLINE_ASM_ALL
+// or  HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
+
 
 #include "hurchalla/util/detail/platform_specific/impl_branchless_shift_right.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"

@@ -41,6 +41,7 @@ struct impl_branchless_shift_left {
 
 #if defined(HURCHALLA_TARGET_ISA_X86_64)
 # if defined(__GNUC__) && !defined(__clang__)   // gcc
+#  if defined(HURCHALLA_ALLOW_INLINE_ASM_ALL) || defined(HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS)
     static_assert(ut_numeric_limits<T>::digits == 128, "");
     static_assert(ut_numeric_limits<H>::digits == 64, "");
     // gcc very often uses branches for the compiler generated shifts for
@@ -55,7 +56,9 @@ struct impl_branchless_shift_left {
              : [zero]"r"(zero), [ushift]"c"(ushift)
              : "cc");
     T result = (static_cast<T>(ahi) << 64) | alo;
-
+#  else
+    T result = a << ushift;
+#  endif
 # else  // clang, if T == __uint128_t, since MSVC doesn't support __uint128_t
     // Clang compiler's plain shift is fine, since clang never seems to use
     // branches for __uint128_t shifts.
