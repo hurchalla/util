@@ -5,9 +5,9 @@
 #ifndef HURCHALLA_UTIL_BRANCHLESS_SHIFT_LEFT_H_INCLUDED
 #define HURCHALLA_UTIL_BRANCHLESS_SHIFT_LEFT_H_INCLUDED
 
-// note: in order to make this function use inline asm on x64, you must compile
-// with either gcc or clang, and define either  HURCHALLA_ALLOW_INLINE_ASM_ALL
-// or  HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
+// note: in order to get guaranteed branchless machine code (via inline asm) on
+// x64 when using g++ (gcc) compiler, you must define either
+// HURCHALLA_ALLOW_INLINE_ASM_ALL or HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
 
 
 #include "hurchalla/util/detail/platform_specific/impl_branchless_shift_left.h"
