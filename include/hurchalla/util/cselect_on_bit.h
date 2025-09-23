@@ -9,6 +9,7 @@
 #include "hurchalla/util/detail/platform_specific/impl_cselect_on_bit.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <array>
+#include <cstdint>
 
 namespace hurchalla {
 
