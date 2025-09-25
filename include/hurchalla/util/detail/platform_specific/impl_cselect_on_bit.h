@@ -6,6 +6,8 @@
 #define HURCHALLA_UTIL_IMPL_CSELECT_ON_BIT_H_INCLUDED
 
 
+#include "hurchalla/util/traits/ut_numeric_limits.h"
+#include "hurchalla/util/traits/extensible_make_unsigned.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <cstdint>
 #include <type_traits>
@@ -1383,6 +1385,118 @@ struct impl_cselect_on_bit {
 
 
 #endif
+// -----------------------------------------------------------------------------
+
+
+
+// impl_cselect_scalar_on_bit is for ALL configurations (asm and not, for all
+// platforms)
+
+
+template <int BITNUM>
+struct impl_cselect_scalar_on_bit {
+
+    // for T <= 32 bit
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits <= 32), T>::type
+    eq_0(uint64_t value, T arg1, T arg2)
+    {
+        // on a 16/32 bit machine that we don't have any inline asm for, we'd
+        // prefer not to take a (very small) risk that the compiler might create
+        // slower code from casting to/from uint64_t, just to eventually do a
+        // ternary operation.  Hence we check HURCHALLA_TARGET_BIT_WIDTH
+#if HURCHALLA_TARGET_BIT_WIDTH >= 64
+        std::array<uint64_t,1> ret = impl_cselect_on_bit<BITNUM>::eq_0(value,
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg1)},
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg2)});
+        return static_cast<T>(ret[0]);
+#else
+        return ((value & (static_cast<uint64_t>(1)<<BITNUM)) == 0) ? arg1 : arg2;
+#endif
+    }
+    // for 64 bit T
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits > 32) &&
+                            (ut_numeric_limits<T>::digits <= 64), T>::type
+    eq_0(uint64_t value, T arg1, T arg2)
+    {
+        std::array<uint64_t,1> ret = impl_cselect_on_bit<BITNUM>::eq_0(value,
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg1)},
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg2)});
+        return static_cast<T>(ret[0]);
+    }
+    // for 128 bit T
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits > 64) &&
+                            (ut_numeric_limits<T>::digits <= 128), T>::type
+    eq_0(uint64_t value, T arg1, T arg2)
+    {
+        using U = typename ::hurchalla::extensible_make_unsigned<T>::type;
+        U u1 = static_cast<U>(arg1);
+        U u2 = static_cast<U>(arg2);
+        std::array<uint64_t, 2> arr1 =
+             { static_cast<uint64_t>(u1), static_cast<uint64_t>(u1 >> 64) };
+        std::array<uint64_t, 2> arr2 =
+             { static_cast<uint64_t>(u2), static_cast<uint64_t>(u2 >> 64) };
+        std::array<uint64_t, 2> sel = impl_cselect_on_bit<BITNUM>::eq_0(value, arr1, arr2);
+        U selection = (static_cast<U>(sel[1]) << 64) | static_cast<U>(sel[0]);
+        return static_cast<T>(selection);
+    }
+
+    // for T <= 32 bit
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits <= 32), T>::type
+    ne_0(uint64_t value, T arg1, T arg2)
+    {
+        // on a 16/32 bit machine that we don't have any inline asm for, we'd
+        // prefer not to take a (very small) risk that the compiler might create
+        // slower code from casting to/from uint64_t, just to eventually do a
+        // ternary operation.  Hence we check HURCHALLA_TARGET_BIT_WIDTH
+#if HURCHALLA_TARGET_BIT_WIDTH >= 64
+        std::array<uint64_t,1> ret = impl_cselect_on_bit<BITNUM>::ne_0(value,
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg1)},
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg2)});
+        return static_cast<T>(ret[0]);
+#else
+        return ((value & (static_cast<uint64_t>(1)<<BITNUM)) != 0) ? arg1 : arg2;
+#endif
+    }
+    // for 64 bit T
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits > 32) &&
+                            (ut_numeric_limits<T>::digits <= 64), T>::type
+    ne_0(uint64_t value, T arg1, T arg2)
+    {
+        std::array<uint64_t,1> ret = impl_cselect_on_bit<BITNUM>::ne_0(value,
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg1)},
+                          std::array<uint64_t,1>{static_cast<uint64_t>(arg2)});
+        return static_cast<T>(ret[0]);
+    }
+    // for 128 bit T
+    template <typename T>
+    static HURCHALLA_FORCE_INLINE
+    typename std::enable_if<(ut_numeric_limits<T>::digits > 64) &&
+                            (ut_numeric_limits<T>::digits <= 128), T>::type
+    ne_0(uint64_t value, T arg1, T arg2)
+    {
+        using U = typename ::hurchalla::extensible_make_unsigned<T>::type;
+        U u1 = static_cast<U>(arg1);
+        U u2 = static_cast<U>(arg2);
+        std::array<uint64_t, 2> arr1 =
+             { static_cast<uint64_t>(u1), static_cast<uint64_t>(u1 >> 64) };
+        std::array<uint64_t, 2> arr2 =
+             { static_cast<uint64_t>(u2), static_cast<uint64_t>(u2 >> 64) };
+        std::array<uint64_t, 2> sel = impl_cselect_on_bit<BITNUM>::ne_0(value, arr1, arr2);
+        U selection = (static_cast<U>(sel[1]) << 64) | static_cast<U>(sel[0]);
+        return static_cast<T>(selection);
+    }
+};
+
 
 }}  // end namespace
 

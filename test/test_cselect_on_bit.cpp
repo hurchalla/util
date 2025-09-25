@@ -85,11 +85,48 @@ void test_cselect_on_bit()
     std::array<uint64_t, 4> arg2_size4 = { pattern2, pattern2, pattern2, pattern2 };
 
 
-    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones, pattern1, pattern2) == pattern2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  pattern1, pattern2) == pattern2);
     EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, pattern1, pattern2) == pattern1);
-    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones, pattern1, pattern2) == pattern1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  pattern1, pattern2) == pattern1);
     EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, pattern1, pattern2) == pattern2);
 
+    int64_t i64_1 = static_cast<int64_t>(pattern1);
+    int64_t i64_2 = static_cast<int64_t>(pattern2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  i64_1, i64_2) == i64_2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, i64_1, i64_2) == i64_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  i64_1, i64_2) == i64_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, i64_1, i64_2) == i64_2);
+
+    int64_t u32_1 = static_cast<uint32_t>(pattern1);
+    int64_t u32_2 = static_cast<uint32_t>(pattern2);
+    int64_t i32_1 = static_cast<int32_t>(pattern1);
+    int64_t i32_2 = static_cast<int32_t>(pattern2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  i32_1, i32_2) == i32_2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, i32_1, i32_2) == i32_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  i32_1, i32_2) == i32_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, i32_1, i32_2) == i32_2);
+
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  u32_1, u32_2) == u32_2);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, u32_1, u32_2) == u32_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  u32_1, u32_2) == u32_1);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, u32_1, u32_2) == u32_2);
+
+#if HURCHALLA_COMPILER_HAS_UINT128_T()
+    __uint128_t u1_128 = (static_cast<__uint128_t>(pattern1) << 64) | pattern1;
+    __uint128_t u2_128 = (static_cast<__uint128_t>(pattern2) << 64) | pattern2;
+    __int128_t i1_128 = static_cast<__int128_t>(u1_128);
+    __int128_t i2_128 = static_cast<__int128_t>(u2_128);
+
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  u1_128, u2_128) == u2_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, u1_128, u2_128) == u1_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  u1_128, u2_128) == u1_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, u1_128, u2_128) == u2_128);
+
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones,  i1_128, i2_128) == i2_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, i1_128, i2_128) == i1_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_ones,  i1_128, i2_128) == i1_128);
+    EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(all_zeros, i1_128, i2_128) == i2_128);
+#endif
 
     EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_ones, arg1_size1, arg2_size1) == arg2_size1);
     EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(all_zeros, arg1_size1, arg2_size1) == arg1_size1);
@@ -128,6 +165,33 @@ void test_cselect_on_bit()
                  ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? pattern1 : pattern2);
         EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, pattern1, pattern2) ==
                  ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? pattern1 : pattern2);
+
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value, i64_1, i64_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? i64_1 : i64_2);
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, i64_1, i64_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? i64_1 : i64_2);
+
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value, u32_1, u32_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? u32_1 : u32_2);
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, u32_1, u32_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? u32_1 : u32_2);
+
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value, i32_1, i32_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? i32_1 : i32_2);
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, i32_1, i32_2) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? i32_1 : i32_2);
+
+#if HURCHALLA_COMPILER_HAS_UINT128_T()
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value,  u1_128, u2_128) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? u1_128 : u2_128);
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, u1_128, u2_128) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? u1_128 : u2_128);
+
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value,  i1_128, i2_128) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) == 0) ? i1_128 : i2_128);
+        EXPECT_TRUE(cselect_on_bit<BITNUM>::ne_0(value, i1_128, i2_128) ==
+                 ((value & (static_cast<uint64_t>(1) << BITNUM)) != 0) ? i1_128 : i2_128);
+#endif
 
         EXPECT_TRUE(cselect_on_bit<BITNUM>::eq_0(value, arg1_size1, arg2_size1) ==
                          ref_csel_on_bit_eq_0<BITNUM>(value, arg1_size1, arg2_size1));
