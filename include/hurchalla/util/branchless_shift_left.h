@@ -7,7 +7,7 @@
 
 // note: in order to get guaranteed branchless machine code (via inline asm) on
 // x64 when using g++ (gcc) compiler, you must define either
-// HURCHALLA_ALLOW_INLINE_ASM_ALL or HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
+// HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
 
 
 #include "hurchalla/util/detail/platform_specific/impl_branchless_shift_left.h"

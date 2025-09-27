@@ -2,7 +2,9 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
-#define HURCHALLA_ALLOW_INLINE_ASM_ALL   // enable cselect_on_bit asm versions
+// enable cselect_on_bit asm versions (if available for the compiled platform),
+// for testing purposes
+#define HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT
 
 
 #include "hurchalla/util/cselect_on_bit.h"

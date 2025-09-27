@@ -40,7 +40,7 @@ struct impl_branchless_shift_right {
 
 #if defined(HURCHALLA_TARGET_ISA_X86_64)
 # if defined(__GNUC__) && !defined(__clang__)   // gcc
-#  if defined(HURCHALLA_ALLOW_INLINE_ASM_ALL) || defined(HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS)
+#  if defined(HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS)
 
     static_assert(ut_numeric_limits<T>::digits == 128, "");
     static_assert(ut_numeric_limits<H>::digits == 64, "");

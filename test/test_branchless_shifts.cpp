@@ -3,7 +3,7 @@
 // by the file "LICENSE.TXT" in the root of this repository ---
 
 // enable impl_branchless_shift_right and impl_branchless_shift_left asm versions, if applicable
-#define HURCHALLA_ALLOW_INLINE_ASM_ALL
+#define HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
 
 
 #include "hurchalla/util/branchless_shift_left.h"
