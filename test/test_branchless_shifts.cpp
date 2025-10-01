@@ -2,10 +2,6 @@
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
-// enable impl_branchless_shift_right and impl_branchless_shift_left asm versions, if applicable
-#define HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
-
-
 #include "hurchalla/util/branchless_shift_left.h"
 #include "hurchalla/util/branchless_shift_right.h"
 #include "hurchalla/util/branchless_large_shift_left.h"
@@ -88,6 +84,16 @@ void test_branchless_shifts()
         for (int i=0; i<bitsT; ++i) {
             EXPECT_TRUE(hc::branchless_shift_left(val, i) == static_cast<T>(val << i));
             EXPECT_TRUE(hc::branchless_shift_right(val, i) == static_cast<T>(val >> i));
+
+            // make sure we test both the asm (where available) and non-asm versions
+            EXPECT_TRUE(hc::detail::impl_branchless_shift_left<T>::call_asm(val, i) ==
+                        static_cast<T>(val << i));
+            EXPECT_TRUE(hc::detail::impl_branchless_shift_right<T>::call_asm(val, i) ==
+                        static_cast<T>(val >> i));
+            EXPECT_TRUE(hc::detail::impl_branchless_shift_left<T>::call(val, i) ==
+                        static_cast<T>(val << i));
+            EXPECT_TRUE(hc::detail::impl_branchless_shift_right<T>::call(val, i) ==
+                        static_cast<T>(val >> i));
         }
         for (int i=0; i<smallShiftMax; ++i) {
             EXPECT_TRUE(hc::branchless_small_shift_right(val, i) == (val >> i));

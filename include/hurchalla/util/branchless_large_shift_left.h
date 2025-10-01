@@ -32,7 +32,10 @@ T branchless_large_shift_left(T a, int shift)
     HPBC_UTIL_PRECONDITION2(bitsT - static_cast<int>(HURCHALLA_TARGET_BIT_WIDTH) <= shift);
     HPBC_UTIL_PRECONDITION2(shift < bitsT);
 
-    return detail::impl_branchless_large_shift_left<T>::call(a, shift);
+    T result = detail::impl_branchless_large_shift_left<T>::call(a, shift);
+
+    HPBC_UTIL_POSTCONDITION2(result == static_cast<T>(a << shift));
+    return result;
 }
 
 

@@ -5,9 +5,13 @@
 #ifndef HURCHALLA_UTIL_BRANCHLESS_SHIFT_RIGHT_H_INCLUDED
 #define HURCHALLA_UTIL_BRANCHLESS_SHIFT_RIGHT_H_INCLUDED
 
-// note: in order to get guaranteed branchless machine code (via inline asm) on
-// x64 when using g++ (gcc) compiler, you must define either
-// HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS
+// note: when using g++ (gcc) compiler on x64 or ARM64, in order to be certain
+// of getting branchless machine code (via inline asm), you must define
+// HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS.  Clang seems to have no need
+// for inline asm and thus no need for this macro, since it always seems to be
+// branchless.  MSVC doesn't support inline asm but it's unlikely it would need
+// it - MSVC will very likely always be branchless for its supported types since
+// it doesn't support __uint128_t.
 
 
 #include "hurchalla/util/detail/platform_specific/impl_branchless_shift_right.h"
@@ -31,7 +35,14 @@ T branchless_shift_right(T a, int shift)
     HPBC_UTIL_PRECONDITION2(shift >= 0);
     HPBC_UTIL_PRECONDITION2(shift < ut_numeric_limits<T>::digits);
 
-    return detail::impl_branchless_shift_right<T>::call(a, shift);
+#if defined(HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS)
+    T result = detail::impl_branchless_shift_right<T>::call_asm(a, shift);
+#else
+    T result = detail::impl_branchless_shift_right<T>::call(a, shift);
+#endif
+
+    HPBC_UTIL_POSTCONDITION2(result == static_cast<T>(a >> shift));
+    return result;
 }
 
 
