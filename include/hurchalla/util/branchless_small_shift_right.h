@@ -27,12 +27,12 @@ T branchless_small_shift_right(T a, int shift)
     static_assert(!(ut_numeric_limits<T>::is_signed), "");
     static_assert(ut_numeric_limits<T>::digits <= 2 * HURCHALLA_TARGET_BIT_WIDTH, "");
 
-    HPBC_UTIL_PRECONDITION2(0 <= shift && shift < ut_numeric_limits<T>::digits);
-    HPBC_UTIL_PRECONDITION2(shift < HURCHALLA_TARGET_BIT_WIDTH);
+    HPBC_UTIL_API_PRECONDITION(0 <= shift && shift < ut_numeric_limits<T>::digits);
+    HPBC_UTIL_API_PRECONDITION(shift < HURCHALLA_TARGET_BIT_WIDTH);
 
     T result = detail::impl_branchless_small_shift_right<T>::call(a, shift);
 
-    HPBC_UTIL_POSTCONDITION2(result == static_cast<T>(a >> shift));
+    HPBC_UTIL_POSTCONDITION(result == static_cast<T>(a >> shift));
     return result;
 }
 

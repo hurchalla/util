@@ -6,6 +6,7 @@
 
 
 #include "hurchalla/util/detail/impl_conditional_select.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/compiler_macros.h"
 #include <type_traits>
@@ -62,7 +63,10 @@ template <typename T, class PerfTag = CSelectDefaultTag>
 HURCHALLA_FORCE_INLINE T conditional_select(bool cond, T a, T b)
 {
     static_assert(ut_numeric_limits<T>::is_integer, "");
-    return detail::impl_conditional_select<T, PerfTag>::call(cond, a, b);
+    auto result = detail::impl_conditional_select<T, PerfTag>::call(cond, a, b);
+
+    HPBC_UTIL_POSTCONDITION(result == (cond) ? a : b);
+    return result;
 }
 
 

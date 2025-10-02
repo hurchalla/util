@@ -32,8 +32,8 @@ T branchless_shift_right(T a, int shift)
     static_assert(!(ut_numeric_limits<T>::is_signed), "");
     static_assert(ut_numeric_limits<T>::digits <= 2 * HURCHALLA_TARGET_BIT_WIDTH, "");
 
-    HPBC_UTIL_PRECONDITION2(shift >= 0);
-    HPBC_UTIL_PRECONDITION2(shift < ut_numeric_limits<T>::digits);
+    HPBC_UTIL_API_PRECONDITION(shift >= 0);
+    HPBC_UTIL_API_PRECONDITION(shift < ut_numeric_limits<T>::digits);
 
 #if defined(HURCHALLA_ALLOW_INLINE_ASM_BRANCHLESS_SHIFTS)
     T result = detail::impl_branchless_shift_right<T>::call_asm(a, shift);
@@ -41,7 +41,7 @@ T branchless_shift_right(T a, int shift)
     T result = detail::impl_branchless_shift_right<T>::call(a, shift);
 #endif
 
-    HPBC_UTIL_POSTCONDITION2(result == static_cast<T>(a >> shift));
+    HPBC_UTIL_POSTCONDITION(result == static_cast<T>(a >> shift));
     return result;
 }
 

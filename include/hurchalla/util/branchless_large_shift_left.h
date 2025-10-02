@@ -28,13 +28,13 @@ T branchless_large_shift_left(T a, int shift)
     static_assert(ut_numeric_limits<T>::digits <= 2 * HURCHALLA_TARGET_BIT_WIDTH, "");
 
     constexpr int bitsT = ut_numeric_limits<T>::digits;
-    HPBC_UTIL_PRECONDITION2(0 <= shift);
-    HPBC_UTIL_PRECONDITION2(bitsT - static_cast<int>(HURCHALLA_TARGET_BIT_WIDTH) <= shift);
-    HPBC_UTIL_PRECONDITION2(shift < bitsT);
+    HPBC_UTIL_API_PRECONDITION(0 <= shift);
+    HPBC_UTIL_API_PRECONDITION(bitsT - static_cast<int>(HURCHALLA_TARGET_BIT_WIDTH) <= shift);
+    HPBC_UTIL_API_PRECONDITION(shift < bitsT);
 
     T result = detail::impl_branchless_large_shift_left<T>::call(a, shift);
 
-    HPBC_UTIL_POSTCONDITION2(result == static_cast<T>(a << shift));
+    HPBC_UTIL_POSTCONDITION(result == static_cast<T>(a << shift));
     return result;
 }
 
