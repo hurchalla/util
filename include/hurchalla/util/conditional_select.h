@@ -65,7 +65,7 @@ HURCHALLA_FORCE_INLINE T conditional_select(bool cond, T a, T b)
     static_assert(ut_numeric_limits<T>::is_integer, "");
     auto result = detail::impl_conditional_select<T, PerfTag>::call(cond, a, b);
 
-    HPBC_UTIL_POSTCONDITION(result == (cond) ? a : b);
+    HPBC_UTIL_POSTCONDITION(result == ((cond) ? a : b));
     return result;
 }
 
