@@ -36,7 +36,8 @@ is recommended for development and debug builds, and not for release builds
 where performance matters.
 
 
-The rest of the programming by contract assertion macros are enabled by defining
+The rest of the programming by contract assertion macros (and also
+HPBC_UTIL_API_PRECONDITION) are enabled by defining
     HURCHALLA_UTIL_ENABLE_ASSERTS
 
 Typically only a provider would define this, in order to help them check that
@@ -47,6 +48,7 @@ so.
 
 The names of the of the programming by contract macros that are enabled by
 defining HURCHALLA_UTIL_ENABLE_ASSERTS are:
+    HPBC_UTIL_API_PRECONDITION(x)
     HPBC_UTIL_PRECONDITION(x)
     HPBC_UTIL_PRECONDITION2(x)
     HPBC_UTIL_PRECONDITION3(x)
