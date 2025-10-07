@@ -153,7 +153,7 @@ struct impl_unsigned_multiply_to_hilo_product {
       static_assert(ut_numeric_limits<T>::is_integer, "");
       static_assert(!(ut_numeric_limits<T>::is_signed), "");
       static_assert(ut_numeric_limits<T>::digits > HURCHALLA_TARGET_BIT_WIDTH,
-        "For T <= the native bit depth, it makes sense to issue the compile error requested by HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH.  Note for T larger than the native bit depth, there would be no way to avoid using a slow math routine.");
+        "For T <= the native bit depth, it makes sense to issue the compile error requested by HURCHALLA_COMPILE_ERROR_ON_SLOW_MATH.  For T larger than the native bit depth, it is more difficult to avoid using a slow math routine.");
 #endif
       return slow_unsigned_multiply_to_hilo_product::call(lowProduct, u, v);
   }
@@ -252,6 +252,184 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
   }
 };
 #endif
+
+
+
+
+
+// On ARM64, benchmarking on M2, using inline asm for this function provided
+// ~3-6% perf boost.  The benefit was greatest for throughput-bound situations
+// (though latency-bound improved too).  Naturally it does not affect *signed*
+// multiplies, because this is an unsigned mul.
+// Measurements were with gcc and clang.
+//
+// On x64, benchmarking on Zen4, I obtained similar perf improvements, though
+// with gcc, the benefit was at times extremely large - gcc seemed to sometimes
+// make terrible choices in generating asm from the plain C++ (non-inline-asm)
+// function.
+
+
+#if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
+    defined(HURCHALLA_TARGET_ISA_X86_64) && \
+    defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
+
+template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
+  HURCHALLA_FORCE_INLINE static
+  __uint128_t call(__uint128_t& lowProduct, __uint128_t u, __uint128_t v)
+  {
+    using T = __uint128_t;
+    using H = std::uint64_t;
+    static constexpr unsigned int shift = 64;
+
+    H u0 = static_cast<H>(u);
+    H v0 = static_cast<H>(v);
+    H u1 = static_cast<H>(u >> shift);
+    H v1 = static_cast<H>(v >> shift);
+
+#if 0
+// This benchmarks slower than the #else for clang and gcc - it's perhaps 5-8%
+// slower on clang, and just terrible on gcc (around 50-80%? slower).  Gcc
+// apparently produces terrible asm for the mults, prior to the inline asm.
+
+    // Calculate all the cross products.
+    T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
+    T hi_lo = static_cast<T>(u1) * static_cast<T>(v0);
+    T lo_hi = static_cast<T>(u0) * static_cast<T>(v1);
+    T hi_hi = static_cast<T>(u1) * static_cast<T>(v1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    H hi_lo_1 = static_cast<H>(hi_lo);
+    H hi_lo_2 = static_cast<H>(hi_lo >> shift);
+
+    H lo_hi_1 = static_cast<H>(lo_hi);
+    H lo_hi_2 = static_cast<H>(lo_hi >> shift);
+
+    H hi_hi_2 = static_cast<H>(hi_hi);
+    H hi_hi_3 = static_cast<H>(hi_hi >> shift);
+
+    __asm__ ("add %[hi_lo_1], %[lo_lo_1] \n\t"
+             "adc %[hi_lo_2], %[hi_hi_2] \n\t"
+             "adc $0, %[hi_hi_3] \n\t"
+             "add %[lo_hi_1], %[lo_lo_1] \n\t"
+             "adc %[lo_hi_2], %[hi_hi_2] \n\t"
+             "adc $0, %[hi_hi_3] \n\t"
+             : [lo_lo_1]"+&r"(lo_lo_1), [hi_hi_2]"+&r"(hi_hi_2),
+               [hi_hi_3]"+&r"(hi_hi_3)
+#  if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
+             : [hi_lo_1]"r"(hi_lo_1), [hi_lo_2]"r"(hi_lo_2),
+               [lo_hi_1]"r"(lo_hi_1), [lo_hi_2]"r"(lo_hi_2)
+#  else
+             : [hi_lo_1]"rm"(hi_lo_1), [hi_lo_2]"rm"(hi_lo_2),
+               [lo_hi_1]"rm"(lo_hi_1), [lo_hi_2]"rm"(lo_hi_2)
+#  endif
+             : "cc");
+
+#else
+// This benchmarks best for both gcc and clang.
+
+    H rrax = u0;
+    H rrdx, lo_lo_0, lo_lo_1, hi_lo_2;
+    __asm__ ("mulq %[v0] \n\t"             /* rdx:rax = rax*v0 (rax == u0); high-order bits of the product in rdx */
+             "movq %%rax, %[lo_lo_0] \n\t"
+             "movq %%rdx, %[lo_lo_1] \n\t"
+             "movq %[u1], %%rax \n\t"
+             "mulq %[v0] \n\t"             /* rdx:rax = u1*v0 */
+             "movq %%rax, %[v0] \n\t"      /* v0 = hi_lo_1 */
+             "movq %%rdx, %[hi_lo_2] \n\t"
+             "movq %[u0], %%rax \n\t"
+             "mulq %[v1] \n\t"             /* rdx:rax = u0*v1 */
+             "movq %%rax, %[u0] \n\t"      /* u0 = lo_hi_1 */
+             "movq %[u1], %%rax \n\t"
+             "movq %%rdx, %[u1] \n\t"      /* u1 = lo_hi_2 */
+             "mulq %[v1] \n\t"             /* rdx:rax = u1*v1; on output, rax = hi_hi_2, rdx = hi_hi_3 */
+             "add %[v0], %[lo_lo_1] \n\t"  /* lo_lo_1 += hi_lo_1 */
+             "adc %%rax, %[hi_lo_2] \n\t"  /* hi_lo_2 += hi_hi_2 + carry */
+             "adc $0, %%rdx \n\t"          /* hi_hi_3 += carry */
+             "add %[u0], %[lo_lo_1] \n\t"  /* lo_lo_1 += lo_hi_1 */
+             "adc %[u1], %[hi_lo_2] \n\t"  /* hi_lo_2 += lo_hi_2 + carry */
+             "adc $0, %%rdx \n\t"          /* hi_hi_3 += carry */
+             : "+&a"(rrax), "=&d"(rrdx), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
+               [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_2]"=&r"(hi_lo_2),
+               [u0]"+&r"(u0)
+#  if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
+             : [v1]"r"(v1)
+#  else
+             : [v1]"rm"(v1)
+#  endif
+             : "cc");
+    H hi_hi_2 = hi_lo_2;
+    H hi_hi_3 = rrdx;
+
+#endif
+
+    lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
+    T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
+    return highProduct;
+  }
+};
+
+#endif
+
+
+
+#if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
+    defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
+
+template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
+  HURCHALLA_FORCE_INLINE static
+  __uint128_t call(__uint128_t& lowProduct, __uint128_t u, __uint128_t v)
+  {
+    using T = __uint128_t;
+    using H = uint64_t;
+    static constexpr unsigned int shift = 64;
+
+    H u0 = static_cast<H>(u);
+    H v0 = static_cast<H>(v);
+    H u1 = static_cast<H>(u >> shift);
+    H v1 = static_cast<H>(v >> shift);
+
+    // Calculate all the cross products.
+    T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
+    T hi_lo = static_cast<T>(u1) * static_cast<T>(v0);
+    T lo_hi = static_cast<T>(u0) * static_cast<T>(v1);
+    T hi_hi = static_cast<T>(u1) * static_cast<T>(v1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    H hi_lo_1 = static_cast<H>(hi_lo);
+    H hi_lo_2 = static_cast<H>(hi_lo >> shift);
+
+    H lo_hi_1 = static_cast<H>(lo_hi);
+    H lo_hi_2 = static_cast<H>(lo_hi >> shift);
+
+    H hi_hi_2 = static_cast<H>(hi_hi);
+    H hi_hi_3 = static_cast<H>(hi_hi >> shift);
+
+    __asm__ ("adds %[lo_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[hi_lo_2], %[hi_hi_2] \n\t"
+             "cinc %[hi_hi_3], %[hi_hi_3], hs \n\t"
+             "adds %[lo_lo_1],%[lo_hi_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[lo_hi_2], %[hi_hi_2] \n\t"
+             "cinc %[hi_hi_3], %[hi_hi_3], hs \n\t"
+             : [lo_lo_1]"+&r"(lo_lo_1), [hi_hi_2]"+&r"(hi_hi_2),
+               [hi_hi_3]"+&r"(hi_hi_3)
+             : [hi_lo_1]"r"(hi_lo_1), [hi_lo_2]"r"(hi_lo_2),
+               [lo_hi_1]"r"(lo_hi_1), [lo_hi_2]"r"(lo_hi_2)
+             : "cc");
+    lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
+    T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
+    return highProduct;
+  }
+};
+
+#endif
+
+
+
 
 
 }} // end namespace
