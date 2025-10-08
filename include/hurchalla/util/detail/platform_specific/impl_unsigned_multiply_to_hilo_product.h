@@ -289,7 +289,7 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
 #if 0
 // This benchmarks slower than the #else for clang and gcc - it's perhaps 5-8%
 // slower on clang, and just terrible on gcc (around 50-80%? slower).  Gcc
-// apparently produces terrible asm for the mults, prior to the inline asm.
+// must(?) be creating terrible asm for the mults, prior to the inline asm.
 
     // Calculate all the cross products.
     T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
@@ -344,12 +344,12 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
              "movq %[u1], %%rax \n\t"
              "movq %%rdx, %[u1] \n\t"      /* u1 = lo_hi_2 */
              "mulq %[v1] \n\t"             /* rdx:rax = u1*v1; on output, rax = hi_hi_2, rdx = hi_hi_3 */
-             "add %[v0], %[lo_lo_1] \n\t"  /* lo_lo_1 += hi_lo_1 */
-             "adc %%rax, %[hi_lo_2] \n\t"  /* hi_lo_2 += hi_hi_2 + carry */
-             "adc $0, %%rdx \n\t"          /* hi_hi_3 += carry */
-             "add %[u0], %[lo_lo_1] \n\t"  /* lo_lo_1 += lo_hi_1 */
-             "adc %[u1], %[hi_lo_2] \n\t"  /* hi_lo_2 += lo_hi_2 + carry */
-             "adc $0, %%rdx \n\t"          /* hi_hi_3 += carry */
+             "addq %[v0], %[lo_lo_1] \n\t" /* lo_lo_1 += hi_lo_1 */
+             "adcq %%rax, %[hi_lo_2] \n\t" /* hi_lo_2 += hi_hi_2 + carry */
+             "adcq $0, %%rdx \n\t"         /* hi_hi_3 += carry */
+             "addq %[u0], %[lo_lo_1] \n\t" /* lo_lo_1 += lo_hi_1 */
+             "adcq %[u1], %[hi_lo_2] \n\t" /* hi_lo_2 += lo_hi_2 + carry */
+             "adcq $0, %%rdx \n\t"         /* hi_hi_3 += carry */
              : "+&a"(rrax), "=&d"(rrdx), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
                [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_2]"=&r"(hi_lo_2),
                [u0]"+&r"(u0)
@@ -373,6 +373,7 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
 #endif
 
 
+//#define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_ARM_64) && \
@@ -391,6 +392,7 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     H u1 = static_cast<H>(u >> shift);
     H v1 = static_cast<H>(v >> shift);
 
+#if 1
     // Calculate all the cross products.
     T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
     T hi_lo = static_cast<T>(u1) * static_cast<T>(v0);
@@ -420,6 +422,63 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
              : [hi_lo_1]"r"(hi_lo_1), [hi_lo_2]"r"(hi_lo_2),
                [lo_hi_1]"r"(lo_hi_1), [lo_hi_2]"r"(lo_hi_2)
              : "cc");
+
+#elif 0
+// At the moment this is testing faster than the above on gcc,
+// and slower on clang, using two_pow benchmarking.  My assumption
+// is that once impl_unsigned_square_to_hilo() gets its own code,
+// this will be a win - I'm guessing square is using this code at
+// the moment and thus not able to use the simple optimization of
+// skipping a redundant mult.
+// So for now this section is disabled.
+
+    H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_hi_2;
+    __asm__ ("mul %[lo_lo_0], %[u0], %[v0] \n\t"
+             "umulh %[lo_lo_1], %[u0], %[v0] \n\t"
+             "mul %[hi_lo_1], %[u1], %[v0] \n\t"
+             "mul %[lo_hi_1], %[u0], %[v1] \n\t"
+             "umulh %[v0], %[u1], %[v0] \n\t"   /* v0 = hi_lo_2 */
+             "mul %[hi_hi_2], %[u1], %[v1] \n\t"
+             "umulh %[u0], %[u0], %[v1] \n\t"   /* u0 = lo_hi_2 */
+             "umulh %[u1], %[u1], %[v1] \n\t"   /* u1 = hi_hi_3 */
+             "adds %[lo_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[v0], %[hi_hi_2] \n\t"   /* hi_hi_2 += hi_lo_2 */
+             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
+             "adds %[lo_lo_1], %[lo_hi_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[u0], %[hi_hi_2] \n\t"   /* hi_hi_2 += lo_hi_2 */
+             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
+             : [u0]"+&r"(u0), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
+               [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
+               [lo_hi_1]"=&r"(lo_hi_1), [hi_hi_2]"=&r"(hi_hi_2)
+             : [v1]"r"(v1)
+             : "cc");
+    H hi_hi_3 = u1;
+
+#else
+    H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_hi_2;
+    __asm__ ("mul %[lo_lo_0], %[u0], %[v0] \n\t"
+             "umulh %[lo_lo_1], %[u0], %[v0] \n\t"
+             "mul %[hi_lo_1], %[u1], %[v0] \n\t"
+             "mul %[lo_hi_1], %[u0], %[v1] \n\t"
+             "umulh %[v0], %[u1], %[v0] \n\t"   /* v0 = hi_lo_2 */
+             "mul %[hi_hi_2], %[u1], %[v1] \n\t"
+             "umulh %[u0], %[u0], %[v1] \n\t"   /* u0 = lo_hi_2 */
+             "umulh %[u1], %[u1], %[v1] \n\t"   /* u1 = hi_hi_3 */
+             "adds %[lo_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[v0], %[hi_hi_2] \n\t"   /* hi_hi_2 += hi_lo_2 */
+             "cset %[v0], hs \n\t"                       /* v0 = hi_hi_2_carry */
+             "adds %[lo_lo_1], %[lo_hi_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_hi_2], %[u0], %[hi_hi_2] \n\t"   /* hi_hi_2 += lo_hi_2 */
+             "adcs %[u1], %[v0], %[u1] \n\t"             /* hi_hi_3 += hi_hi_2_carry + carry */
+             : [u0]"+&r"(u0), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
+               [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
+               [lo_hi_1]"=&r"(lo_hi_1), [hi_hi_2]"=&r"(hi_hi_2)
+             : [v1]"r"(v1)
+             : "cc");
+    H hi_hi_3 = u1;
+
+#endif
+
     lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
     T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
     return highProduct;

@@ -14,8 +14,11 @@ namespace hurchalla {
 
 
 // signed_multiply_to_hilo_product() calculates a 'double-width'
-// multiplication product.  This behavior differs from a 'standard' multiply
-// which drops/ignores the highest bits of the product whenever overflow occurs.
+// multiplication product.  This behavior differs from 'standard' signed
+// multiplication which has undefined behavior if the product is too large to
+// fit in type T (i.e. overflow is UB).  Since this function outputs to a
+// double-width product, it never overflows the double-width, and as a result
+// this function never produces undefined behavior.
 //
 // Returns the high-bit portion of the product, and stores the low-bit portion
 // (as an unsigned T) in lowProduct.

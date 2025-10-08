@@ -8,6 +8,8 @@
 #include "hurchalla/util/traits/safely_promote_unsigned.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/traits/extensible_make_unsigned.h"
+#include "hurchalla/util/traits/extensible_make_signed.h"
+#include "hurchalla/util/sized_uint.h"
 #include "hurchalla/util/compiler_macros.h"
 #include "hurchalla/util/detail/util_programming_by_contract.h"
 #include <cstdint>
@@ -299,6 +301,113 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
   }
 };
 #endif
+
+
+
+
+#if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
+    defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
+
+template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
+  HURCHALLA_FORCE_INLINE static
+  __int128_t call(__uint128_t& lowProduct, __int128_t u, __int128_t v)
+  {
+    static_assert(ut_numeric_limits<T>::is_integer, "");
+    static_assert(ut_numeric_limits<T>::is_signed, "");
+    // Assert the CPU architecture uses two's complement, and arithmetic right
+    // shift
+    static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
+    static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
+
+    using S = T;  // S for signed
+    using U = typename extensible_make_unsigned<T>::type;  // U for unsigned
+
+    static constexpr int digitsU = ut_numeric_limits<U>::digits;
+
+    static_assert(is_valid_sized_uint<digitsU/2>::value, "");
+    using H = typename sized_uint<digitsU/2>::type;   // unsigned half size of U
+    using I = typename extensible_make_signed<H>::type;  // signed version of H
+
+    static constexpr int shift = digitsU / 2;
+
+    H u0 = static_cast<H>(u);
+    I u1 = static_cast<I>(u >> shift);
+    H v0 = static_cast<H>(v);
+    I v1 = static_cast<I>(v >> shift);
+
+    H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
+    H sign_mask_v = static_cast<H>(v1 >> (shift - 1));
+    H v0_or_zero = sign_mask_u & v0;
+    H u0_or_zero = sign_mask_v & u0;
+
+    U hi_lo = static_cast<U>(static_cast<H>(u1)) * static_cast<U>(v0);
+    H hi_lo_1 = static_cast<H>(hi_lo);
+    H unfinished_hi_lo_2 = static_cast<H>(hi_lo >> shift);
+
+    U lo_hi = static_cast<U>(u0) * static_cast<U>(static_cast<H>(v1));
+    H lo_hi_1 = static_cast<H>(lo_hi);
+    H unfinished_lo_hi_2 = static_cast<H>(lo_hi >> shift);
+
+    U lo_lo = static_cast<U>(u0) * static_cast<U>(v0);
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);
+    H hi_hi_2 = static_cast<H>(hi_hi);
+    H hi_hi_3 = static_cast<H>(hi_hi >> shift);
+
+# if 1
+    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - v0_or_zero);
+    I lo_hi_2 = static_cast<I>(unfinished_lo_hi_2 - u0_or_zero);
+    I sign_extension_hi_lo_2 = hi_lo_2 >> (shift - 1);
+    I sign_extension_lo_hi_2 = lo_hi_2 >> (shift - 1);
+
+    U middleA = (static_cast<U>(hi_lo_2) << shift) | static_cast<U>(hi_lo_1);
+    middleA = middleA + lo_lo_1;
+
+    U middleB = (static_cast<U>(lo_hi_2) << shift) | static_cast<U>(lo_hi_1);
+    middleB = middleB + static_cast<H>(middleA);
+
+    lowProduct = (middleB << shift) | lo_lo_0;
+
+    U highA = (static_cast<U>(sign_extension_hi_lo_2) << shift) | middleA >> shift;
+    U highB = (static_cast<U>(sign_extension_lo_hi_2) << shift) | middleB >> shift;
+    S highProduct = static_cast<S>(static_cast<U>(hi_hi) + highA + highB);
+
+# else
+    H tmp3A = v0_or_zero;
+    H tmp3B = u0_or_zero;
+    H hi_lo_2 = unfinished_hi_lo_2;
+    H lo_hi_2 = unfinished_lo_hi_2;
+
+    __asm__ ("sub %[hi_lo_2], %[hi_lo_2], %[tmp3A] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - v0_or_zero */
+             "sub %[lo_hi_2], %[lo_hi_2], %[tmp3B] \n\t"   /* lo_hi_2 = unfinished_lo_hi_2 - u0_or_zero */
+             "asr %[tmp3A], %[hi_lo_2], #63 \n\t"          /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "asr %[tmp3B], %[lo_hi_2], #63 \n\t"          /* sign_extension_lo_hi_2 = lo_hi_2 >> 63 */
+             "adds %[hi_lo_1], %[hi_lo_1], %[lo_hi_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_lo_2], %[lo_hi_2] \n\t"
+             "adc %[tmp3A], %[tmp3A], %[tmp3B] \n\t"
+             "adds %[hi_lo_1], %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_hi_2], %[hi_lo_2] \n\t"
+             "adc %[tmp3A], %[hi_hi_3], %[tmp3A] \n\t"
+             : [hi_lo_2]"+&r"(hi_lo_2), [tmp3A]"+&r"(tmp3A),
+               [lo_hi_2]"+&r"(lo_hi_2), [tmp3B]"+&r"(tmp3B),
+               [hi_lo_1]"+&r"(hi_lo_1)
+             : [lo_hi_1]"r"(lo_hi_1), [lo_lo_1]"r"(lo_lo_1),
+               [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
+                                   (static_cast<U>(hi_lo_2)));
+# endif
+
+    return highProduct;
+  }
+};
+
+#endif
+
 
 
 }} // end namespace
