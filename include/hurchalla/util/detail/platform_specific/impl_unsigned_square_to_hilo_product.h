@@ -32,6 +32,99 @@ struct impl_unsigned_square_to_hilo_product {
 
 
 
+
+#if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
+    defined(HURCHALLA_TARGET_ISA_X86_64) && \
+    defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO)
+
+template <> struct impl_unsigned_square_to_hilo_product<__uint128_t> {
+  HURCHALLA_FORCE_INLINE static
+  __uint128_t call(__uint128_t& lowProduct, __uint128_t u)
+  {
+    using T = __uint128_t;
+    using H = std::uint64_t;
+    static constexpr unsigned int shift = 64;
+
+    H u0 = static_cast<H>(u);
+    H u1 = static_cast<H>(u >> shift);
+
+#if 0
+
+    T lo_lo = static_cast<T>(u0) * static_cast<T>(u0);
+    T hi_lo = static_cast<T>(u1) * static_cast<T>(u0);
+    T hi_hi = static_cast<T>(u1) * static_cast<T>(u1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    H hi_lo_1 = static_cast<H>(hi_lo);
+    H hi_lo_2 = static_cast<H>(hi_lo >> shift);
+
+    H hi_hi_2 = static_cast<H>(hi_hi);
+    H hi_hi_3 = static_cast<H>(hi_hi >> shift);
+
+    __asm__ ("add %[hi_lo_1], %[hi_lo_1] \n\t"
+             "adc %[hi_lo_2], %[hi_lo_2] \n\t"
+             "adc $0, %[hi_hi_3] \n\t"
+             "add %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adc %[hi_hi_2], %[hi_lo_2] \n\t"
+             "adc $0, %[hi_hi_3] \n\t"
+             : [hi_lo_1]"+&r"(hi_lo_1), [hi_lo_2]"+&r"(hi_lo_2),
+               [hi_hi_3]"+&r"(hi_hi_3)
+#  if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
+             : [lo_lo_1]"r"(lo_lo_1), [hi_hi_2]"r"(hi_hi_2)
+#  else
+             : [lo_lo_1]"rm"(lo_lo_1), [hi_hi_2]"rm"(hi_hi_2)
+#  endif
+             : "cc");
+    lowProduct = (static_cast<T>(hi_lo_1) << shift) | lo_lo_0;
+    T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_lo_2;
+
+#else
+
+    H rrax = u0;
+    H rrdx, lo_lo_0, lo_lo_1;
+    __asm__ ("mulq %[u0] \n\t"              /* rdx:rax = rax*u0 (rax == u0); high-order bits of the product in rdx */
+             "movq %%rax, %[lo_lo_0] \n\t"
+             "movq %%rdx, %[lo_lo_1] \n\t"
+             "movq %[u1], %%rax \n\t"
+             "mulq %[u0] \n\t"              /* rdx:rax = u1*u0 */
+             "movq %%rax, %[u0] \n\t"       /* u0 = hi_lo_1 */
+             "movq %[u1], %%rax \n\t"       /* u1_orig = u1 */
+             "movq %%rdx, %[u1] \n\t"       /* u1 = hi_lo_2 */
+             "mulq %%rax \n\t"              /* rdx:rax = u1_orig*u1_orig; on output, rax = hi_hi_2, rdx = hi_hi_3 */
+             "addq %[u0], %[u0] \n\t"       /* hi_lo_1 += hi_lo_1 */
+             "adcq %[u1], %[u1] \n\t"       /* hi_lo_2 += hi_lo_2 */
+             "adcq $0, %%rdx \n\t"          /* hi_hi_3 += carry */
+             "addq %[u0], %[lo_lo_1] \n\t"  /* lo_lo_1 += hi_lo_1 */
+             "adcq %[u1], %%rax \n\t"       /* hi_hi_2 += hi_lo_2 + carry */
+             "adcq $0, %%rdx \n\t"          /* hi_hi_3 += carry */
+             : "+&a"(rrax), [u0]"+&r"(u0), "=&d"(rrdx), [lo_lo_0]"=&r"(lo_lo_0),
+               [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1)
+             :
+             : "cc");
+    H hi_hi_2 = rrax;
+    H hi_hi_3 = rrdx;
+    lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
+    T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
+
+#endif
+
+    if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
+        T low2;
+        T high2 = slow_unsigned_multiply_to_hilo_product::call(low2, u, u);
+        HPBC_UTIL_POSTCONDITION2(lowProduct == low2 && highProduct == high2);
+    }
+    return highProduct;
+  }
+};
+
+#endif
+
+
+
+
+
 // Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
 // enable the all-asm version, for both gcc and clang.  A side benefit is the
 // compiler (usually gcc) is less likely to have the bad luck cases where it

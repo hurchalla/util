@@ -312,21 +312,22 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     H hi_hi_3 = static_cast<H>(hi_hi >> shift);
 
     __asm__ ("add %[hi_lo_1], %[lo_lo_1] \n\t"
-             "adc %[hi_lo_2], %[hi_hi_2] \n\t"
+             "adc %[lo_hi_2], %[hi_lo_2] \n\t"
              "adc $0, %[hi_hi_3] \n\t"
              "add %[lo_hi_1], %[lo_lo_1] \n\t"
-             "adc %[lo_hi_2], %[hi_hi_2] \n\t"
+             "adc %[hi_hi_2], %[hi_lo_2] \n\t"
              "adc $0, %[hi_hi_3] \n\t"
-             : [lo_lo_1]"+&r"(lo_lo_1), [hi_hi_2]"+&r"(hi_hi_2),
+             : [lo_lo_1]"+&r"(lo_lo_1), [hi_lo_2]"+&r"(hi_lo_2),
                [hi_hi_3]"+&r"(hi_hi_3)
 #  if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
-             : [hi_lo_1]"r"(hi_lo_1), [hi_lo_2]"r"(hi_lo_2),
-               [lo_hi_1]"r"(lo_hi_1), [lo_hi_2]"r"(lo_hi_2)
+             : [hi_lo_1]"r"(hi_lo_1), [lo_hi_2]"r"(lo_hi_2),
+               [lo_hi_1]"r"(lo_hi_1), [hi_hi_2]"r"(hi_hi_2)
 #  else
-             : [hi_lo_1]"rm"(hi_lo_1), [hi_lo_2]"rm"(hi_lo_2),
-               [lo_hi_1]"rm"(lo_hi_1), [lo_hi_2]"rm"(lo_hi_2)
+             : [hi_lo_1]"rm"(hi_lo_1), [lo_hi_2]"rm"(lo_hi_2),
+               [lo_hi_1]"rm"(lo_hi_1), [hi_hi_2]"rm"(hi_hi_2)
 #  endif
              : "cc");
+    hi_hi_2 = hi_lo_2;
 
 #else
 // This benchmarks best for both gcc and clang.
@@ -347,10 +348,10 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
              "movq %%rdx, %[u1] \n\t"      /* u1 = lo_hi_2 */
              "mulq %[v1] \n\t"             /* rdx:rax = u1*v1; on output, rax = hi_hi_2, rdx = hi_hi_3 */
              "addq %[v0], %[lo_lo_1] \n\t" /* lo_lo_1 += hi_lo_1 */
-             "adcq %%rax, %[hi_lo_2] \n\t" /* hi_lo_2 += hi_hi_2 + carry */
+             "adcq %[u1], %[hi_lo_2] \n\t" /* hi_lo_2 += lo_hi_2 + carry */
              "adcq $0, %%rdx \n\t"         /* hi_hi_3 += carry */
              "addq %[u0], %[lo_lo_1] \n\t" /* lo_lo_1 += lo_hi_1 */
-             "adcq %[u1], %[hi_lo_2] \n\t" /* hi_lo_2 += lo_hi_2 + carry */
+             "adcq %%rax, %[hi_lo_2] \n\t" /* hi_lo_2 += hi_hi_2 + carry */
              "adcq $0, %%rdx \n\t"         /* hi_hi_3 += carry */
              : "+&a"(rrax), "=&d"(rrdx), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
                [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_2]"=&r"(hi_lo_2),
