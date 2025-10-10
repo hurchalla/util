@@ -465,33 +465,6 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     H lo_hi_1 = static_cast<H>(unfinished_lo_hi);
     H unfinished_lo_hi_2 = static_cast<H>(unfinished_lo_hi >> shift);
 
-#  if 0
-// no-asm   get rid of this - the slow_mult at top is the same
-
-    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - v0_or_zero);
-    I lo_hi_2 = static_cast<I>(unfinished_lo_hi_2 - u0_or_zero);
-
-    U hi_lo = (static_cast<U>(static_cast<H>(hi_lo_2)) << shift) | static_cast<U>(hi_lo_1);
-    U lo_hi = (static_cast<U>(static_cast<H>(lo_hi_2)) << shift) | static_cast<U>(lo_hi_1);
-
-    S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);
-
-    H lo_lo_0 = static_cast<H>(lo_lo);
-    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
-
-    hi_lo = hi_lo + lo_lo_1;
-    H tmp0 = static_cast<H>(hi_lo);
-    S tmp1 = static_cast<S>(hi_lo) >> shift;
-
-    lo_hi = lo_hi + tmp0;
-    S tmp2 = static_cast<S>(lo_hi) >> shift;
-
-    lowProduct = (lo_hi << shift) | lo_lo_0;
-    S highProduct = hi_hi + tmp2 + tmp1;
-
-#  else
-// partial-asm
-
     S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);
 
     H lo_lo_0 = static_cast<H>(lo_lo);
@@ -524,7 +497,7 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
                                    (static_cast<U>(hi_lo_2)));
-#  endif
+
 # endif
 
 

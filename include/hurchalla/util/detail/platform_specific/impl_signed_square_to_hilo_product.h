@@ -95,43 +95,6 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     H hi_lo_1 = static_cast<H>(unfinished_hi_lo);
     H unfinished_hi_lo_2 = static_cast<H>(unfinished_hi_lo >> shift);
 
-#if 0
-// no-asm
-
-// TODO: get rid of this - the slow_mult at top is almost the same
-
-
-    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - u0_or_zero);
-
-    U hi_lo = (static_cast<U>(static_cast<H>(hi_lo_2)) << shift) | static_cast<U>(hi_lo_1);
-    // bounds as S: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
-
-    S hi_hi = static_cast<S>(u1) * static_cast<S>(u1);
-
-    H lo_lo_0 = static_cast<H>(lo_lo);
-    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
-
-    // note: it would be tricky (if even possible) to replace lo_hi below with
-    // hi_lo, in order to get rid of the copy.
-    // The fundamental issues are the potential overflow when adding to a type U
-    // var, and the internal carry inside U.  (The inline asm doesn't use any
-    // type U, so these issues don't apply to it.)
-
-    U lo_hi = hi_lo;
-
-    hi_lo = hi_lo + lo_lo_1;   // doesn't overflow hi_lo
-    H tmp0 = static_cast<H>(hi_lo);
-    S tmp1 = static_cast<S>(hi_lo) >> shift;
-
-    lo_hi = lo_hi + tmp0;      // doesn't overflow lo_hi
-    S tmp2 = static_cast<S>(lo_hi) >> shift;
-
-    lowProduct = (lo_hi << shift) | lo_lo_0;
-    S highProduct = hi_hi + tmp2 + tmp1;
-
-#else
-// partial-asm
-
     S hi_hi = static_cast<S>(u1) * static_cast<S>(u1);
 
     H lo_lo_0 = static_cast<H>(lo_lo);
@@ -159,9 +122,6 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
                                    (static_cast<U>(hi_lo_2)));
-#endif
-
-
 #else
 // all-asm
 
