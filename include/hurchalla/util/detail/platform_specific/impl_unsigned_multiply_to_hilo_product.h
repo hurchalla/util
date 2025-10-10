@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Jeffrey Hurchalla
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
@@ -258,10 +259,11 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
 
 
 // On ARM64, benchmarking on M2, using inline asm for this function provided
-// ~3-6% perf boost.  The benefit was greatest for throughput-bound situations
-// (though latency-bound improved too).  Naturally it does not affect *signed*
-// multiplies, because this is an unsigned mul.
-// Measurements were with gcc and clang.
+// 0 to 8% perf boosts.  Throughput-bound situations it made essentially no
+// difference one way or the other.  For latency-bound situations it provided
+// between 4-8% increase in speed.  See the Benchmark Timings further below for
+// details.  Naturally it does not affect *signed* multiplies, because this is
+// an unsigned mul.
 //
 // On x64, benchmarking on Zen4, I obtained similar perf improvements, though
 // with gcc, the benefit was at times extremely large - gcc seemed to sometimes
@@ -366,6 +368,12 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
 
     lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
     T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
+
+    if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
+        T low2;
+        T high2 = slow_unsigned_multiply_to_hilo_product::call(low2, u, v);
+        HPBC_UTIL_POSTCONDITION2(lowProduct == low2 && highProduct == high2);
+    }
     return highProduct;
   }
 };
@@ -373,7 +381,42 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
 #endif
 
 
-//#define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
+
+
+// Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
+// enable the all-asm version, for both gcc and clang.  A side benefit is the
+// compiler (usually gcc) is less likely to have the bad luck cases where it
+// makes bad decisions and produces terrible machine code, if we use all-asm.
+//   (The tests with no-asm square don't count for much since no-asm square is
+//   slower than we'd likely use.)
+//
+// -- Benchmark Timings --
+// Montquarter two pow scalar:
+// gcc with no-asm square: no-asm 2.5080  partial-asm 2.5965  *all-asm 2.4842
+// gcc with partial-asm square: no-asm 2.3966  partial-asm 2.3788  *all-asm 2.2763
+// gcc with full-asm square: no-asm 2.4084  partial-asm 2.3592  *all-asm 2.2766
+// clang with no-asm square: no-asm 2.3635   partial-asm 2.2705  *all-asm 2.2956
+// clang with all-asm square: no-asm 2.3637   partial-asm 2.2819  *all-asm 2.2616
+//
+// Montfull two pow scalar:
+// gcc with no-asm square: no-asm 2.4965   partial-asm 2.4014  *all-asm 2.4900
+// gcc with all-asm square: no-asm 2.4931   partial-asm 2.4444  *all-asm 2.3789
+// clang with no-asm square: no-asm 2.4950  partial-asm 2.3779  *all-asm 2.3932
+// clang with partial-asm square: no-asm 2.4879  partial-asm 2.3864  *all-asm 2.3833
+//
+// Montfull two pow array:
+// gcc with no-asm square: no-asm 1.2892  partial-asm 1.2894  *all-asm 1.2895
+// gcc with partial-asm square: no-asm 1.2311  partial-asm 1.2349  *all-asm 1.2318
+// clang with no-asm square: no-asm 1.2395  partial-asm 1.2391   *all-asm 1.2387
+// clang with all-asm square: no-asm 1.1737  partial-asm 1.1729  *all-asm 1.1737
+//
+// Montquarter two pow array:
+// gcc with no-asm square: no-asm 1.1738  partial-asm 1.1697  *all-asm 1.1654
+// gcc with partial-asm square: no-asm 1.0992  partial-asm 1.0967  *all-asm 1.1075
+// gcc with all-asm square: no-asm 1.0986  partial-asm 1.0983  *all-asm 1.1016
+// clang with no-asm square: no-asm 1.0739  partial-asm 1.0741  *all-asm 1.0750
+// clang with all-asm square: no-asm 1.0411  partial-asm 1.0415  *all-asm 1.0413
+
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_ARM_64) && \
@@ -392,7 +435,11 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     H u1 = static_cast<H>(u >> shift);
     H v1 = static_cast<H>(v >> shift);
 
-#if 1
+#if 0
+// In limited tests benchmarking montgomery two_pow, this partial-asm version
+// tended to be a little slower than the full-asm version.  Thus we disable
+// this version.
+
     // Calculate all the cross products.
     T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
     T hi_lo = static_cast<T>(u1) * static_cast<T>(v0);
@@ -423,37 +470,6 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
                [lo_hi_1]"r"(lo_hi_1), [lo_hi_2]"r"(lo_hi_2)
              : "cc");
 
-#elif 0
-// At the moment this is testing faster than the above on gcc,
-// and slower on clang, using two_pow benchmarking.  My assumption
-// is that once impl_unsigned_square_to_hilo() gets its own code,
-// this will be a win - I'm guessing square is using this code at
-// the moment and thus not able to use the simple optimization of
-// skipping a redundant mult.
-// So for now this section is disabled.
-
-    H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_hi_2;
-    __asm__ ("mul %[lo_lo_0], %[u0], %[v0] \n\t"
-             "umulh %[lo_lo_1], %[u0], %[v0] \n\t"
-             "mul %[hi_lo_1], %[u1], %[v0] \n\t"
-             "mul %[lo_hi_1], %[u0], %[v1] \n\t"
-             "umulh %[v0], %[u1], %[v0] \n\t"   /* v0 = hi_lo_2 */
-             "mul %[hi_hi_2], %[u1], %[v1] \n\t"
-             "umulh %[u0], %[u0], %[v1] \n\t"   /* u0 = lo_hi_2 */
-             "umulh %[u1], %[u1], %[v1] \n\t"   /* u1 = hi_hi_3 */
-             "adds %[lo_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
-             "adcs %[hi_hi_2], %[v0], %[hi_hi_2] \n\t"   /* hi_hi_2 += hi_lo_2 */
-             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
-             "adds %[lo_lo_1], %[lo_hi_1], %[lo_lo_1] \n\t"
-             "adcs %[hi_hi_2], %[u0], %[hi_hi_2] \n\t"   /* hi_hi_2 += lo_hi_2 */
-             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
-             : [u0]"+&r"(u0), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
-               [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
-               [lo_hi_1]"=&r"(lo_hi_1), [hi_hi_2]"=&r"(hi_hi_2)
-             : [v1]"r"(v1)
-             : "cc");
-    H hi_hi_3 = u1;
-
 #else
     H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_hi_2;
     __asm__ ("mul %[lo_lo_0], %[u0], %[v0] \n\t"
@@ -466,28 +482,35 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
              "umulh %[u1], %[u1], %[v1] \n\t"   /* u1 = hi_hi_3 */
              "adds %[lo_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
              "adcs %[hi_hi_2], %[v0], %[hi_hi_2] \n\t"   /* hi_hi_2 += hi_lo_2 */
-             "cset %[v0], hs \n\t"                       /* v0 = hi_hi_2_carry */
+             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
              "adds %[lo_lo_1], %[lo_hi_1], %[lo_lo_1] \n\t"
              "adcs %[hi_hi_2], %[u0], %[hi_hi_2] \n\t"   /* hi_hi_2 += lo_hi_2 */
-             "adcs %[u1], %[v0], %[u1] \n\t"             /* hi_hi_3 += hi_hi_2_carry + carry */
+             "cinc %[u1], %[u1], hs \n\t"                /* hi_hi_3 += carry */
              : [u0]"+&r"(u0), [v0]"+&r"(v0), [lo_lo_0]"=&r"(lo_lo_0),
                [lo_lo_1]"=&r"(lo_lo_1), [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
                [lo_hi_1]"=&r"(lo_hi_1), [hi_hi_2]"=&r"(hi_hi_2)
              : [v1]"r"(v1)
              : "cc");
-    H hi_hi_3 = u1;
+// note: we could use cset in place of the first cinc, and then end with an adcs
+// instead of the final cinc.  But it probably makes no difference either way -
+// in a previous commit I had an extra inline asm version that implemented this
+// alternative, and limited benchmarking suggested the perf is identical.
 
+    H hi_hi_3 = u1;
 #endif
 
     lowProduct = (static_cast<T>(lo_lo_1) << shift) | lo_lo_0;
     T highProduct = (static_cast<T>(hi_hi_3) << shift) | hi_hi_2;
+
+    if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
+        T low2;
+        T high2 = slow_unsigned_multiply_to_hilo_product::call(low2, u, v);
+        HPBC_UTIL_POSTCONDITION2(lowProduct == low2 && highProduct == high2);
+    }
     return highProduct;
   }
 };
-
 #endif
-
-
 
 
 

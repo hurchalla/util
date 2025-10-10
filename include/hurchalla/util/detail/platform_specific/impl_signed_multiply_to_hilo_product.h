@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Jeffrey Hurchalla
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
@@ -26,7 +27,7 @@ namespace hurchalla { namespace detail {
 // Return Value:
 //   Returns the high portion of the product.
 // Notes:
-//   - I adapted this code from https://web.archive.org/web/20190109005441/http://www.hackersdelight.org/hdcodetxt/muldws.c.txt
+//   - I adapted this function from https://web.archive.org/web/20190109005441/http://www.hackersdelight.org/hdcodetxt/muldws.c.txt
 //        Henry Warren writes that his function is "derived from Knuth's
 //        Algorithm M from [Knu2] section 4.3.1.".  He is referring to "The Art
 //        of Computer Programming", volume 2, 3rd edition; but we can note that
@@ -82,19 +83,23 @@ struct slow_signed_multiply_to_hilo_product {
 
     // for example, if U==uint64_t, w ought to == 32
     static constexpr int w = ut_numeric_limits<U>::digits / 2;
-    // for example, if U==uint64_t, lowmask ought to == 0xFFFFFFFF
-    static constexpr S lowmask = (static_cast<S>(1)<<w) - 1;
+    static constexpr int shift = w;
+
+    static_assert(is_valid_sized_uint<w>::value, "");
+    using H = typename sized_uint<w>::type;   // unsigned half size of U
+    using I = typename extensible_make_signed<H>::type;  // signed version of H
 
     // This function is based upon the identity for a signed integer x that
-    // x == pow(2,w)*(x>>w) + static_cast<U>(x & lowmask)
+    // x == pow(2,w)*(x>>w) + static_cast<H>(x)
     //   == pow(2,w)*signed_x_high + unsigned_x_low
     // --------------------------------------------------------------------
 
-    U u0 = static_cast<U>(u & lowmask);
-    U v0 = static_cast<U>(v & lowmask);
+
+    H u0 = static_cast<H>(u);
+    H v0 = static_cast<H>(v);
     // arithmetic (sign-extending) right shift required for next two lines
-    S u1 = u >> w;
-    S v1 = v >> w;
+    I u1 = static_cast<I>(u >> shift);
+    I v1 = static_cast<I>(v >> shift);
 
     // Bounds for u0: [0, pow(2,w) - 1]
     // Bounds for v0: [0, pow(2,w) - 1]
@@ -105,36 +110,85 @@ struct slow_signed_multiply_to_hilo_product {
     // Range of valid values for type S: [-pow(2,2w-1), pow(2,2w-1) - 1]
 
     // We can see u0, v0, u1, v1 are all valid.
-    // Bounds for u0*v0: [0, pow(2,2w) - pow(2,w+1) + 1]
-    // Bounds for u1*v0: [-pow(2,2w-1) + pow(2,w-1),
+    // Bounds for (U)u0 * (U)v0:  [0, pow(2,2w) - 2*pow(2,w) + 1]
+    // Bounds for (S)u1 * (U)v0:  [-pow(2,2w-1) + pow(2,w-1),
     //                      pow(2,2w-1) - pow(2,w) - pow(2,w-1) + 1]
-    // Bounds for v1*u0: same as for u1*v0
-    // Bounds for u1*v1: [-pow(2,2w-2) + pow(2,w-1), pow(2,2w-2)]
+    // Bounds for (S)v1 * (U)u0:  same as for (S)u1 * (U)v0
+    // Bounds for (S)u1 * (S)v1:  [-pow(2,2w-2) + pow(2,w-1), pow(2,2w-2)]
     // These all fit within the valid ranges for U or S.
 
-    // Calculate the cross products.
-    U lo_lo = u0 * v0;  // bounds: [0, pow(2,2w) - pow(2,w+1) + 1]
-    S hi_lo = u1 * static_cast<S>(v0);
+#if 0
+// Straightforward calculate hi_lo and lo_hi, but some compilers might create
+// suboptimal machine code from this.
+
+    U lo_lo = static_cast<U>(u0) * static_cast<U>(v0);  // bounds: [0, pow(2,2w) - 2*pow(2,w) + 1]
+
+    S hi_lo = static_cast<S>(u1) * static_cast<S>(v0);
     // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
-    S lo_hi = v1 * static_cast<S>(u0);
+    S lo_hi = static_cast<S>(v1) * static_cast<S>(u0);
     // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
-    S hi_hi = u1 * v1;  // bounds: [-pow(2,2w-2) + pow(2,w-1), pow(2,2w-2)]
 
-    U lolo1 = lo_lo >> static_cast<U>(w);  // bounds: [0, pow(2,w) - 1]
+#else
+// Calculate hi_lo and lo_hi by hand, to help the compiler make better choices,
+// and also to correspond to inline asm later in this file.
 
-    S tmp = hi_lo + static_cast<S>(lolo1);     // won't overflow (see next line)
+    // Explanation of the method used in this section to do signed by unsigned
+    // halfword hilo multiplication:
+    // Let signbit_x = (x>=0) ? 0 : 1
+    // From twos complement we know:  a signed integer x == (unsigned)x - signbit_x * R
+    // So a hilo mult of  unsigned_y * signed_x == unsigned_y * ((unsigned)x - signbit_x * R)
+    // == hilo_product == unsigned_y * (unsigned)x - unsigned_y * signbit_x * R
+    //    hilo_product == unsigned_hilo_product - unsigned_y * signbit_x * R
+    // Thus, lo_product == static_cast<H>(unsigned_hilo_product)
+    //   and hi_product == static_cast<H>(unsigned_hilo_product >> shift) - unsigned_y * signbit_x
+
+    // for efficiency we use sign masks rather than directly using the sign bits
+    H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
+    H sign_mask_v = static_cast<H>(v1 >> (shift - 1));
+    H v0_or_zero = sign_mask_u & v0;
+    H u0_or_zero = sign_mask_v & u0;
+
+    U lo_lo = static_cast<U>(u0) * static_cast<U>(v0);  // bounds: [0, pow(2,2w) - 2*pow(2,w) + 1]
+
+    U unfinished_hi_lo = static_cast<U>(static_cast<H>(u1)) * static_cast<U>(v0);
+    H hi_lo_1 = static_cast<H>(unfinished_hi_lo);
+    H unfinished_hi_lo_2 = static_cast<H>(unfinished_hi_lo >> shift);
+
+    U unfinished_lo_hi = static_cast<U>(u0) * static_cast<U>(static_cast<H>(v1));
+    H lo_hi_1 = static_cast<H>(unfinished_lo_hi);
+    H unfinished_lo_hi_2 = static_cast<H>(unfinished_lo_hi >> shift);
+
+    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - v0_or_zero);
+    I lo_hi_2 = static_cast<I>(unfinished_lo_hi_2 - u0_or_zero);
+
+    S hi_lo = static_cast<S>((static_cast<U>(static_cast<H>(hi_lo_2)) << shift) |
+                             static_cast<U>(hi_lo_1));
+    // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
+    S lo_hi = static_cast<S>((static_cast<U>(static_cast<H>(lo_hi_2)) << shift) |
+                             static_cast<U>(lo_hi_1));
+    // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
+#endif
+
+    S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);  // bounds: [-pow(2,2w-2) + pow(2,w-1), pow(2,2w-2)]
+
+    H lo_lo_0 = static_cast<H>(lo_lo);           // bounds: [0, pow(2,w) - 1]
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);  // bounds: [0, pow(2,w) - 2]
+
+    hi_lo = hi_lo + static_cast<S>(lo_lo_1);     // won't overflow (see next line)
+    // bounds: [-pow(2,2w-1) + pow(2,w-1), pow(2,2w-1) - pow(2,w-1) - 1]
+
+    H tmp0 = static_cast<H>(hi_lo); // bounds: [0, pow(2,w) -1]
+    S tmp1 = hi_lo >> shift;  // bounds: [-pow(2,w-1), pow(2,w-1) - 1]
+
+    lo_hi = lo_hi + static_cast<S>(tmp0); // won't overflow (see next line)
     // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w-1)]
-    U tmp0 = static_cast<U>(tmp & lowmask); // bounds: [0, pow(2,w) -1]
-    S tmp1 = tmp >> w;  // bounds: [-pow(2,w-1), pow(2,w-1) - 1]
+    S tmp2 = lo_hi >> shift;  // bounds: [-pow(2,w-1), pow(2,w-1) - 1]
 
-    S straddle = lo_hi + static_cast<S>(tmp0); // won't overflow (see next line)
-    // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w-1)]
-    S straddle1 = straddle >> w;  // bounds: [-pow(2,w-1), pow(2,w-1) - 1]
+    lowProduct = (static_cast<U>(lo_hi) << shift) | static_cast<U>(lo_lo_0);
 
-    lowProduct = (static_cast<U>(straddle) << static_cast<U>(w)) |
-                 (lo_lo & static_cast<U>(lowmask));
-    S highProduct = hi_hi + straddle1 + tmp1;  // won't overflow (see next line)
+    S highProduct = hi_hi + tmp2 + tmp1;  // won't overflow (see next line)
     // bounds: [-pow(2,2w-2) - pow(2,w-1), pow(2,2w-2) + pow(2,w) - 2]
+
 
     // Note that the bounds given so far do not necessarily mean that a result
     // can take on any value within bounds - instead, the bounds indicate that
@@ -305,6 +359,25 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 
 
 
+// Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
+// enable the all-asm version, for both gcc and clang.  A side benefit is the
+// compiler (usually gcc) is less likely to have the bad luck cases where it
+// makes bad decisions and produces terrible machine code, if we use all-asm.
+//
+// -- Benchmark Timings --
+// Monthalf two pow array:
+// gcc with no-asm square: no-asm 1.2126  partial-asm 1.2040  *all-asm 1.2076
+// gcc with all-asm square: no-asm 1.0577  partial-asm 1.0649  *all-asm 1.0600
+// clang with no-asm square: no-asm 1.0553  partial-asm 1.0553  *all-asm 1.0551
+// clang with all-asm square: no-asm 1.0172  partial-asm 1.0163  *all-asm 1.0168
+//
+// Monthalf two pow scalar:
+// gcc with no-asm square: no-asm 2.5643  partial-asm 2.5405  *all-asm 2.5426
+// gcc with all-asm square: no-asm 2.5290  partial-asm 2.5122  *all-asm 2.4986
+// clang with no-asm square: no-asm 2.3892  partial-asm 2.3837  *all-asm 2.3717
+// clang with all-asm square: no-asm 2.3814  partial-asm 2.3793  *all-asm 2.3589
+
+
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_ARM_64) && \
     defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
@@ -313,10 +386,9 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
   HURCHALLA_FORCE_INLINE static
   __int128_t call(__uint128_t& lowProduct, __int128_t u, __int128_t v)
   {
-    static_assert(ut_numeric_limits<T>::is_integer, "");
-    static_assert(ut_numeric_limits<T>::is_signed, "");
-    // Assert the CPU architecture uses two's complement, and arithmetic right
-    // shift
+    using T = __int128_t;
+
+    // Assert the CPU uses two's complement, and arithmetic right shift
     static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
     static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
 
@@ -332,50 +404,102 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     static constexpr int shift = digitsU / 2;
 
     H u0 = static_cast<H>(u);
+    // arithmetic (sign-extending) right shift required
     I u1 = static_cast<I>(u >> shift);
     H v0 = static_cast<H>(v);
     I v1 = static_cast<I>(v >> shift);
+
+# if 1
+// all-asm
+
+    H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_lo_2, lo_hi_2;
+    __asm__ (
+             "mul %[lo_lo_0], %[u0], %[v0] \n\t"
+             "umulh %[lo_lo_1], %[u0], %[v0] \n\t"
+             "mul %[hi_lo_1], %[u1], %[v0] \n\t"
+             "mul %[lo_hi_1], %[u0], %[v1] \n\t"
+             "umulh %[hi_lo_2], %[u1], %[v0] \n\t"
+             "umulh %[lo_hi_2], %[u0], %[v1] \n\t"
+             "and %[v0], %[v0], %[u1], asr #63 \n\t"   /* v0 = v0_or_zero,  2 cycles */
+             "and %[u0], %[u0], %[v1], asr #63 \n\t"   /* u0 = u0_or_zero,  2 cycles */
+             "sub %[hi_lo_2], %[hi_lo_2], %[v0] \n\t"  /* hi_lo_2 = unfinished_hi_lo_2 - v0_or_zero */
+             "sub %[lo_hi_2], %[lo_hi_2], %[u0] \n\t"  /* lo_hi_2 = unfinished_lo_hi_2 - u0_or_zero */
+             "mul %[v0], %[u1], %[v1] \n\t"            /* v0 = hi_hi_2 */
+             "smulh %[u1], %[u1], %[v1] \n\t"          /* u1 = hi_hi_3 */
+             "asr %[u0], %[hi_lo_2], #63 \n\t"         /* u0 = sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "asr %[v1], %[lo_hi_2], #63 \n\t"         /* v1 = sign_extension_lo_hi_2 = lo_hi_2 >> 63 */
+             "adds %[hi_lo_1], %[hi_lo_1], %[lo_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_lo_2], %[lo_hi_2] \n\t"
+             "adc %[u0], %[u0], %[v1] \n\t"            /* result3 = carry + sign_extension_hi_lo_2 + sign_extension_lo_hi_2 */
+             "adds %[hi_lo_1], %[lo_hi_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[v0], %[hi_lo_2] \n\t"
+             "adc %[u0], %[u1], %[u0] \n\t"            /* result3 = hi_hi_3 + result3 + carry */
+             : [u0]"+&r"(u0), [v0]"+&r"(v0),
+               [lo_lo_0]"=&r"(lo_lo_0), [lo_lo_1]"=&r"(lo_lo_1),
+               [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
+               [v1]"+&r"(v1), [lo_hi_1]"=&r"(lo_hi_1),
+               [hi_lo_2]"=&r"(hi_lo_2), [lo_hi_2]"=&r"(lo_hi_2)
+             :
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(u0) << shift) |
+                                   (static_cast<U>(hi_lo_2)));
+
+# else
+// In limited tests benchmarking montgomery two_pow, this partial-asm version
+// tended to be a little slower than the full-asm version.  Thus we disable
+// this version.
 
     H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
     H sign_mask_v = static_cast<H>(v1 >> (shift - 1));
     H v0_or_zero = sign_mask_u & v0;
     H u0_or_zero = sign_mask_v & u0;
 
-    U hi_lo = static_cast<U>(static_cast<H>(u1)) * static_cast<U>(v0);
-    H hi_lo_1 = static_cast<H>(hi_lo);
-    H unfinished_hi_lo_2 = static_cast<H>(hi_lo >> shift);
-
-    U lo_hi = static_cast<U>(u0) * static_cast<U>(static_cast<H>(v1));
-    H lo_hi_1 = static_cast<H>(lo_hi);
-    H unfinished_lo_hi_2 = static_cast<H>(lo_hi >> shift);
-
     U lo_lo = static_cast<U>(u0) * static_cast<U>(v0);
+
+    U unfinished_hi_lo = static_cast<U>(static_cast<H>(u1)) * static_cast<U>(v0);
+    H hi_lo_1 = static_cast<H>(unfinished_hi_lo);
+    H unfinished_hi_lo_2 = static_cast<H>(unfinished_hi_lo >> shift);
+
+    U unfinished_lo_hi = static_cast<U>(u0) * static_cast<U>(static_cast<H>(v1));
+    H lo_hi_1 = static_cast<H>(unfinished_lo_hi);
+    H unfinished_lo_hi_2 = static_cast<H>(unfinished_lo_hi >> shift);
+
+#  if 0
+// no-asm   get rid of this - the slow_mult at top is the same
+
+    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - v0_or_zero);
+    I lo_hi_2 = static_cast<I>(unfinished_lo_hi_2 - u0_or_zero);
+
+    U hi_lo = (static_cast<U>(static_cast<H>(hi_lo_2)) << shift) | static_cast<U>(hi_lo_1);
+    U lo_hi = (static_cast<U>(static_cast<H>(lo_hi_2)) << shift) | static_cast<U>(lo_hi_1);
+
+    S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);
+
     H lo_lo_0 = static_cast<H>(lo_lo);
     H lo_lo_1 = static_cast<H>(lo_lo >> shift);
 
+    hi_lo = hi_lo + lo_lo_1;
+    H tmp0 = static_cast<H>(hi_lo);
+    S tmp1 = static_cast<S>(hi_lo) >> shift;
+
+    lo_hi = lo_hi + tmp0;
+    S tmp2 = static_cast<S>(lo_hi) >> shift;
+
+    lowProduct = (lo_hi << shift) | lo_lo_0;
+    S highProduct = hi_hi + tmp2 + tmp1;
+
+#  else
+// partial-asm
+
     S hi_hi = static_cast<S>(u1) * static_cast<S>(v1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
     H hi_hi_2 = static_cast<H>(hi_hi);
     H hi_hi_3 = static_cast<H>(hi_hi >> shift);
 
-# if 1
-    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - v0_or_zero);
-    I lo_hi_2 = static_cast<I>(unfinished_lo_hi_2 - u0_or_zero);
-    I sign_extension_hi_lo_2 = hi_lo_2 >> (shift - 1);
-    I sign_extension_lo_hi_2 = lo_hi_2 >> (shift - 1);
-
-    U middleA = (static_cast<U>(hi_lo_2) << shift) | static_cast<U>(hi_lo_1);
-    middleA = middleA + lo_lo_1;
-
-    U middleB = (static_cast<U>(lo_hi_2) << shift) | static_cast<U>(lo_hi_1);
-    middleB = middleB + static_cast<H>(middleA);
-
-    lowProduct = (middleB << shift) | lo_lo_0;
-
-    U highA = (static_cast<U>(sign_extension_hi_lo_2) << shift) | middleA >> shift;
-    U highB = (static_cast<U>(sign_extension_lo_hi_2) << shift) | middleB >> shift;
-    S highProduct = static_cast<S>(static_cast<U>(hi_hi) + highA + highB);
-
-# else
     H tmp3A = v0_or_zero;
     H tmp3B = u0_or_zero;
     H hi_lo_2 = unfinished_hi_lo_2;
@@ -400,8 +524,15 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
                                    (static_cast<U>(hi_lo_2)));
+#  endif
 # endif
 
+
+    if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
+        U low2;
+        S high2 = slow_signed_multiply_to_hilo_product::call(low2, u, v);
+        HPBC_UTIL_POSTCONDITION2(lowProduct == low2 && highProduct == high2);
+    }
     return highProduct;
   }
 };

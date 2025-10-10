@@ -1,5 +1,19 @@
+// Copyright (c) 2025 Jeffrey Hurchalla
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
+
+
+// Strictly for testing purposes, we make sure to enable the inline-asm function
+// versions of unsigned_multiply_to_hilo_product.  In their postconditions they
+// will call the corresponding non-inline asm version to check their results, so
+// we won't miss unit testing of the "normal" function versions too, so long as
+// we also enable util's postcondition checking.
+#undef HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
+#define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
+#undef HURCHALLA_UTIL_ENABLE_ASSERTS
+#define HURCHALLA_UTIL_ENABLE_ASSERTS
+#undef HURCHALLA_UTIL_ASSERT_LEVEL
+#define HURCHALLA_UTIL_ASSERT_LEVEL 3
 
 
 #include "hurchalla/util/unsigned_multiply_to_hilo_product.h"

@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Jeffrey Hurchalla
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
@@ -5,7 +6,7 @@
 #define HURCHALLA_UTIL_UNSIGNED_SQUARE_TO_HILO_H_INCLUDED
 
 // note: in order to get the inline asm (potentially faster) version of this
-// function, you must define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO.  This
+// function, you must define HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO.  This
 // doesn't apply to MSVC since MSVC doesn't support inline asm.
 
 

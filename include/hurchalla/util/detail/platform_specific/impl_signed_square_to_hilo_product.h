@@ -1,3 +1,4 @@
+// Copyright (c) 2025 Jeffrey Hurchalla
 // --- This file is distributed under the MIT Open Source License, as detailed
 // by the file "LICENSE.TXT" in the root of this repository ---
 
@@ -5,7 +6,13 @@
 #define HURCHALLA_UTIL_IMPL_SIGNED_SQUARE_TO_HILO_H_INCLUDED
 
 
-#include "hurchalla/util/detail/platform_specific/impl_signed_multiply_to_hilo_product.h"
+#include "hurchalla/util/signed_multiply_to_hilo_product.h"
+#include "hurchalla/util/traits/ut_numeric_limits.h"
+#include "hurchalla/util/traits/extensible_make_unsigned.h"
+#include "hurchalla/util/traits/extensible_make_signed.h"
+#include "hurchalla/util/sized_uint.h"
+#include "hurchalla/util/detail/util_programming_by_contract.h"
+#include "hurchalla/util/compiler_macros.h"
 
 namespace hurchalla { namespace detail {
 
@@ -16,9 +23,188 @@ struct impl_signed_square_to_hilo_product {
   HURCHALLA_FORCE_INLINE static
   T call(typename extensible_make_unsigned<T>::type& lowProduct, T u)
   {
-      return impl_signed_multiply_to_hilo_product<T>::call(lowProduct, u, u);
+    static_assert(ut_numeric_limits<T>::is_integer, "");
+    static_assert(ut_numeric_limits<T>::is_signed, "");
+
+    return signed_multiply_to_hilo_product(lowProduct, u, u);
+    // for benchmarking __int128_t, we should use the following instead:
+//    return slow_signed_multiply_to_hilo_product::call(lowProduct, u, u);
   }
 };
+
+
+
+
+// Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
+// enable the all-asm version, for both gcc and clang.  A side benefit is the
+// compiler (usually gcc) is less likely to have the bad luck cases where it
+// makes bad decisions and produces terrible machine code, if we use all-asm.
+//
+// -- Benchmark Timings --
+// Monthalf two pow array:
+// gcc with partial-asm mult: no-asm 1.2040  partial-asm 1.2000  *all-asm 1.0649
+// gcc with all-asm mult: no-asm 1.2074  partial-asm 1.1970  *all-asm 1.0600
+// clang with all-asm mult: no-asm 1.0551  partial-asm 1.0213  *all-asm 1.0168
+//
+// Monthalf two pow scalar:
+// gcc with partial-asm mult: no-asm 2.5405  partial-asm 2.5745  *all-asm 2.5122
+// gcc with all-asm mult: no-asm 2.5412  partial-asm 2.5304  *all-asm 2.4986
+// clang with all-asm mult: no-asm 2.3717  partial-asm 2.4241  *all-asm 2.3612
+
+
+#if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
+    defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO)
+
+template <> struct impl_signed_square_to_hilo_product<__int128_t> {
+  HURCHALLA_FORCE_INLINE static
+  __int128_t call(__uint128_t& lowProduct, __int128_t u)
+  {
+    using T = __int128_t;
+
+    // Assert the CPU uses two's complement, and arithmetic right shift
+    static_assert(static_cast<T>(-1) == ~(static_cast<T>(0)), "");
+    static_assert((static_cast<T>(-1) >> 1) == static_cast<T>(-1), "");
+
+    using S = T;  // S for signed
+    using U = typename extensible_make_unsigned<T>::type;  // U for unsigned
+
+    static constexpr int digitsU = ut_numeric_limits<U>::digits;
+
+    static_assert(is_valid_sized_uint<digitsU/2>::value, "");
+    using H = typename sized_uint<digitsU/2>::type;   // unsigned half size of U
+    using I = typename extensible_make_signed<H>::type;  // signed version of H
+
+    static constexpr int shift = digitsU / 2;
+
+    H u0 = static_cast<H>(u);
+    // arithmetic (sign-extending) right shift required
+    I u1 = static_cast<I>(u >> shift);
+
+#if 0
+// In limited tests benchmarking montgomery two_pow, this partial-asm version
+// tended to be a little slower than the full-asm version.  Thus we disable
+// this version.
+
+    H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
+    H u0_or_zero = sign_mask_u & u0;
+
+    U lo_lo = static_cast<U>(u0) * static_cast<U>(u0);
+
+    U unfinished_hi_lo = static_cast<U>(static_cast<H>(u1)) * static_cast<U>(u0);
+    H hi_lo_1 = static_cast<H>(unfinished_hi_lo);
+    H unfinished_hi_lo_2 = static_cast<H>(unfinished_hi_lo >> shift);
+
+#if 0
+// no-asm
+
+// TODO: get rid of this - the slow_mult at top is almost the same
+
+
+    I hi_lo_2 = static_cast<I>(unfinished_hi_lo_2 - u0_or_zero);
+
+    U hi_lo = (static_cast<U>(static_cast<H>(hi_lo_2)) << shift) | static_cast<U>(hi_lo_1);
+    // bounds as S: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w) -pow(2,w-1) + 1]
+
+    S hi_hi = static_cast<S>(u1) * static_cast<S>(u1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    // note: it would be tricky (if even possible) to replace lo_hi below with
+    // hi_lo, in order to get rid of the copy.
+    // The fundamental issues are the potential overflow when adding to a type U
+    // var, and the internal carry inside U.  (The inline asm doesn't use any
+    // type U, so these issues don't apply to it.)
+
+    U lo_hi = hi_lo;
+
+    hi_lo = hi_lo + lo_lo_1;   // doesn't overflow hi_lo
+    H tmp0 = static_cast<H>(hi_lo);
+    S tmp1 = static_cast<S>(hi_lo) >> shift;
+
+    lo_hi = lo_hi + tmp0;      // doesn't overflow lo_hi
+    S tmp2 = static_cast<S>(lo_hi) >> shift;
+
+    lowProduct = (lo_hi << shift) | lo_lo_0;
+    S highProduct = hi_hi + tmp2 + tmp1;
+
+#else
+// partial-asm
+
+    S hi_hi = static_cast<S>(u1) * static_cast<S>(u1);
+
+    H lo_lo_0 = static_cast<H>(lo_lo);
+    H lo_lo_1 = static_cast<H>(lo_lo >> shift);
+
+    H hi_hi_2 = static_cast<H>(hi_hi);
+    H hi_hi_3 = static_cast<H>(hi_hi >> shift);
+
+    H tmp3A = u0_or_zero;
+    H hi_lo_2 = unfinished_hi_lo_2;
+
+    __asm__ ("sub %[hi_lo_2], %[hi_lo_2], %[tmp3A] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - u0_or_zero */
+             "asr %[tmp3A], %[hi_lo_2], #63 \n\t"          /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "adds %[hi_lo_1], %[hi_lo_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_lo_2], %[hi_lo_2] \n\t"
+             "adc %[tmp3A], %[tmp3A], %[tmp3A] \n\t"
+             "adds %[hi_lo_1], %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_hi_2], %[hi_lo_2] \n\t"
+             "adc %[tmp3A], %[hi_hi_3], %[tmp3A] \n\t"
+             : [hi_lo_2]"+&r"(hi_lo_2), [tmp3A]"+&r"(tmp3A),
+               [hi_lo_1]"+&r"(hi_lo_1)
+             : [lo_lo_1]"r"(lo_lo_1),
+               [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
+                                   (static_cast<U>(hi_lo_2)));
+#endif
+
+
+#else
+// all-asm
+
+    H lo_lo_0, hi_lo_1, lo_lo_1, hi_lo_2, sign2;
+    __asm__ (
+             "mul %[lo_lo_0], %[u0], %[u0] \n\t"
+             "mul %[hi_lo_1], %[u1], %[u0] \n\t"
+             "umulh %[lo_lo_1], %[u0], %[u0] \n\t"
+             "umulh %[hi_lo_2], %[u1], %[u0] \n\t"
+             "and %[u0], %[u0], %[u1], asr #63 \n\t"   /* u0 = u0_or_zero,  2 cycles */
+             "sub %[hi_lo_2], %[hi_lo_2], %[u0] \n\t"  /* hi_lo_2 = unfinished_hi_lo_2 - u0_or_zero */
+             "mul %[u0], %[u1], %[u1] \n\t"            /* u0 = hi_hi_2 */
+             "smulh %[u1], %[u1], %[u1] \n\t"          /* u1 = hi_hi_3 */
+             "asr %[sign2], %[hi_lo_2], #63 \n\t"      /* sign2 = sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "adds %[hi_lo_1], %[hi_lo_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[hi_lo_2], %[hi_lo_2] \n\t"
+             "adc %[sign2], %[sign2], %[sign2] \n\t"   /* result3 = carry + sign2 + sign2 */
+             "adds %[hi_lo_1], %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcs %[hi_lo_2], %[u0], %[hi_lo_2] \n\t" /* hi_lo_2 = hi_hi_2 + hi_lo_2 + carry */
+             "adc %[sign2], %[u1], %[sign2] \n\t"      /* result3 = hi_hi_3 + result3 + carry */
+             : [u0]"+&r"(u0), [lo_lo_0]"=&r"(lo_lo_0),
+               [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
+               [lo_lo_1]"=&r"(lo_lo_1), [hi_lo_2]"=&r"(hi_lo_2),
+               [sign2]"=&r"(sign2)
+             :
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(sign2) << shift) |
+                                   (static_cast<U>(hi_lo_2)));
+#endif
+
+
+    if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
+        U low2;
+        S high2 = slow_signed_multiply_to_hilo_product::call(low2, u, u);
+        HPBC_UTIL_POSTCONDITION2(lowProduct == low2 && highProduct == high2);
+    }
+    return highProduct;
+  }
+};
+
+#endif
+
 
 
 }} // end namespace
