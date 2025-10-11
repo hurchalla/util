@@ -258,17 +258,34 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
 
 
 
-// On ARM64, benchmarking on M2, using inline asm for this function provided
-// 0 to 8% perf boosts.  Throughput-bound situations it made essentially no
-// difference one way or the other.  For latency-bound situations it provided
-// between 4-8% increase in speed.  See the Benchmark Timings further below for
-// details.  Naturally it does not affect *signed* multiplies, because this is
-// an unsigned mul.
+// Inline asm summary/conclusion from these X64 (Zen4) timings -
+// For x64:
+// We should use all-asm for gcc (pretty clear cut), and for clang we should use
+// partial-asm (this loses on montquarter scalar, but is a win or tossup
+// everywhere else, and we prefer to prioritize array pow over scalar pow anyway
+// since array is faster).
+// For gcc, a side benefit is the compiler is less likely to have the bad luck
+// cases where it makes bad decisions and produces terrible machine code, if we
+// use all-asm.
 //
-// On x64, benchmarking on Zen4, I obtained similar perf improvements, though
-// with gcc, the benefit was at times extremely large - gcc seemed to sometimes
-// make terrible choices in generating asm from the plain C++ (non-inline-asm)
-// function.
+// -- Benchmark Timings --
+// Montquarter two pow scalar:
+// gcc with all-asm square: no-asm 2.2583  partial-asm 2.3200  *all-asm 2.0015
+// clang with partial-asm square: no-asm 2.0142  partial-asm 1.9678  all-asm 1.9605
+// clang with all-asm square: no-asm 1.9672  (tossup)partial-asm 1.9283  (tossup)all-asm 1.9282
+// Montfull two pow scalar:
+// gcc with all-asm square: no-asm 2.4615  partial-asm 2.5842  *all-asm 2.0770
+// clang with partial-asm square: no-asm 2.0737  *partial-asm 2.0189  all-asm 2.1128
+// clang with all-asm square: no-asm 2.1354  partial-asm 2.1175  all-asm 2.1040
+// Montfull two pow array:
+// gcc with all-asm square: no-asm 1.7254  partial-asm 1.7241  *all-asm 1.7195
+// clang with partial-asm square: no-asm 1.4690  *partial-asm 1.4633  all-asm 1.4724
+// clang with all-asm square: no-asm 1.4805  partial-asm 1.4858  all-asm 1.4796
+// Montquarter two pow array:
+// gcc with all-asm square: no-asm 1.5246  (tossup)partial-asm 1.5214  (tossup)all-asm 1.5213
+// clang with partial-asm square: no-asm 1.2943  (tossup)partial-asm 1.2928  (tossup)all-asm 1.2932
+// clang with all-asm square: no-asm 1.3358  (tossup)partial-asm 1.3360  (tossup)all-asm 1.3353
+
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
@@ -288,10 +305,7 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     H u1 = static_cast<H>(u >> shift);
     H v1 = static_cast<H>(v >> shift);
 
-#if 0
-// This benchmarks slower than the #else for clang and gcc - it's perhaps 5-8%
-// slower on clang, and just terrible on gcc (around 50-80%? slower).  Gcc
-// must(?) be creating terrible asm for the mults, prior to the inline asm.
+#if defined(__clang__)
 
     // Calculate all the cross products.
     T lo_lo = static_cast<T>(u0) * static_cast<T>(v0);
@@ -330,7 +344,6 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     hi_hi_2 = hi_lo_2;
 
 #else
-// This benchmarks best for both gcc and clang.
 
     H rrax = u0;
     H rrdx, lo_lo_0, lo_lo_1, hi_lo_2;
@@ -511,6 +524,7 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
     return highProduct;
   }
 };
+
 #endif
 
 

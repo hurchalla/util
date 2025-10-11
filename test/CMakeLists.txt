@@ -81,11 +81,13 @@ add_executable(test_hurchalla_util
                test_safely_promote_unsigned.cpp
                test_branchless_shifts.cpp
                test_signed_multiply_to_hilo_product.cpp
+               test_signed_multiply_to_hi_product.cpp
                test_signed_square_to_hilo_product.cpp
                test_sized_uint.cpp
                test_unreachable.cpp
                test_Unroll.cpp
                test_unsigned_multiply_to_hilo_product.cpp
+               test_unsigned_multiply_to_hi_product.cpp
                test_unsigned_square_to_hilo_product.cpp
                test_ut_numeric_limits.cpp)
 

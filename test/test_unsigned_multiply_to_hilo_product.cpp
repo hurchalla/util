@@ -101,6 +101,27 @@ void test_unsigned_multiply_to_hilo_product()
 
 
 
+void test_unsigned_multiply_exhaustive_uint8()
+{
+    using std::uint8_t;
+    namespace hc = ::hurchalla;
+    uint8_t tmax = hc::ut_numeric_limits<uint8_t>::max();
+
+    for (int i=0; i<=tmax; i++) {
+        for (int j=0; j<=tmax; j++) {
+            uint8_t i8 = static_cast<uint8_t>(i);
+            uint8_t j8 = static_cast<uint8_t>(j);
+            std::uint8_t lo;
+            uint8_t hi = hc::unsigned_multiply_to_hilo_product(lo, i8, j8);
+            int ref_hi = (i*j) >> 8;
+            unsigned int ref_lo = static_cast<unsigned int>((i*j) & 0xFF);
+            EXPECT_TRUE(hi == ref_hi && lo == ref_lo);
+        }
+    }
+}
+
+
+
 template <typename T>
 struct umthp {
     static T call(T& lowProduct, T u, T v)
@@ -125,6 +146,8 @@ TEST(HurchallaUtil, unsigned_multiply_to_hilo_product) {
 #if HURCHALLA_COMPILER_HAS_UINT128_T()
     test_unsigned_multiply_to_hilo_product<__uint128_t, umthp>();
 #endif
+
+    test_unsigned_multiply_exhaustive_uint8();
 }
 
 TEST(HurchallaUtil, slow_unsigned_multiply_to_hilo_product) {

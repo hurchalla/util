@@ -33,7 +33,7 @@ struct impl_signed_square_to_hilo_product {
 };
 
 
-
+//#define HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO
 
 // Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
 // enable the all-asm version, for both gcc and clang.  A side benefit is the
@@ -53,7 +53,7 @@ struct impl_signed_square_to_hilo_product {
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
-    defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    (defined(HURCHALLA_TARGET_ISA_ARM_64) || defined(HURCHALLA_TARGET_ISA_X86_64)) && \
     defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO)
 
 template <> struct impl_signed_square_to_hilo_product<__int128_t> {
@@ -81,10 +81,10 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     // arithmetic (sign-extending) right shift required
     I u1 = static_cast<I>(u >> shift);
 
-#if 0
-// In limited tests benchmarking montgomery two_pow, this partial-asm version
-// tended to be a little slower than the full-asm version.  Thus we disable
-// this version.
+#if 1
+// For ARM64, In limited tests benchmarking montgomery two_pow, this partial-asm
+// version tended to be a little slower than the full-asm version.  Thus we
+// disable this version for ARM64.
 
     H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
     H u0_or_zero = sign_mask_u & u0;
@@ -106,8 +106,9 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     H tmp3A = u0_or_zero;
     H hi_lo_2 = unfinished_hi_lo_2;
 
+#  if defined(HURCHALLA_TARGET_ISA_ARM_64)
     __asm__ ("sub %[hi_lo_2], %[hi_lo_2], %[tmp3A] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - u0_or_zero */
-             "asr %[tmp3A], %[hi_lo_2], #63 \n\t"          /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "asr %[tmp3A], %[hi_lo_2], #63 \n\t"          /* tmp3A = sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
              "adds %[hi_lo_1], %[hi_lo_1], %[hi_lo_1] \n\t"
              "adcs %[hi_lo_2], %[hi_lo_2], %[hi_lo_2] \n\t"
              "adc %[tmp3A], %[tmp3A], %[tmp3A] \n\t"
@@ -119,12 +120,39 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
              : [lo_lo_1]"r"(lo_lo_1),
                [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
              : "cc");
+#  elif defined(HURCHALLA_TARGET_ISA_X86_64)
+    __asm__ (
+             "subq %[tmp3A], %[hi_lo_2] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - u0_or_zero */
+             "movq %[hi_lo_2], %[tmp3A] \n\t"   /* tmp3A = hi_lo_2 */
+             "sarq $63, %[tmp3A] \n\t"          /* tmp3A = sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "addq %[hi_lo_1], %[hi_lo_1] \n\t"
+             "adcq %[hi_lo_2], %[hi_lo_2] \n\t"
+             "adcq %[tmp3A], %[tmp3A] \n\t"     /* tmp3A = sign_extension_hi_lo_2 + sign_extension_hi_lo_2 + carry */
+             "addq %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcq %[hi_hi_2], %[hi_lo_2] \n\t" /* u0 += hi_hi_2 + carry */
+             "adcq %[hi_hi_3], %[tmp3A] \n\t"   /* u1 += hi_hi_3 + carry */
+             : [hi_lo_2]"+&r"(hi_lo_2), [tmp3A]"+&r"(tmp3A),
+               [hi_lo_1]"+&r"(hi_lo_1)
+#    if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
+             : [lo_lo_1]"r"(lo_lo_1),
+               [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
+#    else
+             : [lo_lo_1]"rm"(lo_lo_1),
+               [hi_hi_2]"rm"(hi_hi_2), [hi_hi_3]"rm"(hi_hi_3)
+#    endif
+             : "cc");
+#  else
+#    error "inline asm has not been written for your target ISA"
+#  endif
+
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
                                    (static_cast<U>(hi_lo_2)));
+
 #else
 // all-asm
 
+#  if defined(HURCHALLA_TARGET_ISA_ARM_64)
     H lo_lo_0, hi_lo_1, lo_lo_1, hi_lo_2, sign2;
     __asm__ (
              "mul %[lo_lo_0], %[u0], %[u0] \n\t"
@@ -151,8 +179,49 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(sign2) << shift) |
                                    (static_cast<U>(hi_lo_2)));
-#endif
+#  elif defined(HURCHALLA_TARGET_ISA_X86_64)
+    H rrax = u0;
+    H rrdx, lo_lo_0, lo_lo_1, hi_lo_1;
+    __asm__ (
+             "mulq %[u0] \n\t"             /* rdx:rax = rax*u0 (rax == u0); high-order bits of the product in rdx */
+             "movq %%rax, %[lo_lo_0] \n\t"
+             "movq %%rdx, %[lo_lo_1] \n\t"
+             "movq %[u1], %%rax \n\t"
+             "mulq %[u0] \n\t"             /* MUL. rdx:rax = u1*u0; rdx = unfinished_hi_lo_2 */
+             "movq %%rax, %[hi_lo_1] \n\t"
 
+             "movq %[u1], %%rax \n\t"
+             "sarq $63, %%rax \n\t"
+             "andq %%rax, %[u0] \n\t"      /* u0 = u0_or_zero */
+             "subq %[u0], %%rdx \n\t"      /* hi_lo_2 = unfinished_hi_lo_2 - u0_or_zero */
+             "movq %%rdx, %[u0] \n\t"      /* u0 = hi_lo_2 */
+
+             "movq %[u1], %%rax \n\t"
+             "imulq %[u1] \n\t"            /* IMUL. rdx:rax = u1*u1; on output, rax = hi_hi_2, rdx = hi_hi_3 */
+
+             "movq %[u0], %[u1] \n\t"      /* u1 = hi_lo_2 */
+             "sarq $63, %[u1] \n\t"        /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+
+             "addq %[hi_lo_1], %[hi_lo_1] \n\t"
+             "adcq %[u0], %[u0] \n\t"      /* u0 = hi_lo_2 + hi_lo_2 + carry */
+             "adcq %[u1], %[u1] \n\t"      /* u1 = sign_extension_hi_lo_2 + sign_extension_hi_lo_2 + carry */
+             "addq %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcq %%rax, %[u0] \n\t"      /* u0 += hi_hi_2 + carry */
+             "adcq %%rdx, %[u1] \n\t"      /* u1 += hi_hi_3 + carry */
+             : "+&a"(rrax), "=&d"(rrdx), [u0]"+&r"(u0),
+               [lo_lo_0]"=&r"(lo_lo_0), [lo_lo_1]"=&r"(lo_lo_1),
+               [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1)
+             :
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(u1) << shift) |
+                                   (static_cast<U>(u0)));
+#  else
+#    error "inline asm has not been written for your target ISA"
+#  endif
+
+
+#endif
 
     if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
         U low2;

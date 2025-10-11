@@ -33,6 +33,32 @@ struct impl_unsigned_square_to_hilo_product {
 
 
 
+
+// Inline asm summary/conclusion from these x64 (Zen4) timings -
+// For x64:
+// We should use all-asm for gcc (pretty clear cut), and for clang we should use
+// partial-asm (this isn't completely clear cut since it's a loss on montquarter
+// - for wins see the comments in impl_unsigned_multiply_to_hilo_product.h).
+// For gcc, a side benefit is the compiler is less likely to have the bad luck
+// cases where it makes bad decisions and produces terrible machine code, if we
+// use all-asm.
+//
+// -- Benchmark Timings --
+//
+// Montquarter two pow scalar:
+// gcc with all-asm mult: no-asm 2.3755  partial-asm 2.1298  *all-asm 2.0015
+// clang with all-asm mult: no-asm 1.9701  partial-asm 1.9605  all-asm 1.9282
+// Montfull two pow scalar:
+// gcc with all-asm mult: no-asm 2.5055  partial-asm 2.4362  *all-asm 2.0770
+// clang with all-asm mult: no-asm 2.1848  partial-asm 2.1150  all-asm 2.1040
+// Montfull two pow array:
+// gcc with all-asm mult: no-asm 2.0061  partial-asm 1.9696  *all-asm 1.7195
+// clang with all-asm mult: no-asm 1.5402  partial-asm 1.4724  all-asm 1.4796
+// Montquarter two pow array:
+// gcc with all-asm mult: no-asm 1.8282  partial-asm 1.7800  *all-asm 1.5213
+// clang with all-asm mult: no-asm 1.3898  partial-asm 1.2932  all-asm 1.3353
+
+
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_X86_64) && \
     defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO)
@@ -48,7 +74,7 @@ template <> struct impl_unsigned_square_to_hilo_product<__uint128_t> {
     H u0 = static_cast<H>(u);
     H u1 = static_cast<H>(u >> shift);
 
-#if 0
+#if defined(__clang__)
 
     T lo_lo = static_cast<T>(u0) * static_cast<T>(u0);
     T hi_lo = static_cast<T>(u1) * static_cast<T>(u0);

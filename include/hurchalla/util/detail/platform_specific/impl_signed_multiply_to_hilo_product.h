@@ -184,7 +184,7 @@ struct slow_signed_multiply_to_hilo_product {
     // bounds: [-pow(2,2w-1) +pow(2,w-1), pow(2,2w-1) -pow(2,w-1)]
     S tmp2 = lo_hi >> shift;  // bounds: [-pow(2,w-1), pow(2,w-1) - 1]
 
-    lowProduct = (static_cast<U>(lo_hi) << shift) | static_cast<U>(lo_lo_0);
+    lowProduct = static_cast<U>((static_cast<U>(lo_hi) << shift) | static_cast<U>(lo_lo_0));
 
     S highProduct = hi_hi + tmp2 + tmp1;  // won't overflow (see next line)
     // bounds: [-pow(2,2w-2) - pow(2,w-1), pow(2,2w-2) + pow(2,w) - 2]
@@ -378,8 +378,13 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 // clang with all-asm square: no-asm 2.3814  partial-asm 2.3793  *all-asm 2.3589
 
 
+
+//#define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
+
+
+
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
-    defined(HURCHALLA_TARGET_ISA_ARM_64) && \
+    (defined(HURCHALLA_TARGET_ISA_ARM_64) || defined(HURCHALLA_TARGET_ISA_X86_64)) && \
     defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
 
 template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
@@ -412,6 +417,7 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
 # if 1
 // all-asm
 
+#  if defined(HURCHALLA_TARGET_ISA_ARM_64)
     H lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1, hi_lo_2, lo_hi_2;
     __asm__ (
              "mul %[lo_lo_0], %[u0], %[v0] \n\t"
@@ -444,11 +450,67 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(u0) << shift) |
                                    (static_cast<U>(hi_lo_2)));
+#  elif defined(HURCHALLA_TARGET_ISA_X86_64)
+    H rrax = u0;
+    H rrdx, lo_lo_0, lo_lo_1, hi_lo_1, lo_hi_1;
+    __asm__ (
+             "mulq %[v0] \n\t"             /* rdx:rax = rax*v0 (rax == u0); high-order bits of the product in rdx */
+             "movq %%rax, %[lo_lo_0] \n\t"
+             "movq %%rdx, %[lo_lo_1] \n\t"
+             "movq %[u1], %%rax \n\t"
+             "mulq %[v0] \n\t"             /* MUL. rdx:rax = u1*v0; rdx = unfinished_hi_lo_2 */
+             "movq %%rax, %[hi_lo_1] \n\t"
+
+             "movq %[u1], %%rax \n\t"
+             "sarq $63, %%rax \n\t"
+             "andq %%rax, %[v0] \n\t"      /* v0 = v0_or_zero */
+             "subq %[v0], %%rdx \n\t"      /* hi_lo_2 = unfinished_hi_lo_2 - v0_or_zero */
+             "movq %%rdx, %[v0] \n\t"      /* v0 = hi_lo_2 */
+
+             "movq %[u0], %%rax \n\t"
+             "mulq %[v1] \n\t"             /* MUL. rdx:rax = u0*v1; rdx = unfinished_lo_hi_2 */
+             "movq %%rax, %[lo_hi_1] \n\t"
+
+             "movq %[v1], %%rax \n\t"      /* prep the next imul by setting rax */
+
+             "sarq $63, %[v1] \n\t"
+             "andq %[v1], %[u0] \n\t"      /* u0 = u0_or_zero */
+             "subq %[u0], %%rdx \n\t"      /* lo_hi_2 = unfinished_lo_hi_2 - u0_or_zero */
+             "movq %%rdx, %[v1] \n\t"      /* v1 = lo_hi_2 */
+
+             "imulq %[u1] \n\t"            /* IMUL. rdx:rax = u1*v1; on output, rax = hi_hi_2, rdx = hi_hi_3 */
+
+             "movq %[v0], %[u0] \n\t"      /* u0 = hi_lo_2 */
+             "movq %[v1], %[u1] \n\t"      /* u1 = lo_hi_2 */
+             "sarq $63, %[u0] \n\t"        /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "sarq $63, %[u1] \n\t"        /* sign_extension_lo_hi_2 = lo_hi_2 >> 63 */
+
+             "addq %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcq %[v1], %[v0] \n\t"      /* v0 = hi_lo_2 + lo_hi_2 */
+             "adcq %[u1], %[u0] \n\t"      /* u0 = sign_extension_hi_lo_2 + sign_extension_lo_hi_2 */
+             "addq %[lo_hi_1], %[hi_lo_1] \n\t"
+             "adcq %%rax, %[v0] \n\t"      /* v0 += hi_hi_2 */
+             "adcq %%rdx, %[u0] \n\t"      /* u0 += hi_hi_3 */
+             : "+&a"(rrax), "=&d"(rrdx), [v0]"+&r"(v0),
+               [lo_lo_0]"=&r"(lo_lo_0), [lo_lo_1]"=&r"(lo_lo_1),
+               [u1]"+&r"(u1), [hi_lo_1]"=&r"(hi_lo_1),
+               [u0]"+&r"(u0), [v1]"+&r"(v1),
+               [lo_hi_1]"=&r"(lo_hi_1)
+             :
+             : "cc");
+    lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
+    S highProduct = static_cast<S>((static_cast<U>(u0) << shift) |
+                                   (static_cast<U>(v0)));
+#  else
+#    error "inline asm has not been written for your target ISA"
+#  endif
+
+
 
 # else
-// In limited tests benchmarking montgomery two_pow, this partial-asm version
-// tended to be a little slower than the full-asm version.  Thus we disable
-// this version.
+// For ARM64: In limited tests benchmarking montgomery two_pow, this partial-asm
+// version tended to be a little slower than the full-asm version.  Thus we
+// disable this version for ARM64.
 
     H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
     H sign_mask_v = static_cast<H>(v1 >> (shift - 1));
@@ -478,6 +540,7 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
     H hi_lo_2 = unfinished_hi_lo_2;
     H lo_hi_2 = unfinished_lo_hi_2;
 
+#  if defined(HURCHALLA_TARGET_ISA_ARM_64)
     __asm__ ("sub %[hi_lo_2], %[hi_lo_2], %[tmp3A] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - v0_or_zero */
              "sub %[lo_hi_2], %[lo_hi_2], %[tmp3B] \n\t"   /* lo_hi_2 = unfinished_lo_hi_2 - u0_or_zero */
              "asr %[tmp3A], %[hi_lo_2], #63 \n\t"          /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
@@ -494,12 +557,38 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
              : [lo_hi_1]"r"(lo_hi_1), [lo_lo_1]"r"(lo_lo_1),
                [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
              : "cc");
+#  elif defined(HURCHALLA_TARGET_ISA_X86_64)
+    __asm__ ("subq %[tmp3A], %[hi_lo_2] \n\t"   /* hi_lo_2 = unfinished_hi_lo_2 - v0_or_zero */
+             "subq %[tmp3B], %[lo_hi_2] \n\t"   /* lo_hi_2 = unfinished_lo_hi_2 - u0_or_zero */
+             "movq %[hi_lo_2], %[tmp3A] \n\t"
+             "movq %[lo_hi_2], %[tmp3B] \n\t"
+             "sarq $63, %[tmp3A] \n\t"          /* sign_extension_hi_lo_2 = hi_lo_2 >> 63 */
+             "sarq $63, %[tmp3B] \n\t"          /* sign_extension_lo_hi_2 = lo_hi_2 >> 63 */
+             "addq %[lo_hi_1], %[hi_lo_1] \n\t"
+             "adcq %[lo_hi_2], %[hi_lo_2] \n\t"
+             "adcq %[tmp3B], %[tmp3A] \n\t"
+             "addq %[lo_lo_1], %[hi_lo_1] \n\t"
+             "adcq %[hi_hi_2], %[hi_lo_2] \n\t"
+             "adcq %[hi_hi_3], %[tmp3A] \n\t"
+             : [hi_lo_2]"+&r"(hi_lo_2), [tmp3A]"+&r"(tmp3A),
+               [lo_hi_2]"+&r"(lo_hi_2), [tmp3B]"+&r"(tmp3B),
+               [hi_lo_1]"+&r"(hi_lo_1)
+#    if defined(__clang__)       /* https://bugs.llvm.org/show_bug.cgi?id=20197 */
+             : [lo_hi_1]"r"(lo_hi_1), [lo_lo_1]"r"(lo_lo_1),
+               [hi_hi_2]"r"(hi_hi_2), [hi_hi_3]"r"(hi_hi_3)
+#    else
+             : [lo_hi_1]"rm"(lo_hi_1), [lo_lo_1]"rm"(lo_lo_1),
+               [hi_hi_2]"rm"(hi_hi_2), [hi_hi_3]"rm"(hi_hi_3)
+#    endif
+             : "cc");
+#  else
+#    error "inline asm has not been written for your target ISA"
+#  endif
+
     lowProduct = (static_cast<U>(hi_lo_1) << shift) | static_cast<U>(lo_lo_0);
     S highProduct = static_cast<S>((static_cast<U>(tmp3A) << shift) |
                                    (static_cast<U>(hi_lo_2)));
-
 # endif
-
 
     if (HPBC_UTIL_POSTCONDITION2_MACRO_IS_ACTIVE) {
         U low2;
