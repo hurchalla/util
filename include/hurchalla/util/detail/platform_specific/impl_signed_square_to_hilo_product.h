@@ -81,7 +81,7 @@ template <> struct impl_signed_square_to_hilo_product<__int128_t> {
     // arithmetic (sign-extending) right shift required
     I u1 = static_cast<I>(u >> shift);
 
-#if 1
+#if 0
 // For ARM64, In limited tests benchmarking montgomery two_pow, this partial-asm
 // version tended to be a little slower than the full-asm version.  Thus we
 // disable this version for ARM64.

@@ -165,7 +165,6 @@ template <> struct impl_unsigned_square_to_hilo_product<__uint128_t> {
 // clang with all-asm mult: no-asm 2.2957  partial-asm 2.3362  *all-asm 2.2633
 //
 // Montfull two pow scalar:
-// (OLD bit still good) gcc: no-asm ---   partial-asm 2.4030  all-asm 2.3789
 // gcc: no-asm 2.4053   partial-asm 2.4028  all-asm 2.3802
 // gcc with all-asm mult: no-asm 2.4019  partial-asm 2.4048  *all-asm 2.3789
 // clang: no-asm 2.3779  partial-asm 2.3864  all-asm 2.3960
@@ -173,13 +172,11 @@ template <> struct impl_unsigned_square_to_hilo_product<__uint128_t> {
 //
 // Montfull two pow array:
 // gcc: no-asm 1.2895  partial-asm 1.2325  all-asm 1.2382
-// (OLD but still good)clang: no-asm ---  partial-asm 1.1739  all-asm 1.1729
 // gcc with all-asm mult: no-asm 1.2888  partial-asm 1.2321  *all-asm 1.2423
 // clang: no-asm 1.2387  partial-asm 1.1748  all-asm 1.1742
 // clang with all-asm mult: no-asm 1.2375  partial-asm 1.1736  *all-asm 1.1738
 //
 // Montquarter two pow array:
-// (OLD but still good)gcc: no-asm ---  partial-asm 1.0967  all-asm 1.0995
 // gcc: no-asm 1.1654  partial-asm 1.1064  all-asm 1.1023
 // gcc with all-asm mult: no-asm 1.1660  partial-asm 1.1059  *all-asm 1.1014
 // clang: no-asm 1.0739  partial-asm 1.0458  all-asm 1.0415
