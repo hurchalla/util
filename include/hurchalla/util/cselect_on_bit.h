@@ -17,7 +17,8 @@ namespace hurchalla {
 
 // note: in order to make these functions use inline asm, you must compile with
 // either gcc or clang, you must compile for x64 or ARM64, and you must define
-// HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT
+// HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT or
+// HURCHALLA_ALLOW_INLINE_ASM_ALL.
 
 
 template <int BITNUM>

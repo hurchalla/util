@@ -18,7 +18,7 @@ namespace hurchalla { namespace detail {
 
 
 #if defined(HURCHALLA_TARGET_ISA_X86_64) && !defined(_MSC_VER) && \
-    (defined(HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT))
+    (defined(HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))
 
 // ---------------------------------- X64 --------------------------------------
 
@@ -954,7 +954,7 @@ struct impl_cselect_on_bit<BITNUM, typename std::enable_if<32 <= BITNUM && BITNU
 
   // end of #if defined(HURCHALLA_TARGET_ISA_X86_64) && !defined(_MSC_VER) ...
 #elif defined(HURCHALLA_TARGET_ISA_ARM_64) && !defined(_MSC_VER) && \
-    (defined(HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT))
+    (defined(HURCHALLA_ALLOW_INLINE_ASM_CSELECT_ON_BIT) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))
 
 // --------------------------------- ARM64 -------------------------------------
 

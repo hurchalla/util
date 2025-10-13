@@ -32,7 +32,7 @@ struct impl_unsigned_multiply_to_hi_product {
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_X86_64) && \
-    defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
+    (defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))
 
 template <> struct impl_unsigned_multiply_to_hi_product<__uint128_t> {
   HURCHALLA_FORCE_INLINE static
@@ -137,7 +137,7 @@ template <> struct impl_unsigned_multiply_to_hi_product<__uint128_t> {
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_ARM_64) && \
-    defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO)
+    (defined(HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))
 
 template <> struct impl_unsigned_multiply_to_hi_product<__uint128_t> {
   HURCHALLA_FORCE_INLINE static

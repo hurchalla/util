@@ -6,8 +6,9 @@
 #define HURCHALLA_UTIL_UNSIGNED_MULT_TO_HILO_H_INCLUDED
 
 // note: in order to get the inline asm (potentially faster) version of this
-// function, you must define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO.  This
-// doesn't apply to MSVC since MSVC doesn't support inline asm.
+// function, you must define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO or
+// HURCHALLA_ALLOW_INLINE_ASM_ALL.  This doesn't apply to MSVC since MSVC
+// doesn't support inline asm.
 
 
 #include "hurchalla/util/detail/platform_specific/impl_unsigned_multiply_to_hilo_product.h"
