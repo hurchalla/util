@@ -358,7 +358,12 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 
 
 
-
+// THE ARM64 TIMINGS SHOULD BE REDONE - the benchmark test I did at the time
+// only barely stressed this function.  (When using a mont pow test I need to
+// choose a testbench experimental_montgomery_two_pow version that will have a
+// heavy amount of mont mults, and as few mont squares as possible.  For the
+// array two pow the best choice is TABLE_BITS=1 CODE_SECTION=8)
+//
 // Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
 // enable the all-asm version, for both gcc and clang.  A side benefit is the
 // compiler (usually gcc) is less likely to have the bad luck cases where it
@@ -379,8 +384,23 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 
 
 
-//#define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO
-
+// X64 (Zen4) Timings:
+// Conclusions:  Use all-asm for gcc.  Although clang scalar loses by 17% with
+// all-asm compared to no-asm, a user can in principle choose not to define
+// HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO  or  HURCHALLA_ALLOW_INLINE_ASM_ALL
+// and thereby get the better scalar perf - but on array pow, clang all-asm wins
+// by 3% and we would need to enable all-asm here for it to be possible for a
+// user to get that benefit, and array pow is what matters the most since the
+// timings basically always show it faster than scalar pow.  So use all-asm for
+// clang.
+//
+// Monthalf two pow array (array mont two pow TABLE_BITS=1 CODE_SECTION=8):
+// gcc with no-asm square: no-asm 4.9666  partial-asm 5.0916  all-asm 3.3798
+// clang with no-asm square: no-asm 3.0988  partial-asm 3.0977  all-asm 3.0022
+//
+// Monthalf two pow scalar (scalar mont two pow TABLE_BITS=1 CODE_SECTION=0):
+// gcc with no-asm square: no-asm 4.5610  partial-asm 4.5236  all-asm 3.7055
+// clang with no-asm square: no-asm 3.5257  partial-asm 3.6841  all-asm 4.1186
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \

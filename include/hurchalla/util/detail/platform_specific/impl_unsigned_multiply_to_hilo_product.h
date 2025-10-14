@@ -287,6 +287,23 @@ template <> struct impl_unsigned_multiply_to_hilo_product<std::uint64_t> {
 // clang with all-asm square: no-asm 1.3358  (tossup)partial-asm 1.3360  (tossup)all-asm 1.3353
 
 
+// X64 (Zen 4) Updated Timings:
+// These should be quite a bit more reliable than the above for estimating perf.
+// Conclusions: gcc use all-asm.  clang prefer partial asm, but all-asm is fine.
+// This is incidentally almost the same conclusions as above.
+// Montquarter two pow scalar:
+// gcc with all-asm square: no-asm 2.2558  partial-asm 2.3230  all-asm 2.0051
+// clang with all-asm square: no-asm 2.0114  partial-asm 1.9669  all-asm 1.9605
+// Montfull two pow scalar:
+// gcc with all-asm square: no-asm 2.4131  partial-asm 2.4531  all-asm 2.0792
+// clang with all-asm square: no-asm 2.0694  partial-asm 2.0221  all-asm 2.0339
+// Montfull two pow array:
+// gcc with all-asm square: no-asm 1.9274  partial-asm 1.9011  all-asm 1.5146
+// clang with all-asm square: no-asm 1.6425  partial-asm 1.5238  all-asm 1.5561
+// Montquarter two pow array:
+// gcc with all-asm square: no-asm 1.7247  partial-asm 1.9813  all-asm 1.4472
+// clang with all-asm square: no-asm 1.5986  partial-asm 1.4786  all-asm 1.4797
+
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_X86_64) && \

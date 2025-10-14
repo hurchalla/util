@@ -52,6 +52,18 @@ struct impl_signed_square_to_hilo_product {
 // clang with all-asm mult: no-asm 2.3717  partial-asm 2.4241  *all-asm 2.3612
 
 
+// X64 (Zen4) conclusions:
+// always use all-asm, for both gcc and clang.
+// X64 timings:
+// Monthalf two pow array:
+// gcc no-asm 1.4420  partial-asm 1.8731  all-asm 1.4436
+// clang no-asm 1.4895  partial-asm 1.3603  all-asm 1.3429
+//
+// Monthalf two pow scalar:
+// gcc no-asm 2.1733  partial-asm 2.6371  all-asm 2.0038
+// clang no-asm 2.1258  partial-asm 1.9399  all-asm 1.9006
+
+
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     (defined(HURCHALLA_TARGET_ISA_ARM_64) || defined(HURCHALLA_TARGET_ISA_X86_64)) && \
     (defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))

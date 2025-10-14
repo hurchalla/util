@@ -59,6 +59,29 @@ struct impl_unsigned_square_to_hilo_product {
 // clang with all-asm mult: no-asm 1.3898  partial-asm 1.2932  all-asm 1.3353
 
 
+// X64 Update: Conclusions remain unchanged for clang and gcc.  But note: we can
+// see for gcc that a user in some circumstances might want to avoid defining
+// HURCHALLA_ALLOW_INLINE_ASM_ALL or HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO,
+// and just define HURCHALLA_ALLOW_INLINE_ASM_MULTIPLY_TO_HILO, so as to get
+// faster scalar two pow functions via this function's default (which calls
+// unsigned_multiple_to_hilo); it's unclear why that would ever be faster, but
+// that's what happens for gcc in these timings essentially.
+//
+// Updated timings:
+// Montfull two pow array:
+// gcc no-asm 1.5282  partial-asm 1.6065  all-asm 1.4200
+// clang no-asm 1.4924  partial-asm 1.3921  all-asm 1.4377
+// Montquarter two pow array:
+// gcc no-asm 1.4552  partial-asm 1.5968  all-asm 1.3490
+// clang no-asm 1.3800  partial-asm 1.3086  all-asm 1.3303
+// Montquarter two pow scalar:
+// gcc no-asm 1.8890  partial-asm 2.2430  all-asm 1.9667
+// clang no-asm 1.9247  partial-asm 1.9687  all-asm 1.9289
+// Montfull two pow scalar:
+// gcc no-asm 2.0859  partial-asm 2.3375  all-asm 2.1598
+// clang no-asm 2.0473  partial-asm 2.0221  all-asm 2.0549
+
+
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_X86_64) && \
     (defined(HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO) || defined(HURCHALLA_ALLOW_INLINE_ASM_ALL))
