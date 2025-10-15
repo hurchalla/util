@@ -415,38 +415,47 @@ template <> struct impl_unsigned_multiply_to_hilo_product<__uint128_t> {
 
 
 // Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
-// enable the all-asm version, for both gcc and clang.  A side benefit is the
-// compiler (usually gcc) is less likely to have the bad luck cases where it
-// makes bad decisions and produces terrible machine code, if we use all-asm.
-//   (The tests with no-asm square don't count for much since no-asm square is
-//   slower than we'd likely use.)
+// enable the all-asm version, for both gcc and clang.  Note that this is a
+// conclusion (I believe completely justified) based on the results of using
+// asm-all in impl_unsigned_multiply_to_hi_product, since that was what I was
+// testing when doing asm-all in the benchmarks here.  The asm in the hi_product
+// file is almost exactly the same as the all-asm here, except that it skips a
+// single mult - as we needed for these tests - see the note in comments just
+// below for why we needed that.
+// A side benefit of using the full asm-all is the compiler (usually gcc) is
+// less likely to have the bad luck cases where it makes bad decisions and
+// produces terrible machine code, when we use all-asm.
 //
-// -- Benchmark Timings --
-// Montquarter two pow scalar:
-// gcc with no-asm square: no-asm 2.5080  partial-asm 2.5965  *all-asm 2.4842
-// gcc with partial-asm square: no-asm 2.3966  partial-asm 2.3788  *all-asm 2.2763
-// gcc with full-asm square: no-asm 2.4084  partial-asm 2.3592  *all-asm 2.2766
-// clang with no-asm square: no-asm 2.3635   partial-asm 2.2705  *all-asm 2.2956
-// clang with all-asm square: no-asm 2.3637   partial-asm 2.2819  *all-asm 2.2616
-//
-// Montfull two pow scalar:
-// gcc with no-asm square: no-asm 2.4965   partial-asm 2.4014  *all-asm 2.4900
-// gcc with all-asm square: no-asm 2.4931   partial-asm 2.4444  *all-asm 2.3789
-// clang with no-asm square: no-asm 2.4950  partial-asm 2.3779  *all-asm 2.3932
-// clang with partial-asm square: no-asm 2.4879  partial-asm 2.3864  *all-asm 2.3833
-//
-// Montfull two pow array:
-// gcc with no-asm square: no-asm 1.2892  partial-asm 1.2894  *all-asm 1.2895
-// gcc with partial-asm square: no-asm 1.2311  partial-asm 1.2349  *all-asm 1.2318
-// clang with no-asm square: no-asm 1.2395  partial-asm 1.2391   *all-asm 1.2387
-// clang with all-asm square: no-asm 1.1737  partial-asm 1.1729  *all-asm 1.1737
+// Timings for ARM64 (M2)
+// Note when using mont two pow as the benchmark test, we need to make sure we
+// call impl_unsigned_multiply_to_hi_product instead of this file's function
+// when we are doing asm-all, because this file's function's all-asm version
+// has an extra multiply in it (to do hi and lo) that
+// impl_unsigned_multiply_to_hi_product does not have.  The partial asm in this
+// file's function will skip that extra mult because the compiler will see it
+// isn't needed, but this file's all-asm version can not skip it because that
+// extra mult is coded into the inline asm.  This is all as it should be, but
+// it's a quirk of benchmarks that depend heavily on REDC (which needs only the
+// hi word result), like the benchmark test I did here using mont two pow.
+// We didn't (and don't) need to worry about this with x64, since unlike ARM64,
+// when using x64 there is no way to skip the loword multiplication (the
+// compiler can't skip it and neither can we with inline asm) when we just need
+// a hiword mult - the x64 double-width-result mul instruction always produces
+// both lo and hi words with one single instruction.
 //
 // Montquarter two pow array:
-// gcc with no-asm square: no-asm 1.1738  partial-asm 1.1697  *all-asm 1.1654
-// gcc with partial-asm square: no-asm 1.0992  partial-asm 1.0967  *all-asm 1.1075
-// gcc with all-asm square: no-asm 1.0986  partial-asm 1.0983  *all-asm 1.1016
-// clang with no-asm square: no-asm 1.0739  partial-asm 1.0741  *all-asm 1.0750
-// clang with all-asm square: no-asm 1.0411  partial-asm 1.0415  *all-asm 1.0413
+// gcc: no-asm 1.2371  partial-asm 1.2186  all-asm-mul-to-**hi**-product 1.2154
+// clang: no-asm 1.2501  partial-asm 1.2442  all-asm-mul-to-**hi**-product 1.2405
+// Montfull two pow array:
+// gcc: no-asm 1.2318  partial-asm 1.2046  all-asm-mul-to-**hi**-product 1.2141
+// clang: no-asm 1.2542  partial-asm 1.2300  all-asm-mul-to-**hi**-product  1.2282
+//
+// Montquarter two pow scalar:
+// gcc: no-asm 2.4194  partial-asm 2.3752  all-asm-mul-to-**hi**-product 2.2874
+// clang: no-asm 2.3535  partial-asm 2.2538  all-asm-mul-to-**hi**-product 2.2582
+// Montfull two pow scalar:
+// gcc: no-asm 2.4158  partial-asm 2.3799  all-asm-mul-to-**hi**-product 2.2960
+// clang: no-asm 2.3398  partial-asm 2.2573  all-asm-mul-to-**hi**-product 2.2442
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \

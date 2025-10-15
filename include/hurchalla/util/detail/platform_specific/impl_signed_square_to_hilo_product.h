@@ -33,19 +33,17 @@ struct impl_signed_square_to_hilo_product {
 };
 
 
-//#define HURCHALLA_ALLOW_INLINE_ASM_SQUARE_TO_HILO
 
 // Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
 // enable the all-asm version, for both gcc and clang.  A side benefit is the
 // compiler (usually gcc) is less likely to have the bad luck cases where it
 // makes bad decisions and produces terrible machine code, if we use all-asm.
 //
-// -- Benchmark Timings --
+// (Older) Benchmark Timings --
 // Monthalf two pow array:
 // gcc with partial-asm mult: no-asm 1.2040  partial-asm 1.2000  *all-asm 1.0649
 // gcc with all-asm mult: no-asm 1.2074  partial-asm 1.1970  *all-asm 1.0600
 // clang with all-asm mult: no-asm 1.0551  partial-asm 1.0213  *all-asm 1.0168
-//
 // Monthalf two pow scalar:
 // gcc with partial-asm mult: no-asm 2.5405  partial-asm 2.5745  *all-asm 2.5122
 // gcc with all-asm mult: no-asm 2.5412  partial-asm 2.5304  *all-asm 2.4986
@@ -62,6 +60,17 @@ struct impl_signed_square_to_hilo_product {
 // Monthalf two pow scalar:
 // gcc no-asm 2.1733  partial-asm 2.6371  all-asm 2.0038
 // clang no-asm 2.1258  partial-asm 1.9399  all-asm 1.9006
+
+
+// Updated ARM64 (M2) conclusions:
+// always use all-asm, for both gcc and clang
+// Updated ARM64 (M2) timings:
+// Monthalf two pow array:
+// gcc no-asm 1.3574  partial-asm 1.3416  all-asm 1.2116
+// clang no-asm 1.3797  partial-asm 1.2409  all-asm 1.2522
+// Monthalf two pow scalar:
+// gcc no-asm 2.4048  partial-asm 2.3523  all-asm 2.2885
+// clang no-asm 2.3562  partial-asm 2.2952  all-asm 2.2530
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \

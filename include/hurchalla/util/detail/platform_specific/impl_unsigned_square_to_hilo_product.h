@@ -205,6 +205,22 @@ template <> struct impl_unsigned_square_to_hilo_product<__uint128_t> {
 // clang: no-asm 1.0739  partial-asm 1.0458  all-asm 1.0415
 // clang with all-asm mult: no-asm 1.0740  partial-asm 1.0465  *all-asm 1.0411
 
+// Updated conclusions for ARM64 (M2): unchanged, enable all-asm for gcc and
+// clang
+// Upated Timings for ARM64 (M2)
+// Montquarter two pow scalar:
+// gcc: no-asm 2.3300  partial-asm 2.3063  all-asm 2.2973
+// clang: no-asm 2.3255  partial-asm 2.2969  all-asm 2.2566
+// Montfull two pow scalar:
+// gcc: no-asm 2.3976  partial-asm 2.3824  all-asm 2.3585
+// clang: no-asm 2.4203  partial-asm 2.3455  all-asm 2.3475
+// Montfull two pow array:
+// gcc: no-asm 1.3335  partial-asm 1.2082  all-asm 1.2141
+// clang: no-asm 1.3335  partial-asm 1.2291  all-asm 1.2292
+// Montquarter two pow array:
+// gcc: no-asm 1.3337  partial-asm 1.2151  all-asm 1.2130
+// clang: no-asm 1.3570  partial-asm 1.2434  all-asm 1.2400
+
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
     defined(HURCHALLA_TARGET_ISA_ARM_64) && \

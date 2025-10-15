@@ -358,30 +358,11 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 
 
 
-// THE ARM64 TIMINGS SHOULD BE REDONE - the benchmark test I did at the time
-// only barely stressed this function.  (When using a mont pow test I need to
-// choose a testbench experimental_montgomery_two_pow version that will have a
-// heavy amount of mont mults, and as few mont squares as possible.  For the
-// array two pow the best choice is TABLE_BITS=1 CODE_SECTION=8)
-//
-// Inline asm summary/conclusion from these ARM64 timings - for ARM64 we should
-// enable the all-asm version, for both gcc and clang.  A side benefit is the
-// compiler (usually gcc) is less likely to have the bad luck cases where it
-// makes bad decisions and produces terrible machine code, if we use all-asm.
-//
-// -- Benchmark Timings --
-// Monthalf two pow array:
-// gcc with no-asm square: no-asm 1.2126  partial-asm 1.2040  *all-asm 1.2076
-// gcc with all-asm square: no-asm 1.0577  partial-asm 1.0649  *all-asm 1.0600
-// clang with no-asm square: no-asm 1.0553  partial-asm 1.0553  *all-asm 1.0551
-// clang with all-asm square: no-asm 1.0172  partial-asm 1.0163  *all-asm 1.0168
-//
-// Monthalf two pow scalar:
-// gcc with no-asm square: no-asm 2.5643  partial-asm 2.5405  *all-asm 2.5426
-// gcc with all-asm square: no-asm 2.5290  partial-asm 2.5122  *all-asm 2.4986
-// clang with no-asm square: no-asm 2.3892  partial-asm 2.3837  *all-asm 2.3717
-// clang with all-asm square: no-asm 2.3814  partial-asm 2.3793  *all-asm 2.3589
-
+// --- Note --- when benchmark timing this function with mont two pow:
+// Make sure to use a testbench experimental_montgomery_two_pow version that has
+// a heavy amount of mont mults, and as few mont squares as possible.  For the
+// array two pow the best choice is TABLE_BITS=1 CODE_SECTION=8, for scalar the
+// best is TABLE_BITS=1 CODE_SECTION=0
 
 
 // X64 (Zen4) Timings:
@@ -401,6 +382,20 @@ template <> struct impl_signed_multiply_to_hilo_product<std::int64_t> {
 // Monthalf two pow scalar (scalar mont two pow TABLE_BITS=1 CODE_SECTION=0):
 // gcc with no-asm square: no-asm 4.5610  partial-asm 4.5236  all-asm 3.7055
 // clang with no-asm square: no-asm 3.5257  partial-asm 3.6841  all-asm 4.1186
+
+// ARM 64 (M2) timings:
+// Conclusions: for ARM64 use the all-asm version, for both gcc and clang.  A
+// side benefit is the compiler (usually gcc) is less likely to have the bad
+// luck cases where it makes bad decisions and produces terrible machine code,
+// if we use all-asm.
+//
+// Monthalf two pow scalar (scalar mont two pow TABLE_BITS=1 CODE_SECTION=0):
+// gcc: no-asm 4.3034  partial-asm 4.4175  all-asm 4.2409
+// clang: no-asm 4.3468  partial-asm 4.3023  all-asm 4.2150
+//
+// Monthalf two pow array (array mont two pow TABLE_BITS=1 CODE_SECTION=8):
+// gcc: no-asm 2.6328  partial-asm 2.5863  all-asm 2.5246
+// clang: no-asm 2.6728  partial-asm 2.6129  all-asm 2.4487
 
 
 #if (HURCHALLA_COMPILER_HAS_UINT128_T()) && \
@@ -526,11 +521,7 @@ template <> struct impl_signed_multiply_to_hilo_product<__int128_t> {
 #  endif
 
 
-
 # else
-// For ARM64: In limited tests benchmarking montgomery two_pow, this partial-asm
-// version tended to be a little slower than the full-asm version.  Thus we
-// disable this version for ARM64.
 
     H sign_mask_u = static_cast<H>(u1 >> (shift - 1));
     H sign_mask_v = static_cast<H>(v1 >> (shift - 1));
