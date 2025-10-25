@@ -36,7 +36,7 @@ struct cselect_on_bit {
 
         T ret = detail::impl_cselect_scalar_on_bit<BITNUM>::eq_0(value, arg1, arg2);
 
-        HPBC_UTIL_POSTCONDITION(ret == ((value&(1ull<<BITNUM)) == 0) ? arg1 : arg2);
+        HPBC_UTIL_POSTCONDITION(ret == (((value&(1ull<<BITNUM)) == 0) ? arg1 : arg2));
         return ret;
     }
 
@@ -51,7 +51,7 @@ struct cselect_on_bit {
 
         T ret = detail::impl_cselect_scalar_on_bit<BITNUM>::ne_0(value, arg1, arg2);
 
-        HPBC_UTIL_POSTCONDITION(ret == ((value&(1ull<<BITNUM)) != 0) ? arg1 : arg2);
+        HPBC_UTIL_POSTCONDITION(ret == (((value&(1ull<<BITNUM)) != 0) ? arg1 : arg2));
         return ret;
     }
 
