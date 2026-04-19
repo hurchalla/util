@@ -15,21 +15,20 @@
 namespace hurchalla { namespace detail {
 
 
-
 // primary template
 template <typename T, class Enable = void>
 struct impl_branchless_shift_left {
   // handles types T that are two times larger than the native bit width
 
-  template <int bits>
+  template <int bits, typename DUMMY=void>
   struct log2bits {
     // this assert should eventually reject any non-power of 2 during recursion,
     // which is what we want when calling log2 on the number of bits of a type.
     static_assert(bits % 2 == 0 && bits >= 2, "");
-    static constexpr int value = 1 + log2bits<bits/2>::value;
+    static constexpr int value = 1 + log2bits<bits/2,DUMMY>::value;
   };
-  template <>
-  struct log2bits<1> {
+  template <typename DUMMY>
+  struct log2bits<1, DUMMY> {
     static constexpr int value = 0;
   };
 
