@@ -6,6 +6,8 @@
 #include "hurchalla/util/branchless_shift_right.h"
 #include "hurchalla/util/branchless_large_shift_left.h"
 #include "hurchalla/util/branchless_small_shift_right.h"
+#include "hurchalla/util/branchless_shift_left_to_hilo.h"
+#include "hurchalla/util/branchless_two_times_shift_left_to_hilo.h"
 #include "hurchalla/util/traits/ut_numeric_limits.h"
 #include "hurchalla/util/compiler_macros.h"
 #include "gtest/gtest.h"
@@ -94,6 +96,29 @@ void test_branchless_shifts()
                         static_cast<T>(val << i));
             EXPECT_TRUE(hc::detail::impl_branchless_shift_right<T>::call(val, i) ==
                         static_cast<T>(val >> i));
+
+            // test branchless_shift_left_to_hilo
+            T lowResult, highResult;
+            T lowAnswer = static_cast<T>(val << i);
+            T highAnswer = static_cast<T>((val >> (bitsT - i - 1)) >> 1);
+            highResult = hc::branchless_shift_left_to_hilo(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
+            // make sure we test both the asm (where available) and non-asm versions
+            highResult = hc::detail::impl_branchless_shift_left_to_hilo<T>::call(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
+            highResult = hc::detail::impl_branchless_shift_left_to_hilo<T>::call_asm(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
+
+            // test branchless_two_times_shift_left_to_hilo
+            lowAnswer = static_cast<T>((val << i) << 1);
+            highAnswer = static_cast<T>(val >> (bitsT - i - 1));
+            highResult = hc::branchless_two_times_shift_left_to_hilo(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
+            // make sure we test both the asm (where available) and non-asm versions
+            highResult = hc::detail::impl_branchless_two_times_shift_left_to_hilo<T>::call(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
+            highResult = hc::detail::impl_branchless_two_times_shift_left_to_hilo<T>::call_asm(lowResult, val, i);
+            EXPECT_TRUE(highResult == highAnswer && lowResult == lowAnswer);
         }
         for (int i=0; i<smallShiftMax; ++i) {
             EXPECT_TRUE(hc::branchless_small_shift_right(val, i) == (val >> i));

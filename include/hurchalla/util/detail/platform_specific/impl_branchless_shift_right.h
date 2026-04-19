@@ -20,6 +20,18 @@ template <typename T, class Enable = void>
 struct impl_branchless_shift_right {
   // handles types T that are two times larger than the native bit width
 
+  template <int bits>
+  struct log2bits {
+    // this assert should eventually reject any non-power of 2 during recursion,
+    // which is what we want when calling log2 on the number of bits of a type.
+    static_assert(bits % 2 == 0 && bits >= 2, "");
+    static constexpr int value = 1 + log2bits<bits/2>::value;
+  };
+  template <>
+  struct log2bits<1> {
+    static constexpr int value = 0;
+  };
+
 
   HURCHALLA_FORCE_INLINE static T call_asm(T a, int shift)
   {
@@ -121,7 +133,8 @@ struct impl_branchless_shift_right {
     H alo = static_cast<H>(a);
 
     H hi_shifted = ahi >> (ushift % HALFBITS);
-    H mask = static_cast<H>(ushift >> 6) - 1u;
+    H mask = static_cast<H>(ushift >> (log2bits<HALFBITS>::value)) - 1u;
+    HPBC_UTIL_ASSERT2(mask == 0 || mask == static_cast<H>(-1));
     H hi_result = hi_shifted & mask;
 
     H lo_shifted = alo >> (ushift % HALFBITS);
