@@ -66,6 +66,7 @@ struct impl_branchless_two_times_shift_left_to_hilo {
     //     And thus  not(x) % 64 == (64 - 1 - x) % 64
     uint64_t ushift_not = static_cast<uint64_t>(~ushift);
     uint64_t part0 = alo;
+    uint64_t zero = 0;
     __asm__ ("shrdq %%cl, %[ahi], %[alo] \n\t"    /* alo = part1 */
              "shrq %%cl, %[ahi] \n\t"             /* ahi = part2 */
              "movl %k[ushift64], %%ecx \n\t"
@@ -73,14 +74,13 @@ struct impl_branchless_two_times_shift_left_to_hilo {
              "add %[part0], %[part0] \n\t"
              "xorl %%ecx, %%ecx \n\t"
              "testb $64, %b[ushift64] \n\t"
-             "xorl %k[ushift64], %k[ushift64] \n\t"
              "cmovzq %[part0], %%rcx \n\t"
              "cmovzq %[alo], %[part0] \n\t"
              "cmovzq %[ahi], %[alo] \n\t"
-             "cmovzq %[ushift64], %[ahi] \n\t"
-             : [ahi]"+&r"(ahi), [alo]"+&r"(alo), [ushift64]"+&r"(ushift64),
-               [ushift_not]"+&c"(ushift_not), [part0]"+&r"(part0)
-             :
+             "cmovzq %[zero], %[ahi] \n\t"
+             : [ushift_not]"+&c"(ushift_not), [ahi]"+&r"(ahi), [alo]"+&r"(alo),
+               [part0]"+&r"(part0)
+             : [zero]"r"(zero), [ushift64]"r"(ushift64)
              : "cc");
     lowResult = (static_cast<T>(part0) << 64) | ushift_not;
     return (static_cast<T>(ahi) << 64) | alo;

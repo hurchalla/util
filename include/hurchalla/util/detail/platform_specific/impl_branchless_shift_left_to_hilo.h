@@ -63,6 +63,7 @@ struct impl_branchless_shift_left_to_hilo {
     uint64_t ushift64 = ushift;
     uint64_t ushift2 = ushift;
     uint64_t part2 = ahi;
+    uint64_t zero = 0;
     __asm__ ("shldq %%cl, %[alo], %[ahi] \n\t"    /* ahi = part1 */
              "shlq %%cl, %[alo] \n\t"             /* alo = part0 */
              "notl %%ecx \n\t"
@@ -70,14 +71,13 @@ struct impl_branchless_shift_left_to_hilo {
              "shrq %%cl, %[part2] \n\t"
              "xorl %%ecx, %%ecx \n\t"
              "testb $64, %b[ushift2] \n\t"
-             "xorl %k[ushift2], %k[ushift2] \n\t"
              "cmovzq %[alo], %%rcx \n\t"
              "cmovzq %[ahi], %[alo] \n\t"
              "cmovzq %[part2], %[ahi] \n\t"
-             "cmovzq %[ushift2], %[part2] \n\t"
+             "cmovzq %[zero], %[part2] \n\t"
              : [ushift64]"+&c"(ushift64), [alo]"+&r"(alo), [ahi]"+&r"(ahi),
-               [part2]"+&r"(part2), [ushift2]"+&r"(ushift2)
-             :
+               [part2]"+&r"(part2)
+             : [zero]"r"(zero), [ushift2]"r"(ushift2)
              : "cc");
     lowResult = (static_cast<T>(alo) << 64) | ushift64;
     return (static_cast<T>(part2) << 64) | ahi;
