@@ -42,22 +42,6 @@ U generate_random_value(std::mt19937_64& gen,
 }
 
 
-template <typename U>
-std::string uint_to_str(U a)
-{
-    if (a == 0)
-        return "0";
-
-    std::string strnum;
-    while (a != 0) {
-        strnum.push_back(static_cast<char>(a%10) + '0');
-        a /= 10;
-    }
-    std::reverse(strnum.begin(), strnum.end());
-    return strnum;
-}
-
-
 template <typename T>
 void test_branchless_shifts()
 {
